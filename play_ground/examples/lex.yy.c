@@ -362,7 +362,7 @@ struct yy_trans_info
 	};
 static const flex_int16_t yy_accept[12] =
     {   0,
-        0,    0,    7,    6,    5,    1,    4,    3,    2,    1,
+        0,    0,    7,    6,    5,    4,    2,    3,    1,    1,
         0
     } ;
 
@@ -371,17 +371,17 @@ static const YY_CHAR yy_ec[256] =
         1,    1,    1,    1,    1,    1,    1,    1,    1,    2,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    3,    1,    1,    1,    1,    1,    1,    1,    4,
-        4,    5,    6,    1,    6,    1,    5,    1,    1,    1,
+        1,    1,    1,    1,    1,    1,    1,    1,    1,    3,
+        3,    1,    4,    1,    5,    1,    1,    6,    6,    6,
+        6,    6,    6,    6,    6,    6,    6,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    3,    3,    3,    3,    3,    3,
-        3,    3,    3,    3,    3,    3,    3,    3,    3,    3,
-        3,    3,    3,    3,    3,    3,    3,    3,    3,    3,
-        1,    1,    1,    1,    1,    1,    3,    3,    3,    3,
+        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
+        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
+        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
 
-        3,    3,    3,    3,    3,    3,    3,    3,    3,    3,
-        3,    3,    3,    3,    3,    3,    3,    3,    3,    3,
-        3,    3,    1,    1,    1,    1,    1,    1,    1,    1,
+        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
+        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
+        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -400,18 +400,18 @@ static const YY_CHAR yy_ec[256] =
 
 static const YY_CHAR yy_meta[7] =
     {   0,
-        1,    1,    2,    1,    1,    1
+        1,    1,    1,    1,    1,    2
     } ;
 
 static const flex_int16_t yy_base[13] =
     {   0,
-        0,    0,    8,    9,    9,    0,    9,    9,    9,    0,
+        0,    0,    8,    9,    9,    9,    9,    9,    0,    0,
         9,    5
     } ;
 
 static const flex_int16_t yy_def[13] =
     {   0,
-       11,    1,   11,   11,   11,   12,   11,   11,   11,   12,
+       11,    1,   11,   11,   11,   11,   11,   11,   12,   12,
         0,   11
     } ;
 
@@ -441,13 +441,12 @@ int yy_flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "lwy_exercise_3_2.l"
-#line 2 "lwy_exercise_3_2.l"
+#line 1 "in2post.l"
+#line 2 "in2post.l"
 	#include<stdio.h>
-	#include<string.h>
 	#include"y.tab.h"
+#line 449 "lex.yy.c"
 #line 450 "lex.yy.c"
-#line 451 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -664,10 +663,10 @@ YY_DECL
 		}
 
 	{
-#line 7 "lwy_exercise_3_2.l"
+#line 6 "in2post.l"
 
 
-#line 671 "lex.yy.c"
+#line 670 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -726,48 +725,39 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 9 "lwy_exercise_3_2.l"
+#line 8 "in2post.l"
 {
-				char* temp = (char*)malloc(sizeof(char)*strlen(yytext));
-				strcpy(temp, yytext);
-				yylval.c = temp;
-				printf("FLEX: %s\n", yytext);
-				return ALPHA;
+				yylval = atoi(yytext);
+				return DIGIT;
 			}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 16 "lwy_exercise_3_2.l"
-{
-				yylval.operator =  *yytext;
-				return OPLOW;
-			}	
+#line 12 "in2post.l"
+return *yytext;
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 20 "lwy_exercise_3_2.l"
-{
-				yylval.operator =  *yytext;
-				return OPHIGH;
-			}	
+#line 13 "in2post.l"
+return *yytext;
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 24 "lwy_exercise_3_2.l"
+#line 14 "in2post.l"
 return *yytext;
 	YY_BREAK
 case 5:
 /* rule 5 can match eol */
 YY_RULE_SETUP
-#line 25 "lwy_exercise_3_2.l"
+#line 15 "in2post.l"
 return NEWLINE;
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 27 "lwy_exercise_3_2.l"
+#line 17 "in2post.l"
 ECHO;
 	YY_BREAK
-#line 771 "lex.yy.c"
+#line 761 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1772,9 +1762,9 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 27 "lwy_exercise_3_2.l"
+#line 17 "in2post.l"
 
 
-int yywrap(){
+yywrap(){
 	return 1;
 }
