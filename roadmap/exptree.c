@@ -1,5 +1,10 @@
 #include<stdlib.h>
 
+#ifndef DATA_H
+#define DATA_H
+#include"data.h"
+#endif
+
 tnode* makeLeafNode(int n)
 {
 	tnode *temp;

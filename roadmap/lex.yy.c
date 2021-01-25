@@ -448,9 +448,13 @@ char *yytext;
 	#include<stdio.h>
 	#include<stdlib.h>
 	#include "y.tab.h"
-	#include "data.h"
-#line 453 "lex.yy.c"
-#line 454 "lex.yy.c"
+	
+	#ifndef DATA_H
+	#define DATA_H
+	#include"data.h"
+	#endif
+#line 457 "lex.yy.c"
+#line 458 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -667,10 +671,10 @@ YY_DECL
 		}
 
 	{
-#line 8 "parser.l"
+#line 12 "parser.l"
 
 
-#line 674 "lex.yy.c"
+#line 678 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -729,7 +733,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 10 "parser.l"
+#line 14 "parser.l"
 {
 				yylval.node = makeLeafNode(atoi(yytext));
 				return NUM;
@@ -737,51 +741,51 @@ YY_RULE_SETUP
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 15 "parser.l"
+#line 19 "parser.l"
 {	return ADD;	}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 16 "parser.l"
+#line 20 "parser.l"
 {	return SUB;	}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 17 "parser.l"
+#line 21 "parser.l"
 {	return MUL;	}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 18 "parser.l"
+#line 22 "parser.l"
 {	return DIV;	}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 19 "parser.l"
+#line 23 "parser.l"
 {}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 20 "parser.l"
+#line 24 "parser.l"
 {	return *yytext; }
 	YY_BREAK
 case 8:
 /* rule 8 can match eol */
 YY_RULE_SETUP
-#line 21 "parser.l"
+#line 25 "parser.l"
 {	return END;	}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 22 "parser.l"
+#line 26 "parser.l"
 {	printf("UNKNOWN CHARACTER\n"); exit(1);	}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 24 "parser.l"
+#line 28 "parser.l"
 ECHO;
 	YY_BREAK
-#line 785 "lex.yy.c"
+#line 789 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1786,7 +1790,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 24 "parser.l"
+#line 28 "parser.l"
 
 
 int yywrap(void){

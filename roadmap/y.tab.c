@@ -70,13 +70,19 @@
 
 	#include<stdio.h>
 	#include<stdlib.h>
-	#include "data.h"
+
+	#ifndef DATA_H
+	#define DATA_H
+	#include"data.h"
+	#endif
+
 	#include "exptree.c"
+	#include "compiler.c"
 
 	int yylex(void);
 	void yyerror(const char *s);
 
-#line 80 "y.tab.c"
+#line 86 "y.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -144,11 +150,11 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 11 "parser.y"
+#line 17 "parser.y"
 
 	struct tnode* node;
 
-#line 152 "y.tab.c"
+#line 158 "y.tab.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -524,7 +530,7 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
-       0,    22,    22,    32,    33,    34,    35,    36,    37
+       0,    28,    28,    34,    35,    36,    37,    38,    39
 };
 #endif
 
@@ -1317,57 +1323,53 @@ yyreduce:
   switch (yyn)
     {
   case 2:
-#line 22 "parser.y"
+#line 28 "parser.y"
                         {
-						printTree((yyvsp[-1].node));
-						printf("\n");
-						printPreOrder((yyvsp[-1].node));
-						printf("\n");
-						printPostOrder((yyvsp[-1].node));
-						printf("\nCOMPLETED\n");
+						starter((yyvsp[-1].node));
+						printf("COMPLETED\n");
 						exit(0);
 					}
-#line 1331 "y.tab.c"
+#line 1333 "y.tab.c"
     break;
 
   case 3:
-#line 32 "parser.y"
+#line 34 "parser.y"
                                 {	(yyval.node) = makeOperatorNode('+',(yyvsp[-2].node),(yyvsp[0].node));	}
-#line 1337 "y.tab.c"
+#line 1339 "y.tab.c"
     break;
 
   case 4:
-#line 33 "parser.y"
+#line 35 "parser.y"
                                 {	(yyval.node) = makeOperatorNode('-',(yyvsp[-2].node),(yyvsp[0].node));	}
-#line 1343 "y.tab.c"
+#line 1345 "y.tab.c"
     break;
 
   case 5:
-#line 34 "parser.y"
+#line 36 "parser.y"
                                 {	(yyval.node) = makeOperatorNode('*',(yyvsp[-2].node),(yyvsp[0].node));	}
-#line 1349 "y.tab.c"
+#line 1351 "y.tab.c"
     break;
 
   case 6:
-#line 35 "parser.y"
+#line 37 "parser.y"
                                 {	(yyval.node) = makeOperatorNode('/',(yyvsp[-2].node),(yyvsp[0].node));	}
-#line 1355 "y.tab.c"
+#line 1357 "y.tab.c"
     break;
 
   case 7:
-#line 36 "parser.y"
+#line 38 "parser.y"
                                 {	(yyval.node) = (yyvsp[-1].node); }
-#line 1361 "y.tab.c"
+#line 1363 "y.tab.c"
     break;
 
   case 8:
-#line 37 "parser.y"
+#line 39 "parser.y"
                                         {	(yyval.node) = (yyvsp[0].node); }
-#line 1367 "y.tab.c"
+#line 1369 "y.tab.c"
     break;
 
 
-#line 1371 "y.tab.c"
+#line 1373 "y.tab.c"
 
       default: break;
     }
@@ -1599,7 +1601,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 38 "parser.y"
+#line 40 "parser.y"
 
 
 void yyerror(char const *s)

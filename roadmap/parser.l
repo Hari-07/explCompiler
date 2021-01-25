@@ -2,7 +2,11 @@
 	#include<stdio.h>
 	#include<stdlib.h>
 	#include "y.tab.h"
-	#include "data.h"
+	
+	#ifndef DATA_H
+	#define DATA_H
+	#include"data.h"
+	#endif
 %}
 
 %%

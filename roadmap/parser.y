@@ -1,8 +1,14 @@
 %{
 	#include<stdio.h>
 	#include<stdlib.h>
-	#include "data.h"
+
+	#ifndef DATA_H
+	#define DATA_H
+	#include"data.h"
+	#endif
+
 	#include "exptree.c"
+	#include "compiler.c"
 
 	int yylex(void);
 	void yyerror(const char *s);
@@ -20,12 +26,8 @@
 %%
 
 program: expr END	{
-						printTree($1);
-						printf("\n");
-						printPreOrder($1);
-						printf("\n");
-						printPostOrder($1);
-						printf("\nCOMPLETED\n");
+						starter($1);
+						printf("COMPLETED\n");
 						exit(0);
 					}
 
