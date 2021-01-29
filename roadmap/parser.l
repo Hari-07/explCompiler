@@ -2,7 +2,6 @@
 	#include<stdio.h>
 	#include<stdlib.h>
 	#include "y.tab.h"
-	
 	#ifndef DATA_H
 	#define DATA_H
 	#include"data.h"
@@ -12,18 +11,25 @@
 %%
 
 [0-9]+		{
-				yylval.node = makeLeafNode(atoi(yytext));
+				yylval.node = makeLeafNode(0, yytext);
 				return NUM;
 			}
-
+[a-z]		{
+				yylval.node = makeLeafNode(1, yytext);	
+				return VAR;	
+			}
 "+"			{	return ADD;	}
 "-"			{	return SUB;	}
 "*"			{	return MUL;	}
 "/"			{	return DIV;	}
-[ \t]		{}
-[()]		{	return *yytext; }
-[\n]		{	return END;	}
-.			{	printf("UNKNOWN CHARACTER\n"); exit(1);	}
+"="			{	return EQUALS;	}
+[ \t\n;]	{}
+[()]		{	return *yytext;	}
+start		{	return START;	}
+end 		{	return END;		}
+read 		{	return READ; 	}
+write		{	return WRITE;	}
+.			{	printf("UNKNOWN CHARACTER\n %s", yytext); exit(1);	}
 
 %%
 

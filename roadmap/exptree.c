@@ -5,11 +5,47 @@
 #include"data.h"
 #endif
 
-tnode* makeLeafNode(int n)
+tnode* createTreeNode(tnode* l, tnode* r) {
+	tnode* temp;
+	temp = (tnode*)malloc(sizeof(tnode));
+	temp -> left = l;
+	temp -> right = r;
+	temp -> nodetype = -1;
+	return temp;
+}
+
+tnode* makeReadNode(tnode* target) {
+	tnode* temp;
+	temp = (tnode*)malloc(sizeof(tnode));
+	temp -> nodetype = 2;
+	temp -> left = target;
+	temp -> right = NULL;
+}
+
+tnode* makeWriteNode(tnode* source) {
+	tnode* temp;
+	temp = (tnode*)malloc(sizeof(tnode));
+	temp -> nodetype = 1;
+	temp -> left = source;
+	temp -> right = NULL;
+}
+
+tnode* makeLeafNode(int type, char* s)
 {
 	tnode *temp;
 	temp = (tnode*)malloc(sizeof(tnode));
-	temp -> val 	= n;
+	if(type == 0) {
+		temp -> val = atoi(s);
+		temp -> nodetype = 3;
+	}
+	else if(type == 1) {
+		temp -> varname = s;
+		temp -> nodetype = 4;
+	}
+	else {
+		printf("ILLEGAL NODE CREATION REQUEST\n");
+		exit(3);
+	}
 	temp -> left	= NULL;
 	temp -> right 	= NULL;
 	return temp;
@@ -21,6 +57,7 @@ tnode* makeOperatorNode(char c, tnode* l, tnode* r) {
 	temp -> op = c;
 	temp -> left = l;
 	temp -> right = r;
+	temp -> nodetype = 5;
 	return temp;
 }
 
