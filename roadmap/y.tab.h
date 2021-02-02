@@ -49,31 +49,57 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    NUM = 258,
-    VAR = 259,
-    ADD = 260,
-    SUB = 261,
-    MUL = 262,
-    DIV = 263,
-    EQUALS = 264,
-    START = 265,
-    END = 266,
+    START = 258,
+    END = 259,
+    IF = 260,
+    THEN = 261,
+    ELSE = 262,
+    ENDIF = 263,
+    WHILE = 264,
+    DO = 265,
+    ENDWHILE = 266,
     READ = 267,
-    WRITE = 268
+    WRITE = 268,
+    NUM = 269,
+    VAR = 270,
+    ADD = 271,
+    SUB = 272,
+    MUL = 273,
+    DIV = 274,
+    EQUALS = 275,
+    SLT = 276,
+    SGT = 277,
+    LTE = 278,
+    GTE = 279,
+    NEQ = 280,
+    EQU = 281
   };
 #endif
 /* Tokens.  */
-#define NUM 258
-#define VAR 259
-#define ADD 260
-#define SUB 261
-#define MUL 262
-#define DIV 263
-#define EQUALS 264
-#define START 265
-#define END 266
+#define START 258
+#define END 259
+#define IF 260
+#define THEN 261
+#define ELSE 262
+#define ENDIF 263
+#define WHILE 264
+#define DO 265
+#define ENDWHILE 266
 #define READ 267
 #define WRITE 268
+#define NUM 269
+#define VAR 270
+#define ADD 271
+#define SUB 272
+#define MUL 273
+#define DIV 274
+#define EQUALS 275
+#define SLT 276
+#define SGT 277
+#define LTE 278
+#define GTE 279
+#define NEQ 280
+#define EQU 281
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -83,7 +109,7 @@ union YYSTYPE
 
 	struct tnode* node;
 
-#line 87 "y.tab.h"
+#line 113 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
