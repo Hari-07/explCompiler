@@ -31,11 +31,9 @@
 program: START slist END	{
 								starter($2);
 								printf("COMPLETED\n");
-								exit(0);
 							}
 	   | START END			{
 		   						printf("EMPTY PROGRAM\n");
-								exit(0);
 	   						}
 	   ;
 

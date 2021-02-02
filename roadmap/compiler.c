@@ -8,14 +8,11 @@
 #endif
 
 int HIGHEST_REGISTER = -1;
+int LABEL_COUNTER = -1;
 FILE *target;
 
+// CODEGEN FUNCTIONS
 int codeGen(tnode *t);
-int getReg();
-void freeReg();
-void printFromIndex(int index);
-void readToIndex(int index);
-
 int writeNodeCodeGen(tnode *t);
 int readNodeCodeGen(tnode *t);
 int numberNodeCodeGen(tnode *t);
@@ -23,6 +20,16 @@ int variableNodeCodeGen(tnode *t);
 int operatorNodeCodeGen(tnode *t);
 int ifNodeCodeGen(tnode *t);
 int whileNodeCodeGen(tnode *t);
+
+// CODEGEN ABSTRACTIONS
+void printFromIndex(int index);
+void readToIndex(int index);
+
+// HELPER FUNCTIONS
+int getReg();
+void freeReg();
+int getLabel();
+
 
 void starter(tnode *t)
 {
@@ -173,21 +180,27 @@ int operatorNodeCodeGen(tnode *t)
 
 int ifNodeCodeGen(tnode *t) {
 	int p = codeGen(t->left);
-	fprintf(target, "JZ R%d, %s\n", p, "ELSEBODY");
+	int l1 = getLabel();
+	int l2 = getLabel();
+
+	fprintf(target, "JZ R%d, LABEL%d\n", p, l1);
 	codeGen(t->right->left);
-	fprintf(target, "JUMP %s\n", "ENDIF");
-	fprintf(target, "%s\n", "ELSEBODY");
+	fprintf(target, "JUMP LABEL%d\n", l2);
+	fprintf(target, "LABEL%d\n", l1);
 	codeGen(t->right->right);
-	fprintf(target, "%s\n", "ENDIF");
+	fprintf(target, "LABEL%d\n", l2);
 }
 
 int whileNodeCodeGen(tnode *t) {
-	fprintf(target, "%s\n", "STARTWHILE");
+	int l1 = getLabel();
+	int l2 = getLabel();
+
+	fprintf(target, "LABEL%d\n", l1);
 	int p = codeGen(t->left);
-	fprintf(target, "JZ R%d, %s\n", p, "ENDWHILE");
+	fprintf(target, "JZ R%d, LABEL%d\n", p, l2);
 	codeGen(t->right);
-	fprintf(target, "JMP %s\n", "STARTWHILE");
-	fprintf(target, "%s\n", "ENDWHILE");
+	fprintf(target, "JMP LABEL%d\n", l1);
+	fprintf(target, "LABEL%d\n", l2);
 }
 
 void printFromIndex(int index)
@@ -240,6 +253,11 @@ int getReg()
 	}
 
 	return ++HIGHEST_REGISTER;
+}
+
+int getLabel()
+{
+	return ++LABEL_COUNTER;
 }
 
 void freeReg()
