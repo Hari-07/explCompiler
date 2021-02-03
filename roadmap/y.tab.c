@@ -1834,8 +1834,5 @@ int main(int argc, char* argv[]) {
 			yyin = fp;
 	}
 	yyparse();
-	printf("BACK HOMEEE\n");
-	yyin = fopen("output.xsm","r");
-	yyparse();
 	return 0;
 }

@@ -185,7 +185,7 @@ int ifNodeCodeGen(tnode *t) {
 
 	fprintf(target, "JZ R%d, LABEL%d\n", p, l1);
 	codeGen(t->right->left);
-	fprintf(target, "JUMP LABEL%d\n", l2);
+	fprintf(target, "JMP LABEL%d\n", l2);
 	fprintf(target, "LABEL%d\n", l1);
 	codeGen(t->right->right);
 	fprintf(target, "LABEL%d\n", l2);
