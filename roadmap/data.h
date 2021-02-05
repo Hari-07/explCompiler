@@ -8,17 +8,20 @@ typedef struct tnode{
 }tnode;
 
 /*
-	nodetype keys
-	-1 : Connectors
-	1 : Write
-	2 : Read
-	3 : Number
-	4 : Variable
-	5 : Operator
-		1 : Arithmetic Expression
-		2 : Boolean Expression
-	6 : IF Node
-	7 : WHILE Node
+	Nodetype Keys
+	-1: Connectors
+	1:	Write
+	2:	Read
+	3:	Number
+	4:	Variable
+	5:	Operator
+		1:	Arithmetic Expression
+		2:	Boolean Expression
+	6:	IF Node
+	7:	WHILE Node
+	8:	Jump Statements
+		0:	Continue
+		1: 	Break
 */
 tnode* makeConnectorNode(tnode* l, tnode* r);
 
@@ -28,9 +31,11 @@ tnode* makeLeafNode(int type, char* s);
 tnode* makeOperatorNode(int meta, char* c, tnode* l, tnode* r);
 tnode* makeIfNode(tnode* condn, tnode* trueBody, tnode* falseBody);
 tnode* makeWhileNode(tnode* condn, tnode* body);
+tnode* makeJumpStatement(int type);
+
 
 /*
-	LeafNode types
+	*** LeafNode types ***
 	0 - Number
 	1 - Variable
 */

@@ -42,6 +42,8 @@ endif		{	return ENDIF;	}
 while		{	return WHILE;	}
 do			{	return DO;		}
 endwhile	{	return ENDWHILE;}
+break		{	return BREAK;	}
+continue 	{	return CONTINUE;}
 .			{	printf("UNKNOWN CHARACTER\n %s", yytext); exit(1);	}
 
 %%

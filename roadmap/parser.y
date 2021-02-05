@@ -18,9 +18,9 @@
 	struct tnode* node;
 }
 
-%type <node> expr program stmt slist inputStmt outputStmt assgStmt ifStmt whileStmt;
+%type <node> expr program stmt slist inputStmt outputStmt assgStmt ifStmt whileStmt jmpStmts;
 %token START END
-%token IF THEN ELSE ENDIF WHILE DO ENDWHILE READ WRITE 
+%token IF THEN ELSE ENDIF WHILE DO ENDWHILE READ WRITE CONTINUE BREAK
 %token NUM VAR ADD SUB MUL DIV EQUALS SLT SGT LTE GTE NEQ EQU
 %left SLT SGT LTE GTE NEQ EQU
 %left ADD SUB
@@ -45,8 +45,9 @@ slist:	slist stmt		{	$$ = makeConnectorNode($1, $2);	}
 stmt:	inputStmt		{	$$ = $<node>1;	}
 	|   outputStmt		{	$$ = $<node>1;	}
 	|	assgStmt		{	$$ = $<node>1;	}
-	|   ifStmt
-	|	whileStmt
+	|   ifStmt			{	$$ = $<node>1;	}
+	|	whileStmt		{	$$ = $<node>1;	}
+	| 	jmpStmts		{   $$ = $<node>1;	}
 	;
 
 inputStmt:	READ'('expr')'	{	$$ = makeReadNode($3);	}
@@ -63,6 +64,10 @@ ifStmt : IF '('expr')' THEN slist ELSE slist ENDIF	{ $$ = makeIfNode($3, $6, $8)
 	   ;
 
 whileStmt	: WHILE '('expr')' DO slist ENDWHILE	{	$$ = makeWhileNode($3, $6);	}
+			;
+
+jmpStmts	: CONTINUE	{	$$ = makeJumpStatement(0);	}
+			| BREAK		{	$$ = makeJumpStatement(1);	}
 			;
 
 expr: '('expr')'		{	$$ = $<node>2; }

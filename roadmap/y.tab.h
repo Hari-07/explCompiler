@@ -60,19 +60,21 @@ extern int yydebug;
     ENDWHILE = 266,
     READ = 267,
     WRITE = 268,
-    NUM = 269,
-    VAR = 270,
-    ADD = 271,
-    SUB = 272,
-    MUL = 273,
-    DIV = 274,
-    EQUALS = 275,
-    SLT = 276,
-    SGT = 277,
-    LTE = 278,
-    GTE = 279,
-    NEQ = 280,
-    EQU = 281
+    CONTINUE = 269,
+    BREAK = 270,
+    NUM = 271,
+    VAR = 272,
+    ADD = 273,
+    SUB = 274,
+    MUL = 275,
+    DIV = 276,
+    EQUALS = 277,
+    SLT = 278,
+    SGT = 279,
+    LTE = 280,
+    GTE = 281,
+    NEQ = 282,
+    EQU = 283
   };
 #endif
 /* Tokens.  */
@@ -87,19 +89,21 @@ extern int yydebug;
 #define ENDWHILE 266
 #define READ 267
 #define WRITE 268
-#define NUM 269
-#define VAR 270
-#define ADD 271
-#define SUB 272
-#define MUL 273
-#define DIV 274
-#define EQUALS 275
-#define SLT 276
-#define SGT 277
-#define LTE 278
-#define GTE 279
-#define NEQ 280
-#define EQU 281
+#define CONTINUE 269
+#define BREAK 270
+#define NUM 271
+#define VAR 272
+#define ADD 273
+#define SUB 274
+#define MUL 275
+#define DIV 276
+#define EQUALS 277
+#define SLT 278
+#define SGT 279
+#define LTE 280
+#define GTE 281
+#define NEQ 282
+#define EQU 283
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -109,7 +113,7 @@ union YYSTYPE
 
 	struct tnode* node;
 
-#line 113 "y.tab.h"
+#line 117 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

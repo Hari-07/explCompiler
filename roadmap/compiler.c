@@ -9,6 +9,8 @@
 
 int HIGHEST_REGISTER = -1;
 int LABEL_COUNTER = -1;
+int CURRENT_WHILE_START = -1;
+int CURRENT_WHILE_END = -1;
 FILE *target;
 
 // CODEGEN FUNCTIONS
@@ -20,6 +22,7 @@ int variableNodeCodeGen(tnode *t);
 int operatorNodeCodeGen(tnode *t);
 int ifNodeCodeGen(tnode *t);
 int whileNodeCodeGen(tnode *t);
+int jumpNodeCodeGen(tnode* t);
 
 // CODEGEN ABSTRACTIONS
 void printFromIndex(int index);
@@ -66,6 +69,8 @@ int codeGen(tnode *t)
 		return ifNodeCodeGen(t);
 	} else if (t->nodetype == 7) {
 		return whileNodeCodeGen(t);
+	} else if (t->nodetype == 8) {
+		return jumpNodeCodeGen(t);
 	} else {
 		printf("INVALID NODE\n");
 		exit(-1);
@@ -194,6 +199,8 @@ int ifNodeCodeGen(tnode *t) {
 int whileNodeCodeGen(tnode *t) {
 	int l1 = getLabel();
 	int l2 = getLabel();
+	CURRENT_WHILE_START = l1;
+	CURRENT_WHILE_END 	= l2;
 
 	fprintf(target, "LABEL%d\n", l1);
 	int p = codeGen(t->left);
@@ -201,6 +208,19 @@ int whileNodeCodeGen(tnode *t) {
 	codeGen(t->right);
 	fprintf(target, "JMP LABEL%d\n", l1);
 	fprintf(target, "LABEL%d\n", l2);
+
+	CURRENT_WHILE_START = -1;
+	CURRENT_WHILE_END 	= -1;
+}
+
+int jumpNodeCodeGen(tnode *t) {
+	if(CURRENT_WHILE_START != -1) {
+		if(t->metatype == 0){
+			fprintf(target, "JMP LABEL%d\n", CURRENT_WHILE_START);
+		} else if(t->metatype == 1){
+			fprintf(target, "JMP LABEL%d\n", CURRENT_WHILE_END);
+		}
+	}
 }
 
 void printFromIndex(int index)

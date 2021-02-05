@@ -126,3 +126,12 @@ tnode *makeWhileNode(tnode *condn, tnode *body)
 		exit(-1);
 	}
 }
+
+tnode* makeJumpStatement(int type) {
+	tnode* temp;
+	temp = (tnode*)malloc(sizeof(tnode));
+	temp-> nodetype = 8;
+	temp-> left = NULL;
+	temp-> right = NULL; 
+	temp-> metatype = type;
+}
