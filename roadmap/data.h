@@ -19,6 +19,9 @@ typedef struct tnode{
 		2:	Boolean Expression
 	6:	IF Node
 	7:	WHILE Node
+		0: While Loop
+		1: Do While Loop
+		2: Repeat Until Loop
 	8:	Jump Statements
 		0:	Continue
 		1: 	Break
@@ -30,12 +33,12 @@ tnode* makeReadNode(tnode* target);
 tnode* makeLeafNode(int type, char* s);
 tnode* makeOperatorNode(int meta, char* c, tnode* l, tnode* r);
 tnode* makeIfNode(tnode* condn, tnode* trueBody, tnode* falseBody);
-tnode* makeWhileNode(tnode* condn, tnode* body);
+tnode* makeWhileNode(int looptype, tnode* condn, tnode* body);
 tnode* makeJumpStatement(int type);
 
 
 /*
-	*** LeafNode types ***
+	LeafNode types
 	0 - Number
 	1 - Variable
 */

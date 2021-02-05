@@ -185,29 +185,45 @@ int operatorNodeCodeGen(tnode *t)
 
 int ifNodeCodeGen(tnode *t) {
 	int p = codeGen(t->left);
-	int l1 = getLabel();
-	int l2 = getLabel();
+	int startLabel = getLabel();
+	int endLabel = getLabel();
 
-	fprintf(target, "JZ R%d, LABEL%d\n", p, l1);
+	fprintf(target, "JZ R%d, LABEL%d\n", p, startLabel);
 	codeGen(t->right->left);
-	fprintf(target, "JMP LABEL%d\n", l2);
-	fprintf(target, "LABEL%d\n", l1);
+	fprintf(target, "JMP LABEL%d\n", endLabel);
+	fprintf(target, "LABEL%d\n", startLabel);
 	codeGen(t->right->right);
-	fprintf(target, "LABEL%d\n", l2);
+	fprintf(target, "LABEL%d\n", endLabel);
 }
 
 int whileNodeCodeGen(tnode *t) {
-	int l1 = getLabel();
-	int l2 = getLabel();
-	CURRENT_WHILE_START = l1;
-	CURRENT_WHILE_END 	= l2;
+	int startLabel = getLabel();
+	int endLabel = getLabel();
+	CURRENT_WHILE_START = startLabel;
+	CURRENT_WHILE_END 	= endLabel;
 
-	fprintf(target, "LABEL%d\n", l1);
-	int p = codeGen(t->left);
-	fprintf(target, "JZ R%d, LABEL%d\n", p, l2);
-	codeGen(t->right);
-	fprintf(target, "JMP LABEL%d\n", l1);
-	fprintf(target, "LABEL%d\n", l2);
+	fprintf(target, "LABEL%d\n", startLabel);
+	if(t->metatype == 0) {
+		int p = codeGen(t->left);
+		fprintf(target, "JZ R%d, LABEL%d\n", p, endLabel);
+		codeGen(t->right);
+		fprintf(target, "JMP LABEL%d\n", startLabel);
+	} 
+	else if (t->metatype == 1) {
+		codeGen(t->right);
+		int p = codeGen(t->left);
+		fprintf(target, "JNZ R%d, LABEL%d\n", p, startLabel);
+	}
+	else if (t->metatype == 2) {
+		codeGen(t->right);
+		int p = codeGen(t->left);
+		fprintf(target, "JZ R%d, LABEL%d\n", p, startLabel);
+	}
+	else {
+		printf("UNEXPECTED WHILE NODE\n");
+		exit(-1);
+	}
+	fprintf(target, "LABEL%d\n", endLabel);
 
 	CURRENT_WHILE_START = -1;
 	CURRENT_WHILE_END 	= -1;

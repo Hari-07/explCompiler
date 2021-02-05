@@ -113,7 +113,7 @@ tnode *makeIfNode(tnode *condn, tnode *trueBody, tnode *falseBody)
 	}
 };
 
-tnode *makeWhileNode(tnode *condn, tnode *body)
+tnode *makeWhileNode(int looptype, tnode *condn, tnode *body)
 {
 	if(condn -> nodetype == 5 && condn->metatype == 2) {
 		tnode *temp;
@@ -121,6 +121,7 @@ tnode *makeWhileNode(tnode *condn, tnode *body)
 		temp->nodetype = 7;
 		temp->left = condn;
 		temp->right = body;
+		temp->metatype = looptype;
 	} else {
 		printf("ILLEGAL CONDITION STATEMENT\n");
 		exit(-1);

@@ -44,6 +44,8 @@ do			{	return DO;		}
 endwhile	{	return ENDWHILE;}
 break		{	return BREAK;	}
 continue 	{	return CONTINUE;}
+repeat 		{	return REPEAT;	}
+until		{	return UNTIL;	}
 .			{	printf("UNKNOWN CHARACTER\n %s", yytext); exit(1);	}
 
 %%

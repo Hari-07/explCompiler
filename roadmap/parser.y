@@ -20,7 +20,7 @@
 
 %type <node> expr program stmt slist inputStmt outputStmt assgStmt ifStmt whileStmt jmpStmts;
 %token START END
-%token IF THEN ELSE ENDIF WHILE DO ENDWHILE READ WRITE CONTINUE BREAK
+%token IF THEN ELSE ENDIF WHILE DO ENDWHILE READ WRITE CONTINUE BREAK REPEAT UNTIL
 %token NUM VAR ADD SUB MUL DIV EQUALS SLT SGT LTE GTE NEQ EQU
 %left SLT SGT LTE GTE NEQ EQU
 %left ADD SUB
@@ -63,7 +63,9 @@ ifStmt : IF '('expr')' THEN slist ELSE slist ENDIF	{ $$ = makeIfNode($3, $6, $8)
 	   | IF '('expr')' THEN slist ENDIF				{ $$ = makeIfNode($3, $6, NULL); }
 	   ;
 
-whileStmt	: WHILE '('expr')' DO slist ENDWHILE	{	$$ = makeWhileNode($3, $6);	}
+whileStmt	: WHILE '('expr')' DO slist ENDWHILE	{	$$ = makeWhileNode(0, $3, $6);	}
+			| DO slist WHILE '('expr')' ENDWHILE	{	$$ = makeWhileNode(1, $5, $2); 	}
+			| REPEAT slist UNTIL '('expr')'			{	$$ = makeWhileNode(2, $5, $2);	}
 			;
 
 jmpStmts	: CONTINUE	{	$$ = makeJumpStatement(0);	}
