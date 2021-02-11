@@ -2,9 +2,14 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifndef DATA_H
-#define DATA_H
-#include "data.h"
+#ifndef EXPTREE_H
+#define EXPTREE_H
+#include "exptree.h"
+#endif
+
+#ifndef SYMBOLS_H
+#define SYMBOLS_H
+#include "symbol_table.h"
 #endif
 
 int HIGHEST_REGISTER = -1;
@@ -17,7 +22,7 @@ FILE *target;
 int codeGen(tnode *t);
 int writeNodeCodeGen(tnode *t);
 int readNodeCodeGen(tnode *t);
-int numberNodeCodeGen(tnode *t);
+int constantNodeCodeGen(tnode *t);
 int variableNodeCodeGen(tnode *t);
 int operatorNodeCodeGen(tnode *t);
 int ifNodeCodeGen(tnode *t);
@@ -60,7 +65,7 @@ int codeGen(tnode *t)
 	} else if (t->nodetype == 2) {
 		return readNodeCodeGen(t);
 	} else if (t->nodetype == 3) {
-		return numberNodeCodeGen(t);
+		return constantNodeCodeGen(t);
 	} else if (t->nodetype == 4) {
 		return variableNodeCodeGen(t);
 	} else if (t->nodetype == 5) {
@@ -97,24 +102,29 @@ int readNodeCodeGen(tnode *t)
 	}
 	else
 	{
-		p = 4096 + *(t->left->varname) - 'a';
+		GSymbol* var = t->left->varLocation;
+		p = var->address;
 	}
 	fprintf(target, "MOV [%d], R%d\n", p, q);
 	freeReg();
 	return 0;
 }
 
-int numberNodeCodeGen(tnode *t)
+int constantNodeCodeGen(tnode *t)
 {
 	int p = getReg();
-	fprintf(target, "MOV R%d, %d\n", p, t->val);
+	if(t->metatype == 0)
+		fprintf(target, "MOV R%d, %d\n", p, t->val.decimal);
+	if(t->metatype == 1)
+		fprintf(target, "MOV R%d, %s\n", p, t->val.string);
 	return p;
 }
 
 int variableNodeCodeGen(tnode *t)
 {
 	int p = getReg();
-	fprintf(target, "MOV R%d, [%d]\n", p, 4096 + (*(t->varname) - 'a'));
+	GSymbol* var = t->varLocation;
+	fprintf(target, "MOV R%d, [%d]\n", p, var->address);
 	return p;
 }
 
@@ -141,7 +151,8 @@ int operatorNodeCodeGen(tnode *t)
 	}
 	else if (strcmp((t->op),"=") == 0)
 	{
-		int p = 4096 + (*(t->left->varname) - 'a');
+		GSymbol* var = t->left->varLocation;
+		int p = var->address;
 		fprintf(target, "MOV [%d], R%d\n", p, q);
 	}
 	else if (strcmp((t->op),"<") == 0)
@@ -185,13 +196,13 @@ int operatorNodeCodeGen(tnode *t)
 
 int ifNodeCodeGen(tnode *t) {
 	int p = codeGen(t->left);
-	int startLabel = getLabel();
+	int midLabel = getLabel();
 	int endLabel = getLabel();
 
-	fprintf(target, "JZ R%d, LABEL%d\n", p, startLabel);
+	fprintf(target, "JZ R%d, LABEL%d\n", p, midLabel);
 	codeGen(t->right->left);
 	fprintf(target, "JMP LABEL%d\n", endLabel);
-	fprintf(target, "LABEL%d\n", startLabel);
+	fprintf(target, "LABEL%d\n", midLabel);
 	codeGen(t->right->right);
 	fprintf(target, "LABEL%d\n", endLabel);
 }

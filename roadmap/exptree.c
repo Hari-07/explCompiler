@@ -1,9 +1,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef DATA_H
-#define DATA_H
-#include "data.h"
+#ifndef EXPTREE_H
+#define EXPTREE_H
+#include "exptree.h"
+#endif
+
+#ifndef SYMBOLS_H
+#define SYMBOLS_H
+#include "symbol_table.h"
 #endif
 
 tnode *makeConnectorNode(tnode *l, tnode *r)
@@ -26,7 +31,7 @@ tnode *makeReadNode(tnode *target)
 		temp->left = target;
 		temp->right = NULL;
 	} else {
-		printf("CAN ONLY READ TO A VARIABLE\n");
+		printf("CAN ONLY READ TO A VARIABLE \n");
 		exit(-1);
 	}
 }
@@ -45,25 +50,29 @@ tnode *makeWriteNode(tnode *source)
 	}
 }
 
-tnode *makeLeafNode(int type, char *s)
+tnode *makeConstantNode(int type, char *s)
 {
 	tnode *temp;
 	temp = (tnode *)malloc(sizeof(tnode));
-	if (type == 0)
-	{
-		temp->val = atoi(s);
-		temp->nodetype = 3;
+	temp->nodetype = 3;
+	temp->metatype = type;
+	if(temp->metatype == 0)
+		temp->val.decimal = atoi(s);
+	else {
+		temp->val.string = (char*)malloc(sizeof(char)*strlen(s));
+		strcpy(temp->val.string, s);
 	}
-	else if (type == 1)
-	{
-		temp->varname = s;
-		temp->nodetype = 4;
-	}
-	else
-	{
-		printf("ILLEGAL NODE CREATION REQUEST\n");
-		exit(3);
-	}
+	temp->left = NULL;
+	temp->right = NULL;
+	return temp;
+}
+
+tnode *makeVariableNode(char *s)
+{
+	tnode *temp;
+	temp = (tnode *)malloc(sizeof(tnode));
+	temp->nodetype = 4;
+	temp->varLocation = findVariable(s);
 	temp->left = NULL;
 	temp->right = NULL;
 	return temp;

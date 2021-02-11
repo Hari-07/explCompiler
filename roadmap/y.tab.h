@@ -51,73 +51,85 @@ extern int yydebug;
   {
     START = 258,
     END = 259,
-    IF = 260,
-    THEN = 261,
-    ELSE = 262,
-    ENDIF = 263,
-    WHILE = 264,
-    DO = 265,
-    ENDWHILE = 266,
-    READ = 267,
-    WRITE = 268,
-    CONTINUE = 269,
-    BREAK = 270,
-    REPEAT = 271,
-    UNTIL = 272,
-    NUM = 273,
-    VAR = 274,
-    ADD = 275,
-    SUB = 276,
-    MUL = 277,
-    DIV = 278,
-    EQUALS = 279,
-    SLT = 280,
-    SGT = 281,
-    LTE = 282,
-    GTE = 283,
-    NEQ = 284,
-    EQU = 285
+    DECL = 260,
+    ENDDECL = 261,
+    IF = 262,
+    THEN = 263,
+    ELSE = 264,
+    ENDIF = 265,
+    WHILE = 266,
+    DO = 267,
+    ENDWHILE = 268,
+    READ = 269,
+    WRITE = 270,
+    CONTINUE = 271,
+    BREAK = 272,
+    REPEAT = 273,
+    UNTIL = 274,
+    INT = 275,
+    STR = 276,
+    NUM = 277,
+    VAR = 278,
+    ADD = 279,
+    SUB = 280,
+    MUL = 281,
+    DIV = 282,
+    EQUALS = 283,
+    SLT = 284,
+    SGT = 285,
+    LTE = 286,
+    GTE = 287,
+    NEQ = 288,
+    EQU = 289,
+    STRING = 290
   };
 #endif
 /* Tokens.  */
 #define START 258
 #define END 259
-#define IF 260
-#define THEN 261
-#define ELSE 262
-#define ENDIF 263
-#define WHILE 264
-#define DO 265
-#define ENDWHILE 266
-#define READ 267
-#define WRITE 268
-#define CONTINUE 269
-#define BREAK 270
-#define REPEAT 271
-#define UNTIL 272
-#define NUM 273
-#define VAR 274
-#define ADD 275
-#define SUB 276
-#define MUL 277
-#define DIV 278
-#define EQUALS 279
-#define SLT 280
-#define SGT 281
-#define LTE 282
-#define GTE 283
-#define NEQ 284
-#define EQU 285
+#define DECL 260
+#define ENDDECL 261
+#define IF 262
+#define THEN 263
+#define ELSE 264
+#define ENDIF 265
+#define WHILE 266
+#define DO 267
+#define ENDWHILE 268
+#define READ 269
+#define WRITE 270
+#define CONTINUE 271
+#define BREAK 272
+#define REPEAT 273
+#define UNTIL 274
+#define INT 275
+#define STR 276
+#define NUM 277
+#define VAR 278
+#define ADD 279
+#define SUB 280
+#define MUL 281
+#define DIV 282
+#define EQUALS 283
+#define SLT 284
+#define SGT 285
+#define LTE 286
+#define GTE 287
+#define NEQ 288
+#define EQU 289
+#define STRING 290
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 17 "parser.y"
+#line 23 "parser.y"
 
 	struct tnode* node;
+	int d;
+	char* s;
 
-#line 121 "y.tab.h"
+#line 133 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

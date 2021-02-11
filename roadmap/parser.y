@@ -2,13 +2,19 @@
 	#include<stdio.h>
 	#include<stdlib.h>
 
-	#ifndef DATA_H
-	#define DATA_H
-	#include"data.h"
+	#ifndef EXPTREE_H
+	#define EXPTREE_H
+	#include"exptree.h"
+	#endif
+
+	#ifndef SYMBOLS_H
+	#define SYMBOLS_H
+	#include "symbol_table.h"
 	#endif
 
 	#include "exptree.c"
 	#include "compiler.c"
+	#include "symbol_table.c"
 
 	int yylex(void);
 	void yyerror(const char *s);
@@ -16,17 +22,42 @@
 
 %union {
 	struct tnode* node;
-}
+	int d;
+	char* s;
+};
 
-%type <node> expr program stmt slist inputStmt outputStmt assgStmt ifStmt whileStmt jmpStmts;
-%token START END
+%type <d> type varlist
+%type <node> expr program stmt slist inputStmt outputStmt assgStmt ifStmt whileStmt jmpStmts declarations decllist decl
+%token START END DECL ENDDECL
 %token IF THEN ELSE ENDIF WHILE DO ENDWHILE READ WRITE CONTINUE BREAK REPEAT UNTIL
-%token NUM VAR ADD SUB MUL DIV EQUALS SLT SGT LTE GTE NEQ EQU
+%token INT STR
+%token NUM VAR ADD SUB MUL DIV EQUALS SLT SGT LTE GTE NEQ EQU STRING
 %left SLT SGT LTE GTE NEQ EQU
 %left ADD SUB
 %left MUL DIV
 
 %%
+code: declarations program
+	;
+
+declarations: DECL decllist ENDDECL		{}
+			| DECL ENDDECL				{}
+			;
+
+decllist: decllist decl
+		| decl
+		;
+
+decl: type varlist						{}
+	;
+
+type: INT 	{	$<d>$ = 0;	}
+	| STR	{	$<d>$ = 1;	}
+	;
+
+varlist: varlist ',' VAR				{	addVariable($<s>3, $<d>0, 1);	} 
+	   | VAR							{	addVariable($<s>1, $<d>0, 1); 	}
+	   ;
 
 program: START slist END	{
 								starter($2);
@@ -83,8 +114,9 @@ expr: '('expr')'		{	$$ = $<node>2; }
 	| expr 	GTE expr    {	$$ = makeOperatorNode(2, ">=", $1, $3);	}
 	| expr 	NEQ expr    {	$$ = makeOperatorNode(2, "!=", $1, $3);	}
 	| expr 	EQU expr    {	$$ = makeOperatorNode(2, "==", $1, $3);	}
-	| NUM				{	$$ = $<node>1; }
-	| VAR				{	$$ = $<node>1; }
+	| NUM				{	$$ = $<node>1; 	}
+	| STRING			{	$$ = $<node>1;	}
+	| VAR				{	$$ = makeVariableNode($<s>$); }
 	;
 %%
 
