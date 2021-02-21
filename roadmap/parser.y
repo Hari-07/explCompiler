@@ -31,7 +31,7 @@
 %token START END DECL ENDDECL
 %token IF THEN ELSE ENDIF WHILE DO ENDWHILE READ WRITE CONTINUE BREAK REPEAT UNTIL
 %token INT STR
-%token NUM VAR ADD SUB MUL DIV EQUALS SLT SGT LTE GTE NEQ EQU STRING
+%token NUM VAR ADD SUB MUL DIV EQUALS SLT SGT LTE GTE NEQ EQU STRING ARR_INDEX
 %left SLT SGT LTE GTE NEQ EQU
 %left ADD SUB
 %left MUL DIV
@@ -55,12 +55,14 @@ type: INT 	{	$<d>$ = 0;	}
 	| STR	{	$<d>$ = 1;	}
 	;
 
-varlist: varlist ',' VAR				{	addVariable($<s>3, $<d>0, 1);	} 
+varlist: varlist ',' VAR				{	addVariable($<s>3, $<d>0, 1);		}
+	   | varlist ',' VAR '['NUM']'		{	addVariable($<s>3, $<d>0, $<d>5);	}
 	   | VAR							{	addVariable($<s>1, $<d>0, 1); 	}
+	   | VAR '['NUM']'					{	addVariable($<s>1, $<d>0, $<d>2);	}
 	   ;
 
 program: START slist END	{
-								starter($2);
+								startCodeGen($2);
 								printf("COMPLETED\n");
 							}
 	   | START END			{
@@ -81,14 +83,11 @@ stmt:	inputStmt		{	$$ = $<node>1;	}
 	| 	jmpStmts		{   $$ = $<node>1;	}
 	;
 
-inputStmt:	READ'('expr')'	{	$$ = makeReadNode($3);	}
-		 ;
+inputStmt:	READ'('expr')'	{	$$ = makeReadNode($3);	};
 
-outputStmt:	WRITE'('expr')' { 	$$ = makeWriteNode($3);	}
-		  ;
+outputStmt:	WRITE'('expr')' { 	$$ = makeWriteNode($3);	};
 
-assgStmt: expr EQUALS expr	{	$$ = makeOperatorNode(1, "=",$1,$3);	}
-		;
+assgStmt: expr EQUALS expr	{	$$ = makeOperatorNode(0, "=",$1,$3);	};
 
 ifStmt : IF '('expr')' THEN slist ELSE slist ENDIF	{ $$ = makeIfNode($3, $6, $8); }
 	   | IF '('expr')' THEN slist ENDIF				{ $$ = makeIfNode($3, $6, NULL); }
@@ -114,9 +113,10 @@ expr: '('expr')'		{	$$ = $<node>2; }
 	| expr 	GTE expr    {	$$ = makeOperatorNode(2, ">=", $1, $3);	}
 	| expr 	NEQ expr    {	$$ = makeOperatorNode(2, "!=", $1, $3);	}
 	| expr 	EQU expr    {	$$ = makeOperatorNode(2, "==", $1, $3);	}
-	| NUM				{	$$ = $<node>1; 	}
-	| STRING			{	$$ = $<node>1;	}
-	| VAR				{	$$ = makeVariableNode($<s>$); }
+	| NUM				{	$$ = makeConstantNode(0, $<d>1, NULL); 	}
+	| STRING			{	$$ = makeConstantNode(1, 0, $<s>1);		}
+	| VAR '['expr']'	{	$$ = makeVariableNode($<s>$, $<node>3);	}
+	| VAR				{	$$ = makeVariableNode($<s>$, makeConstantNode(0, 0, NULL)); 		}
 	;
 %%
 

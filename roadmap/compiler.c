@@ -16,6 +16,7 @@ int HIGHEST_REGISTER = -1;
 int LABEL_COUNTER = -1;
 int CURRENT_WHILE_START = -1;
 int CURRENT_WHILE_END = -1;
+int READ_WRITE_BUFFER = -1;
 FILE *target;
 
 // CODEGEN FUNCTIONS
@@ -27,23 +28,24 @@ int variableNodeCodeGen(tnode *t);
 int operatorNodeCodeGen(tnode *t);
 int ifNodeCodeGen(tnode *t);
 int whileNodeCodeGen(tnode *t);
-int jumpNodeCodeGen(tnode* t);
+int jumpNodeCodeGen(tnode *t);
 
 // CODEGEN ABSTRACTIONS
 void printFromIndex(int index);
 void readToIndex(int index);
+int getOffset(tnode *t);
 
 // HELPER FUNCTIONS
 int getReg();
 void freeReg();
 int getLabel();
 
-
-void starter(tnode *t)
+void startCodeGen(tnode *t)
 {
 	target = fopen("output.xsm", "w");
 	fprintf(target, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n", 0, 2056, 0, 0, 0, 0, 0, 0);
-	fprintf(target, "MOV SP, 4123\n");
+	READ_WRITE_BUFFER = getVarAddress();
+	fprintf(target, "MOV SP, %d\n", getVarAddress() + 1);
 	codeGen(t);
 	fprintf(target, "INT 10\n");
 }
@@ -60,23 +62,41 @@ int codeGen(tnode *t)
 		codeGen(t->left);
 		codeGen(t->right);
 		return 0;
-	} else if (t->nodetype == 1) {
+	}
+	else if (t->nodetype == 1)
+	{
 		return writeNodeCodeGen(t);
-	} else if (t->nodetype == 2) {
+	}
+	else if (t->nodetype == 2)
+	{
 		return readNodeCodeGen(t);
-	} else if (t->nodetype == 3) {
+	}
+	else if (t->nodetype == 3)
+	{
 		return constantNodeCodeGen(t);
-	} else if (t->nodetype == 4) {
+	}
+	else if (t->nodetype == 4)
+	{
 		return variableNodeCodeGen(t);
-	} else if (t->nodetype == 5) {
+	}
+	else if (t->nodetype == 5)
+	{
 		return operatorNodeCodeGen(t);
-	} else if (t->nodetype == 6) {
+	}
+	else if (t->nodetype == 6)
+	{
 		return ifNodeCodeGen(t);
-	} else if (t->nodetype == 7) {
+	}
+	else if (t->nodetype == 7)
+	{
 		return whileNodeCodeGen(t);
-	} else if (t->nodetype == 8) {
+	}
+	else if (t->nodetype == 8)
+	{
 		return jumpNodeCodeGen(t);
-	} else {
+	}
+	else
+	{
 		printf("INVALID NODE\n");
 		exit(-1);
 	}
@@ -86,6 +106,7 @@ int writeNodeCodeGen(tnode *t)
 {
 	int p = codeGen(t->left);
 	printFromIndex(p);
+	freeReg();
 	return 0;
 }
 
@@ -93,19 +114,16 @@ int readNodeCodeGen(tnode *t)
 {
 	int q = getReg();
 	readToIndex(q);
-	int p;
 
-	if (t->left->nodetype != 4)
-	{
-		printf("INVALID WRITE STATEMENT\n");
-		exit(-1);
-	}
-	else
-	{
-		GSymbol* var = t->left->varLocation;
-		p = var->address;
-	}
-	fprintf(target, "MOV [%d], R%d\n", p, q);
+	GSymbol *var = t->left->varLocation;
+	int p = getReg();
+	int offsetValueRegister = getOffset(t->left->left);
+
+	fprintf(target, "MOV R%d, %d\n", p, var->address);
+	fprintf(target, "ADD R%d, R%d\n", p, offsetValueRegister);
+	fprintf(target, "MOV [R%d], R%d\n", p, q);
+	freeReg();
+	freeReg();
 	freeReg();
 	return 0;
 }
@@ -113,9 +131,9 @@ int readNodeCodeGen(tnode *t)
 int constantNodeCodeGen(tnode *t)
 {
 	int p = getReg();
-	if(t->metatype == 0)
+	if (t->metadata == 0)
 		fprintf(target, "MOV R%d, %d\n", p, t->val.decimal);
-	if(t->metatype == 1)
+	if (t->metadata == 1)
 		fprintf(target, "MOV R%d, %s\n", p, t->val.string);
 	return p;
 }
@@ -123,78 +141,96 @@ int constantNodeCodeGen(tnode *t)
 int variableNodeCodeGen(tnode *t)
 {
 	int p = getReg();
-	GSymbol* var = t->varLocation;
-	fprintf(target, "MOV R%d, [%d]\n", p, var->address);
+	GSymbol *var = t->varLocation;
+	int offsetValueRegister = getOffset(t->left);
+	fprintf(target, "MOV R%d, %d\n", p, var->address);
+	fprintf(target, "ADD R%d, R%d\n", p, offsetValueRegister);
+	fprintf(target, "MOV R%d, [R%d]\n", p, p);
+	freeReg();
 	return p;
 }
 
 int operatorNodeCodeGen(tnode *t)
 {
-	int p = codeGen(t->left);
-	int q = codeGen(t->right);
+	int p, q;
+	if (t->metadata == 0)
+	{
+		GSymbol *var = t->left->varLocation;
+		p = getReg();
+		q = codeGen(t->right);
+		int offsetValueRegister = getOffset(t->left->left);
 
-	if (strcmp((t->op),"+") == 0)
-	{
-		fprintf(target, "ADD R%d, R%d\n", p, q);
-	}
-	else if (strcmp((t->op),"-") == 0)
-	{
-		fprintf(target, "SUB R%d, R%d\n", p, q);
-	}
-	else if (strcmp((t->op),"*") == 0)
-	{
-		fprintf(target, "MUL R%d, R%d\n", p, q);
-	}
-	else if (strcmp((t->op),"/") == 0)
-	{
-		fprintf(target, "DIV R%d, R%d\n", p, q);
-	}
-	else if (strcmp((t->op),"=") == 0)
-	{
-		GSymbol* var = t->left->varLocation;
-		int p = var->address;
-		fprintf(target, "MOV [%d], R%d\n", p, q);
-	}
-	else if (strcmp((t->op),"<") == 0)
-	{
-		fprintf(target, "LT R%d, R%d\n", p, q);
+		fprintf(target, "MOV R%d, %d\n", p, var->address);
+		fprintf(target, "ADD R%d, R%d\n", p, offsetValueRegister);
+		fprintf(target, "MOV [R%d], R%d\n", p, q);
+		freeReg();
+		freeReg();
 		freeReg();
 	}
-	else if (strcmp((t->op),">") == 0)
+	else
 	{
-		fprintf(target, "GT R%d, R%d\n", p, q);
-		freeReg();
-	}
-	else if (strcmp((t->op),"<=") == 0)
-	{
-		fprintf(target, "LE R%d, R%d\n", p, q);
-		freeReg();
-	}
-	else if (strcmp((t->op),">=") == 0)
-	{
-		fprintf(target, "GE R%d, R%d\n", p, q);
-		freeReg();
-	}
-	else if (strcmp((t->op),"!=") == 0)
-	{
-		fprintf(target, "NE R%d, R%d\n", p, q);
-		freeReg();
-	}
-	else if (strcmp((t->op),"==") == 0)
-	{
-		fprintf(target, "EQ R%d, R%d\n", p, q);
-		freeReg();
-	}
-	else {
-		printf("INVALID OPERATION\n");
-		exit(-1);
-	}
+		p = codeGen(t->left);
+		q = codeGen(t->right);
 
-	freeReg();
-	return p;
+		if (strcmp((t->op), "+") == 0)
+		{
+			fprintf(target, "ADD R%d, R%d\n", p, q);
+		}
+		else if (strcmp((t->op), "-") == 0)
+		{
+			fprintf(target, "SUB R%d, R%d\n", p, q);
+		}
+		else if (strcmp((t->op), "*") == 0)
+		{
+			fprintf(target, "MUL R%d, R%d\n", p, q);
+		}
+		else if (strcmp((t->op), "/") == 0)
+		{
+			fprintf(target, "DIV R%d, R%d\n", p, q);
+		}
+		else if (strcmp((t->op), "<") == 0)
+		{
+			fprintf(target, "LT R%d, R%d\n", p, q);
+			freeReg();
+		}
+		else if (strcmp((t->op), ">") == 0)
+		{
+			fprintf(target, "GT R%d, R%d\n", p, q);
+			freeReg();
+		}
+		else if (strcmp((t->op), "<=") == 0)
+		{
+			fprintf(target, "LE R%d, R%d\n", p, q);
+			freeReg();
+		}
+		else if (strcmp((t->op), ">=") == 0)
+		{
+			fprintf(target, "GE R%d, R%d\n", p, q);
+			freeReg();
+		}
+		else if (strcmp((t->op), "!=") == 0)
+		{
+			fprintf(target, "NE R%d, R%d\n", p, q);
+			freeReg();
+		}
+		else if (strcmp((t->op), "==") == 0)
+		{
+			fprintf(target, "EQ R%d, R%d\n", p, q);
+			freeReg();
+		}
+		else
+		{
+			printf("INVALID OPERATION\n");
+			exit(-1);
+		}
+
+		freeReg();
+		return p;
+	}
 }
 
-int ifNodeCodeGen(tnode *t) {
+int ifNodeCodeGen(tnode *t)
+{
 	int p = codeGen(t->left);
 	int midLabel = getLabel();
 	int endLabel = getLabel();
@@ -207,44 +243,54 @@ int ifNodeCodeGen(tnode *t) {
 	fprintf(target, "LABEL%d\n", endLabel);
 }
 
-int whileNodeCodeGen(tnode *t) {
+int whileNodeCodeGen(tnode *t)
+{
 	int startLabel = getLabel();
 	int endLabel = getLabel();
 	CURRENT_WHILE_START = startLabel;
-	CURRENT_WHILE_END 	= endLabel;
+	CURRENT_WHILE_END = endLabel;
 
 	fprintf(target, "LABEL%d\n", startLabel);
-	if(t->metatype == 0) {
+	if (t->metadata == 0)
+	{
 		int p = codeGen(t->left);
 		fprintf(target, "JZ R%d, LABEL%d\n", p, endLabel);
 		codeGen(t->right);
 		fprintf(target, "JMP LABEL%d\n", startLabel);
-	} 
-	else if (t->metatype == 1) {
+	}
+	else if (t->metadata == 1)
+	{
 		codeGen(t->right);
 		int p = codeGen(t->left);
 		fprintf(target, "JNZ R%d, LABEL%d\n", p, startLabel);
 	}
-	else if (t->metatype == 2) {
+	else if (t->metadata == 2)
+	{
 		codeGen(t->right);
 		int p = codeGen(t->left);
 		fprintf(target, "JZ R%d, LABEL%d\n", p, startLabel);
 	}
-	else {
+	else
+	{
 		printf("UNEXPECTED WHILE NODE\n");
 		exit(-1);
 	}
 	fprintf(target, "LABEL%d\n", endLabel);
 
 	CURRENT_WHILE_START = -1;
-	CURRENT_WHILE_END 	= -1;
+	CURRENT_WHILE_END = -1;
 }
 
-int jumpNodeCodeGen(tnode *t) {
-	if(CURRENT_WHILE_START != -1) {
-		if(t->metatype == 0){
+int jumpNodeCodeGen(tnode *t)
+{
+	if (CURRENT_WHILE_START != -1)
+	{
+		if (t->metadata == 0)
+		{
 			fprintf(target, "JMP LABEL%d\n", CURRENT_WHILE_START);
-		} else if(t->metatype == 1){
+		}
+		else if (t->metadata == 1)
+		{
 			fprintf(target, "JMP LABEL%d\n", CURRENT_WHILE_END);
 		}
 	}
@@ -277,7 +323,7 @@ void readToIndex(int index)
 	fprintf(target, "PUSH R%d\n", p);
 	fprintf(target, "MOV R%d, -1\n", p);
 	fprintf(target, "PUSH R%d\n", p);
-	fprintf(target, "MOV R%d, 4122\n", p);
+	fprintf(target, "MOV R%d, %d\n", p, READ_WRITE_BUFFER);
 	fprintf(target, "PUSH R%d\n", p);
 	fprintf(target, "PUSH R%d\n", p);
 	fprintf(target, "PUSH R%d\n", p);
@@ -288,7 +334,26 @@ void readToIndex(int index)
 	fprintf(target, "POP R%d\n", p);
 	fprintf(target, "POP R%d\n", p);
 	freeReg();
-	fprintf(target, "MOV R%d, [4122]\n", index);
+	fprintf(target, "MOV R%d, [%d]\n", index, READ_WRITE_BUFFER);
+}
+
+int getOffset(tnode *t)
+{
+	int p = getReg();
+	if (t->nodetype == 3)
+	{
+		fprintf(target, "MOV R%d, %d\n", p, t->val.decimal);
+	}
+	else if (t->nodetype == 4)
+	{
+		GSymbol *var = t->varLocation;
+		int offsetValueRegister = getOffset(t->left);
+		fprintf(target, "MOV R%d, %d\n", p, var->address);
+		fprintf(target, "ADD R%d, R%d\n", p, offsetValueRegister);
+		fprintf(target, "MOV R%d, [R%d]\n", p, p);
+		freeReg();
+	}
+	return p;
 }
 
 int getReg()

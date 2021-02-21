@@ -11,10 +11,29 @@
 #include "symbol_table.h"
 #endif
 
+void checkInputConditions(tnode* t);
+void checkOutputConditions(tnode* t);
+void checkOperatorConditions(int meta, tnode*l, tnode* r);
+void checkConditionalValidity(tnode* condn);
+
+tnode* createNode(){
+	tnode* temp = (tnode*)malloc(sizeof(tnode));
+	temp -> val.decimal = 0;
+	temp -> val.string = "";
+
+	temp -> nodetype = 0;
+	temp -> metadata = 0;
+	temp -> op = NULL;
+	temp -> left = NULL;
+	temp -> right = NULL;
+	temp -> varLocation = NULL;
+
+	return temp;
+}
+
 tnode *makeConnectorNode(tnode *l, tnode *r)
 {
-	tnode *temp;
-	temp = (tnode *)malloc(sizeof(tnode));
+	tnode *temp = createNode();
 	temp->left = l;
 	temp->right = r;
 	temp->nodetype = -1;
@@ -23,125 +42,184 @@ tnode *makeConnectorNode(tnode *l, tnode *r)
 
 tnode *makeReadNode(tnode *target)
 {
-	tnode *temp;
+	checkInputConditions(target);
 
-	if(target -> nodetype == 4){
-		temp = (tnode *)malloc(sizeof(tnode));
-		temp->nodetype = 2;
-		temp->left = target;
-		temp->right = NULL;
-	} else {
-		printf("CAN ONLY READ TO A VARIABLE \n");
-		exit(-1);
-	}
+	tnode* temp = createNode();
+	temp->nodetype = 2;
+	temp->left = target;
+	temp->right = NULL;
+	return temp;
 }
 
 tnode *makeWriteNode(tnode *source)
-{
-	if((source -> nodetype == 5 && source->metatype == 1) || (source->nodetype == 4) || (source->nodetype == 3)) {
-		tnode *temp;
-		temp = (tnode *)malloc(sizeof(tnode));
-		temp->nodetype = 1;
-		temp->left = source;
-		temp->right = NULL;
-	} else {
-		printf("ILLEGAL WRITE STATEMENT\n");
-		exit(-1);
-	}
+{	
+	checkOutputConditions(source);
+
+	tnode *temp = createNode();
+	temp->nodetype = 1;
+	temp->left = source;
+	temp->right = NULL;
+	return temp;
 }
 
-tnode *makeConstantNode(int type, char *s)
+tnode *makeConstantNode(int type, int number, char *s)
 {
-	tnode *temp;
-	temp = (tnode *)malloc(sizeof(tnode));
+	tnode* temp = createNode();
 	temp->nodetype = 3;
-	temp->metatype = type;
-	if(temp->metatype == 0)
-		temp->val.decimal = atoi(s);
+	temp->metadata = type;
+	if(type == 0)
+		temp->val.decimal = number;
 	else {
 		temp->val.string = (char*)malloc(sizeof(char)*strlen(s));
 		strcpy(temp->val.string, s);
 	}
-	temp->left = NULL;
-	temp->right = NULL;
 	return temp;
 }
 
-tnode *makeVariableNode(char *s)
+tnode *makeVariableNode(char *s, tnode* offset)
 {
-	tnode *temp;
-	temp = (tnode *)malloc(sizeof(tnode));
+	tnode *temp = createNode();
 	temp->nodetype = 4;
 	temp->varLocation = findVariable(s);
-	temp->left = NULL;
+	temp->left = offset;
 	temp->right = NULL;
 	return temp;
 }
 
-tnode *makeOperatorNode(int meta, char *c, tnode *l, tnode *r)
+tnode *makeOperatorNode(int meta, char *op, tnode *l, tnode *r)
 {
-	if(strcmp(c, "=") == 0){
-		if((l->nodetype != 4) || (r->nodetype !=3 && r->nodetype != 4 && r->nodetype != 5) || (r->nodetype == 5 && r->metatype != 1)) {
-			printf("ILLEGAL ASSINGMENT OPERATION\n");
-			exit(-1);
-		}
-	} else if(meta == 2) {
-		if((l->nodetype != 3 && l->nodetype != 4 && l->nodetype != 5) || (r->nodetype != 3 && r->nodetype != 4 && r->nodetype != 5)) {
-			printf("INCORRECT COMPARISON OPERATION\n");
-			exit(-1);
-		}
-	} else {
-		if((l->nodetype == 5 && r->nodetype == 5 && (l->metatype != 4 || r->metatype !=4))) {
-			printf("CANNOT MIX BOOLEAN EXPRESSION WITH ARITHMETIC EXPRESSION\n");
-			exit(-1);
-		}
-	}
+	checkOperatorConditions(meta, l, r);
 
-	tnode *temp;
-	temp = (tnode *)malloc(sizeof(tnode));
-	temp->op = c;
+	tnode *temp = createNode();
+	temp->nodetype = 5;
+	temp->metadata = meta;
+	temp->op = op;
 	temp->left = l;
 	temp->right = r;
-	temp->nodetype = 5;
-	temp->metatype = meta;
 	return temp;
 }
 
 tnode *makeIfNode(tnode *condn, tnode *trueBody, tnode *falseBody)
 {
-	if(condn -> nodetype == 5 && condn->metatype == 2) {
-		tnode *temp;
-		temp = (tnode *)malloc(sizeof(tnode));
-		temp->nodetype = 6;
-		temp->left = condn;
-		temp->right = makeConnectorNode(trueBody, falseBody);
-		return temp;
-	} else {
-		printf("ILLEGAL CONDITION STATEMENT\n");
-		exit(-1);
-	}
+	checkConditionalValidity(condn);
+
+	tnode *temp = createNode();
+	temp->nodetype = 6;
+	temp->left = condn;
+	temp->right = makeConnectorNode(trueBody, falseBody);
+	return temp;
 };
 
 tnode *makeWhileNode(int looptype, tnode *condn, tnode *body)
 {
-	if(condn -> nodetype == 5 && condn->metatype == 2) {
-		tnode *temp;
-		temp = (tnode *)malloc(sizeof(tnode));
-		temp->nodetype = 7;
-		temp->left = condn;
-		temp->right = body;
-		temp->metatype = looptype;
+	checkConditionalValidity(condn);
+		
+	tnode *temp = createNode();
+	temp->nodetype = 7;
+	temp->metadata = looptype;
+	temp->left = condn;
+	temp->right = body;
+	return temp;
+}
+
+tnode* makeJumpStatement(int type) {
+	tnode* temp = createNode();
+	temp-> nodetype = 8;
+	temp-> metadata = type;
+}
+
+/*
+Input Conditions:
+- Can only read to variable
+*/
+void checkInputConditions(tnode* t){
+	if(t->nodetype == 4){
+		return;
 	} else {
-		printf("ILLEGAL CONDITION STATEMENT\n");
+		printf("INVALID READ STATEMENT");
 		exit(-1);
 	}
 }
 
-tnode* makeJumpStatement(int type) {
-	tnode* temp;
-	temp = (tnode*)malloc(sizeof(tnode));
-	temp-> nodetype = 8;
-	temp-> left = NULL;
-	temp-> right = NULL; 
-	temp-> metatype = type;
+/*
+Output Conditions:
+- Can Output Constants
+- Can Output Variable
+- Can Output Arithmetic expression
+*/
+void checkOutputConditions(tnode* t){
+	if(t->nodetype == 3) {
+		return;
+	} else if (t->nodetype == 4) {
+		return;
+	} else if (t->nodetype == 5 && t->metadata == 1) {
+		return;
+	} else {
+		printf("INVALID WRITE STATEMENT");
+		exit(-1);
+	}
+}
+
+/*
+Operator Conditions:
+- LHS of assignment should be a variable
+- LHS, RHS of assignment should be of same type
+- LHS, RHS of boolean expression should be integer variable/constant
+- LHS, RHS of arithmetic expression should be integer variable/constants/arithmetic expressions
+*/
+void checkOperatorConditions(int meta, tnode*l, tnode* r){
+	if(meta == 0){
+		if(l->nodetype != 4) {
+			printf("Can only assign to a variable");
+			exit(-1);
+		}
+		else if(r->nodetype != 3 && r->nodetype != 4 && r->nodetype != 5){
+			printf("Invalid Assignment Statement");
+			exit(-1);
+		}
+		else if(r->nodetype == 5 && r->metadata != 1){
+			printf("Invalid Assignment Statement");
+			exit(-1);
+		}
+		else if((l->metadata != r->metadata) && (l->metadata != 0 && r->nodetype == 5)){
+			printf("Type Mismatch in Assignment Statement");
+			exit(-1);
+		}
+	} else if(meta == 1){
+		if((l->nodetype != 3 && l->nodetype != 4 && l->nodetype != 5) ||
+		   (r->nodetype != 3 && r->nodetype != 4 && r->nodetype != 5)
+		) {
+			printf("Invalid Expression");
+			exit(-1);
+		}
+		else if((l->nodetype != 5 && l->metadata != 0) ||
+				(r->nodetype != 5 && r->metadata != 0)
+		) {
+			printf("Invalid Arithmetic Expresson");
+			exit(-1);
+		} else if((l->nodetype == 5 && l->metadata != 1) || (r->nodetype==5 && r->metadata != 1)) {
+			printf("Invalid Arithmetic Expresson");
+			exit(-1);
+		} 
+	} else if(meta == 2){
+		if((l->nodetype != 3 && l->nodetype != 4) ||
+		   (r->nodetype != 3 && r->nodetype != 4)
+		) {
+			printf("Invalid Expression");
+			exit(-1);
+		}
+		else if(l->metadata != 0 || r->metadata != 0) {
+			printf("Invalid comparsion");
+			exit(-1);
+		}
+	}
+}
+
+void checkConditionalValidity(tnode* condn){
+	if(condn -> nodetype == 5 && condn->metadata == 2) {
+		return;
+	}
+	
+	printf("INVALID CONDITION EXPRESSION");
+	exit(-1);
 }

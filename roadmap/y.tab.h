@@ -81,7 +81,8 @@ extern int yydebug;
     GTE = 287,
     NEQ = 288,
     EQU = 289,
-    STRING = 290
+    STRING = 290,
+    ARR_INDEX = 291
   };
 #endif
 /* Tokens.  */
@@ -118,6 +119,7 @@ extern int yydebug;
 #define NEQ 288
 #define EQU 289
 #define STRING 290
+#define ARR_INDEX 291
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -129,7 +131,7 @@ union YYSTYPE
 	int d;
 	char* s;
 
-#line 133 "y.tab.h"
+#line 135 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

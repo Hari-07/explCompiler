@@ -10,26 +10,37 @@ GSymbol *head = NULL;
 int VAR_ADDRESS = 4096;
 
 void addVariable(char* name, int type, int size){
-	GSymbol* temp = (GSymbol*)malloc(sizeof(GSymbol));
+	GSymbol* temp = head;
+	while(temp){
+		if(strcmp(temp->name, name) == 0){
+			printf("MULTIPLE DECLARATION\n");
+			exit(-1);
+		}
+		temp = temp->next;
+	}
+
+	temp = (GSymbol*)malloc(sizeof(GSymbol));
 	temp->name = name;
 	temp->type = type;
-	temp->size = 1;
-	temp->address = VAR_ADDRESS++;
+	temp->size = size;
+	temp->address = VAR_ADDRESS;
+	VAR_ADDRESS += size;
 	temp->next = head;
 	head = temp;
 }
 
 struct GSymbol* findVariable(char* name){
 	GSymbol* temp = head;
-	while(strcmp(temp->name, name) != 0){
+	while(temp){
+		if(strcmp(temp->name, name) == 0){
+			return temp;
+		}
 		temp = temp->next;
-		if(!temp)
-			break;
 	}
-	if(temp){
-		return temp;
-	} else {
-		printf("UNDECLARED VARIABLE\n");
-		exit(-1);
-	}
+	printf("UNDECLARED VARIABLE: %s\n", name);
+	exit(-1);
+}
+
+int getVarAddress(){
+	return VAR_ADDRESS;
 }

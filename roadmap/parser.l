@@ -11,11 +11,12 @@
 %%
 
 [0-9]+		{
-				yylval.node = makeConstantNode(0, yytext);
+				yylval.d = atoi(yytext);
 				return NUM;
 			}
-\"[a-zA-z 0-9]*\" {
-					yylval.node = makeConstantNode(1, yytext);
+			
+\"[:_a-zA-z 0-9]*\" {
+					yylval.s = yytext;
 					return STRING;
 				}
 "+"			{	return ADD;	}
@@ -30,7 +31,7 @@
 "!="		{	return NEQ;	}
 "=="		{	return EQU;	}
 [ \t\n;]	{}
-[(),]		{	return *yytext;	}
+[(),\[\]]	{	return *yytext;	}
 start		{	return START;	}
 end 		{	return END;		}
 read 		{	return READ; 	}

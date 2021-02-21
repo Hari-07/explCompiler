@@ -8,7 +8,7 @@ typedef struct GSymbol {
 
 void addVariable(char* name, int type, int size);
 struct GSymbol* findVariable(char* name);
-
+int getVarAddress();
 
 
 /*
