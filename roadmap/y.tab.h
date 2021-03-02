@@ -66,23 +66,24 @@ extern int yydebug;
     BREAK = 272,
     REPEAT = 273,
     UNTIL = 274,
-    INT = 275,
-    STR = 276,
-    NUM = 277,
-    VAR = 278,
-    ADD = 279,
-    SUB = 280,
-    MUL = 281,
-    DIV = 282,
-    EQUALS = 283,
-    SLT = 284,
-    SGT = 285,
-    LTE = 286,
-    GTE = 287,
-    NEQ = 288,
-    EQU = 289,
-    STRING = 290,
-    ARR_INDEX = 291
+    MAIN = 275,
+    INT = 276,
+    STR = 277,
+    NUM = 278,
+    VAR = 279,
+    ADD = 280,
+    SUB = 281,
+    MUL = 282,
+    DIV = 283,
+    EQUALS = 284,
+    SLT = 285,
+    SGT = 286,
+    LTE = 287,
+    GTE = 288,
+    NEQ = 289,
+    EQU = 290,
+    STRING = 291,
+    ARR_INDEX = 292
   };
 #endif
 /* Tokens.  */
@@ -103,35 +104,37 @@ extern int yydebug;
 #define BREAK 272
 #define REPEAT 273
 #define UNTIL 274
-#define INT 275
-#define STR 276
-#define NUM 277
-#define VAR 278
-#define ADD 279
-#define SUB 280
-#define MUL 281
-#define DIV 282
-#define EQUALS 283
-#define SLT 284
-#define SGT 285
-#define LTE 286
-#define GTE 287
-#define NEQ 288
-#define EQU 289
-#define STRING 290
-#define ARR_INDEX 291
+#define MAIN 275
+#define INT 276
+#define STR 277
+#define NUM 278
+#define VAR 279
+#define ADD 280
+#define SUB 281
+#define MUL 282
+#define DIV 283
+#define EQUALS 284
+#define SLT 285
+#define SGT 286
+#define LTE 287
+#define GTE 288
+#define NEQ 289
+#define EQU 290
+#define STRING 291
+#define ARR_INDEX 292
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 23 "parser.y"
+#line 28 "parser.y"
 
 	struct tnode* node;
 	int d;
 	char* s;
+	struct Param* fparams;
 
-#line 135 "y.tab.h"
+#line 138 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

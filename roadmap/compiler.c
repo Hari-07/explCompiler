@@ -12,6 +12,7 @@
 #include "symbol_table.h"
 #endif
 
+int INIT_CODE = 0;
 int HIGHEST_REGISTER = -1;
 int LABEL_COUNTER = -1;
 int CURRENT_WHILE_START = -1;
@@ -40,13 +41,22 @@ int getReg();
 void freeReg();
 int getLabel();
 
-void startCodeGen(tnode *t)
+void startCodeGen(char* fName, tnode *t)
 {
-	target = fopen("output.xsm", "w");
-	fprintf(target, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n", 0, 2056, 0, 0, 0, 0, 0, 0);
-	READ_WRITE_BUFFER = getVarAddress();
-	fprintf(target, "MOV SP, %d\n", getVarAddress() + 1);
+	if(INIT_CODE == 0){
+		target = fopen("output.xsm", "w");
+		fprintf(target, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n", 0, 2056, 0, 0, 0, 0, 0, 0);
+		READ_WRITE_BUFFER = getVarAddress();
+		fprintf(target, "MOV SP, %d\n", getVarAddress() + 1);
+		INIT_CODE = 1;
+	}
+
+	if(strcmp(fName, "main") != 0) {
+		GSymbol* functionEntry = findGlobalVariable(fName);
+		fprintf(target, "FUNCTION%d\n", functionEntry->flabel);
+	}
 	codeGen(t);
+
 	fprintf(target, "INT 10\n");
 }
 
@@ -57,7 +67,7 @@ int codeGen(tnode *t)
 		return 0;
 	}
 
-	if (t->nodetype == -1)
+	else if (t->nodetype == -1)
 	{
 		codeGen(t->left);
 		codeGen(t->right);

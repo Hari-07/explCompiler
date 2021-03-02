@@ -31,7 +31,7 @@
 "!="		{	return NEQ;	}
 "=="		{	return EQU;	}
 [ \t\n;]	{}
-[(),\[\]]	{	return *yytext;	}
+[(),\[\]{}]	{	return *yytext;	}
 start		{	return START;	}
 end 		{	return END;		}
 read 		{	return READ; 	}
@@ -51,6 +51,7 @@ int			{	return INT;		}
 str 		{	return STR;		}
 decl		{	return DECL;	}
 enddecl		{	return ENDDECL;	}
+main		{	return MAIN;	}
 [a-z][a-z0-9]*		{	
 						char* temp = (char*)malloc(sizeof(char)*strlen(yytext));
 						strcpy(temp, yytext);

@@ -33,7 +33,7 @@ typedef struct tnode{
 	int metadata;
 	char* op;
  	struct tnode *left,*right;
-	struct GSymbol* varLocation;
+	void* varLocation;
 }tnode;
 
 tnode* makeConnectorNode(tnode* l, tnode* r);
@@ -46,3 +46,5 @@ tnode* makeOperatorNode(int meta, char* op, tnode* l, tnode* r);
 tnode* makeIfNode(tnode* condn, tnode* trueBody, tnode* falseBody);
 tnode* makeWhileNode(int looptype, tnode* condn, tnode* body);
 tnode* makeJumpStatement(int type);
+
+tnode* makeFunctionCallNode(char* fName, tnode* arg);

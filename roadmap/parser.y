@@ -18,70 +18,126 @@
 
 	int yylex(void);
 	void yyerror(const char *s);
+	int getfLabel();
+
+	int flabel = 0;
 %}
+
+%define parse.error verbose
 
 %union {
 	struct tnode* node;
 	int d;
 	char* s;
+	struct Param* fparams;
 };
 
 %type <d> type varlist
-%type <node> expr program stmt slist inputStmt outputStmt assgStmt ifStmt whileStmt jmpStmts declarations decllist decl
+%type <node> expr program stmt slist inputStmt outputStmt assgStmt ifStmt whileStmt jmpStmts fnCallStmts declarations decllist decl fbody fdef argList
+%type <fparams> paramlist param
 %token START END DECL ENDDECL
-%token IF THEN ELSE ENDIF WHILE DO ENDWHILE READ WRITE CONTINUE BREAK REPEAT UNTIL
+%token IF THEN ELSE ENDIF WHILE DO ENDWHILE READ WRITE CONTINUE BREAK REPEAT UNTIL MAIN
 %token INT STR
 %token NUM VAR ADD SUB MUL DIV EQUALS SLT SGT LTE GTE NEQ EQU STRING ARR_INDEX
-%left SLT SGT LTE GTE NEQ EQU
+%nonassoc SLT SGT LTE GTE NEQ EQU
 %left ADD SUB
 %left MUL DIV
 
 %%
-code: declarations program
-	;
+code : declarations fdefblock program
+	 | declarations program
+	 | program
+	 ;
 
-declarations: DECL decllist ENDDECL		{}
-			| DECL ENDDECL				{}
-			;
+declarations : DECL decllist ENDDECL	{
+											test();
+										}
+			 | DECL ENDDECL				{}
+			 ;
 
-decllist: decllist decl
-		| decl
-		;
+decllist : decllist decl
+		 | decl
+		 ;
 
-decl: type varlist						{}
-	;
+decl : type varlist						{}
+	 ;
+
+
+varlist: varlist ',' VAR				{	addGlobalVariable($<s>3, $<d>0, 1, -1, NULL);		}
+	   | varlist ',' VAR '['NUM']'		{	addGlobalVariable($<s>3, $<d>0, $<d>5, -1, NULL);	}
+	   | varlist ',' VAR '('paramlist')'{   addGlobalVariable($<s>3, $<d>0, 0, getfLabel(), $5);}
+	   | VAR							{	addGlobalVariable($<s>1, $<d>0, 1, -1, NULL); 		}
+	   | VAR '['NUM']'					{	addGlobalVariable($<s>1, $<d>0, $<d>2, -1, NULL);	}
+	   | VAR '('paramlist')'			{   addGlobalVariable($<s>1, $<d>0, 0, getfLabel(), $3);}
+	   ;
+
+fdefblock : fdefblock fdef
+		  | fdef
+		  ;
+
+fdef : type VAR '('paramlist')''{' ldeclarations fbody'}' 	
+		{
+			startCodeGen($<s>2, $8);
+			free($8);
+			terminateFunction();
+		}
+
+fbody : slist					{
+									if(checkNameEquivalence($<fparams>-3, $<s>-5) == 0){
+										printf("ILLEGAL FUNCTION DEFINITION\n");
+										exit(-1);
+									}
+									addParamstoLSymbol($<fparams>-3);
+								}
+	  ;
+
+paramlist : paramlist',' param			{ $$ = addParameter($1, $<fparams>3); }
+		  | param						{ $$ = $<fparams>1; }
+		  |								{}
+		  ;
+
+param : type VAR	{ 	$$ = createParameter($<s>2, $<d>1); 	}
+	  ;
+
+ldeclarations : DECL ldecllist ENDDECL
+			  | DECL ENDDECL
+			  ;
+
+ldecllist : ldecllist ldecl
+		  | ldecl
+		  ;
+
+ldecl : type lvarlist
+	  ;
+
+lvarlist : lvarlist ',' VAR				{	addLocalVariable($<s>3, $<d>0);	}
+	     | VAR							{	addLocalVariable($<s>1, $<d>0); }
+	     ;
 
 type: INT 	{	$<d>$ = 0;	}
 	| STR	{	$<d>$ = 1;	}
 	;
 
-varlist: varlist ',' VAR				{	addVariable($<s>3, $<d>0, 1);		}
-	   | varlist ',' VAR '['NUM']'		{	addVariable($<s>3, $<d>0, $<d>5);	}
-	   | VAR							{	addVariable($<s>1, $<d>0, 1); 	}
-	   | VAR '['NUM']'					{	addVariable($<s>1, $<d>0, $<d>2);	}
-	   ;
-
-program: START slist END	{
-								startCodeGen($2);
-								printf("COMPLETED\n");
-							}
-	   | START END			{
-		   						printf("EMPTY PROGRAM\n");
-	   						}
-	   ;
+program : INT MAIN '('')''{' ldeclarations slist'}'	
+			{
+				startCodeGen("main", $7);
+				printf("COMPLETED\n");
+			}
+	    ;
 
 
-slist:	slist stmt		{	$$ = makeConnectorNode($1, $2);	}
-	 |	stmt			{	$$ = makeConnectorNode($1, NULL);	}
+slist :	slist stmt		{	$$ = makeConnectorNode($1, $2);	}
+	  |	stmt			{	$$ = makeConnectorNode($1, NULL);	}
+	  ;
+
+stmt :	inputStmt		{	$$ = $<node>1;	}
+	 |  outputStmt		{	$$ = $<node>1;	}
+	 |	assgStmt		{	$$ = $<node>1;	}
+	 |  ifStmt			{	$$ = $<node>1;	}
+	 |	whileStmt		{	$$ = $<node>1;	}
+	 | 	jmpStmts		{   $$ = $<node>1;	}
+	 | 	fnCallStmts		{   $$ = $<node>1;  }
 	 ;
-
-stmt:	inputStmt		{	$$ = $<node>1;	}
-	|   outputStmt		{	$$ = $<node>1;	}
-	|	assgStmt		{	$$ = $<node>1;	}
-	|   ifStmt			{	$$ = $<node>1;	}
-	|	whileStmt		{	$$ = $<node>1;	}
-	| 	jmpStmts		{   $$ = $<node>1;	}
-	;
 
 inputStmt:	READ'('expr')'	{	$$ = makeReadNode($3);	};
 
@@ -102,6 +158,9 @@ jmpStmts	: CONTINUE	{	$$ = makeJumpStatement(0);	}
 			| BREAK		{	$$ = makeJumpStatement(1);	}
 			;
 
+fnCallStmts : VAR '('argList')' {	$$ = makeFunctionCallNode($<s>1, $<node>3); }
+			;
+
 expr: '('expr')'		{	$$ = $<node>2; }
 	| expr	ADD	expr	{	$$ = makeOperatorNode(1, "+",  $1, $3);	}
 	| expr	SUB	expr	{	$$ = makeOperatorNode(1, "-",  $1, $3);	}
@@ -115,10 +174,20 @@ expr: '('expr')'		{	$$ = $<node>2; }
 	| expr 	EQU expr    {	$$ = makeOperatorNode(2, "==", $1, $3);	}
 	| NUM				{	$$ = makeConstantNode(0, $<d>1, NULL); 	}
 	| STRING			{	$$ = makeConstantNode(1, 0, $<s>1);		}
-	| VAR '['expr']'	{	$$ = makeVariableNode($<s>$, $<node>3);	}
-	| VAR				{	$$ = makeVariableNode($<s>$, makeConstantNode(0, 0, NULL)); 		}
+	| VAR '['expr']'	{	$$ = makeVariableNode($<s>1, $<node>3);	}
+	| VAR '('argList')' {	$$ = makeFunctionCallNode($<s>1, $<node>3); }
+	| VAR				{	$$ = makeVariableNode($<s>1, makeConstantNode(0, 0, NULL)); }
 	;
+
+argList : argList',' expr	{ $$ = makeConnectorNode($<node>1, $<node>3);	}
+		| expr				{ $$ = makeConnectorNode(NULL, $<node>1);  }
+		| 					{}
+		;
 %%
+
+int getfLabel() {
+	return flabel++;
+}
 
 void yyerror(char const *s)
 {

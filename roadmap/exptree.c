@@ -13,6 +13,7 @@
 
 void checkInputConditions(tnode* t);
 void checkOutputConditions(tnode* t);
+void checkVariableConditions(tnode* t);
 void checkOperatorConditions(int meta, tnode*l, tnode* r);
 void checkConditionalValidity(tnode* condn);
 
@@ -78,9 +79,18 @@ tnode *makeConstantNode(int type, int number, char *s)
 
 tnode *makeVariableNode(char *s, tnode* offset)
 {
+	checkVariableConditions(offset);
+
 	tnode *temp = createNode();
 	temp->nodetype = 4;
-	temp->varLocation = findVariable(s);
+
+	LSymbol* tempRes = findLocalVariable(s);
+	if(tempRes != NULL){
+		temp->varLocation = (LSymbol*)findLocalVariable(s);
+	} else {
+		temp->varLocation = (GSymbol*)findGlobalVariable(s); 
+	}
+
 	temp->left = offset;
 	temp->right = NULL;
 	return temp;
@@ -128,6 +138,42 @@ tnode* makeJumpStatement(int type) {
 	temp-> metadata = type;
 }
 
+tnode* makeFunctionCallNode(char* fName, tnode* arg) {
+	
+	tnode* iterator = arg;
+	Param* param = findGlobalVariable(fName)->paramlist;
+	
+	while(iterator != NULL){
+		if(param == NULL){
+			printf("INVALID FUNCTION CALL");
+			exit(-1);
+		}
+
+		tnode* temp = iterator->right;
+		if(temp->nodetype == 3 || temp->nodetype == 4){
+			if(param->type != temp->metadata){
+				printf("INVALID FUNCTION CALL");
+				exit(-1);
+			}
+		}
+		else if(temp->nodetype == 5){
+			if(temp->metadata != 1 || param->type != 0){
+				printf("INVALID FUNCTION CALL");
+				exit(-1);
+			}
+		}
+		iterator = iterator->left;
+		param = param->next;
+	}
+
+	if(param != NULL){
+		printf("INVALID FUNCTION CALL");
+		exit(-1);
+	}
+
+	return makeConnectorNode(NULL, NULL);
+}
+
 /*
 Input Conditions:
 - Can only read to variable
@@ -156,6 +202,17 @@ void checkOutputConditions(tnode* t){
 		return;
 	} else {
 		printf("INVALID WRITE STATEMENT");
+		exit(-1);
+	}
+}
+
+/*
+Variable Conditions:
+- Offset must be constant or variable of type integer
+*/
+void checkVariableConditions(tnode* t){
+	if((t->nodetype != 3 && t->nodetype != 4) || t->metadata!= 0){
+		printf("ILLEGAL OFFSET\n");
 		exit(-1);
 	}
 }
