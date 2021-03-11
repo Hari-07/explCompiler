@@ -8,7 +8,7 @@
 
 GSymbol *head = NULL;
 LSymbol* headLocal = NULL;
-int LOCAL_ADDRESS = 0;
+int LOCAL_ADDRESS = 1;
 int VAR_ADDRESS = 4096;
 
 void addGlobalVariable(char* name, int type, int size, int flabel, Param* paramList){
@@ -119,6 +119,10 @@ Param* addParameter(Param* next, Param* paramNode) {
 	return paramNode;
 }
 
+LSymbol* getLocalSymbolTableHeader(){
+	return headLocal;
+}
+
 int getVarAddress(){
 	return VAR_ADDRESS;
 }
@@ -126,7 +130,7 @@ int getVarAddress(){
 void terminateFunction(){
 	free(headLocal);
 	headLocal = NULL;
-	LOCAL_ADDRESS = 0;
+	LOCAL_ADDRESS = 1;
 }
 
 void test(){

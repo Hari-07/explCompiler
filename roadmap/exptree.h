@@ -26,6 +26,12 @@ typedef struct value{
 	8:	Jump Statements
 	- 0: Continue
 	- 1: Break
+	9: Function Call
+	- 0: Returns Integer
+	- 1: Returns String
+	10: Function Return Statement
+	- 0: Return Integer
+	- 1: Returns String
 */
 typedef struct tnode{
  	value val;
@@ -33,7 +39,7 @@ typedef struct tnode{
 	int metadata;
 	char* op;
  	struct tnode *left,*right;
-	void* varLocation;
+	void* varLocation; //Points to SYMBOL TABLE ENTRY
 }tnode;
 
 tnode* makeConnectorNode(tnode* l, tnode* r);
@@ -46,5 +52,5 @@ tnode* makeOperatorNode(int meta, char* op, tnode* l, tnode* r);
 tnode* makeIfNode(tnode* condn, tnode* trueBody, tnode* falseBody);
 tnode* makeWhileNode(int looptype, tnode* condn, tnode* body);
 tnode* makeJumpStatement(int type);
-
 tnode* makeFunctionCallNode(char* fName, tnode* arg);
+tnode* makeReturnNode(tnode* r);

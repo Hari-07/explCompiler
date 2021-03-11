@@ -20,6 +20,8 @@ int CURRENT_WHILE_END = -1;
 int READ_WRITE_BUFFER = -1;
 FILE *target;
 
+char* CURRENT_FUNCTION;
+
 // CODEGEN FUNCTIONS
 int codeGen(tnode *t);
 int writeNodeCodeGen(tnode *t);
@@ -30,34 +32,67 @@ int operatorNodeCodeGen(tnode *t);
 int ifNodeCodeGen(tnode *t);
 int whileNodeCodeGen(tnode *t);
 int jumpNodeCodeGen(tnode *t);
+int functionCallNodeCodeGen(tnode *t);
+int returnNodeCodeGen(tnode *t);
 
 // CODEGEN ABSTRACTIONS
 void printFromIndex(int index);
 void readToIndex(int index);
-int getOffset(tnode *t);
+int getOffsetGlobalVar(tnode *t);
 
 // HELPER FUNCTIONS
 int getReg();
+int getActiveRegIndex();
 void freeReg();
+void setRegIndex();
 int getLabel();
 
 void startCodeGen(char* fName, tnode *t)
 {
+	CURRENT_FUNCTION = (char*) malloc(sizeof(char) * strlen(fName));
+	strcpy(CURRENT_FUNCTION, fName);
+
 	if(INIT_CODE == 0){
 		target = fopen("output.xsm", "w");
-		fprintf(target, "%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n", 0, 2056, 0, 0, 0, 0, 0, 0);
-		READ_WRITE_BUFFER = getVarAddress();
-		fprintf(target, "MOV SP, %d\n", getVarAddress() + 1);
+		fprintf(target, "%d\nCALL MAIN\n%d\n%d\n%d\n%d\n%d\n%d\n", 0, 0, 0, 0, 0, 0, 0);
 		INIT_CODE = 1;
 	}
 
 	if(strcmp(fName, "main") != 0) {
 		GSymbol* functionEntry = findGlobalVariable(fName);
 		fprintf(target, "FUNCTION%d\n", functionEntry->flabel);
+		fprintf(target, "PUSH BP\n");
+		fprintf(target, "MOV BP, SP\n");
+		Param* param = functionEntry->paramlist;
+		LSymbol* temp = getLocalSymbolTableHeader();
+		int paramOffset = -3;
+		while(param!=NULL) {
+			param = param->next;
+			temp->binding = paramOffset;
+			paramOffset--;
+			temp = temp->next;
+		}
+		while(temp != NULL) {
+			fprintf(target, "PUSH BP\n");
+			temp = temp->next;
+		}
+	}
+	else {
+		fprintf(target, "MAIN\n");
+		READ_WRITE_BUFFER = getVarAddress();
+		fprintf(target, "MOV SP, %d\n", getVarAddress()+1);
+		fprintf(target, "MOV BP, SP\n");
+		LSymbol* temp = getLocalSymbolTableHeader();
+		while(temp != NULL) {
+			fprintf(target, "PUSH BP\n");
+			temp = temp->next;
+		}
 	}
 	codeGen(t);
 
-	fprintf(target, "INT 10\n");
+	free(CURRENT_FUNCTION);
+	CURRENT_FUNCTION = NULL;
+	HIGHEST_REGISTER = -1;
 }
 
 int codeGen(tnode *t)
@@ -105,6 +140,14 @@ int codeGen(tnode *t)
 	{
 		return jumpNodeCodeGen(t);
 	}
+	else if (t->nodetype == 9)
+	{
+		return functionCallNodeCodeGen(t);
+	}
+	else if (t->nodetype == 10)
+	{
+		return returnNodeCodeGen(t);
+	}
 	else
 	{
 		printf("INVALID NODE\n");
@@ -126,14 +169,27 @@ int readNodeCodeGen(tnode *t)
 	readToIndex(q);
 
 	GSymbol *var = t->left->varLocation;
-	int p = getReg();
-	int offsetValueRegister = getOffset(t->left->left);
+	char* varName = var->name;
 
-	fprintf(target, "MOV R%d, %d\n", p, var->address);
-	fprintf(target, "ADD R%d, R%d\n", p, offsetValueRegister);
-	fprintf(target, "MOV [R%d], R%d\n", p, q);
-	freeReg();
-	freeReg();
+	LSymbol* localSearch = findLocalVariable(varName);
+
+	if(localSearch != NULL){
+		int p = getReg();
+		fprintf(target, "MOV R%d, BP\n", p);
+		fprintf(target, "ADD R%d, %d\n", p, localSearch->binding);
+		fprintf(target, "MOV [R%d], R%d\n", p, q);
+		freeReg();
+	} else {
+		GSymbol* globalSearch = findGlobalVariable(varName);
+		int p = getReg();
+		int offsetValueRegister = getOffsetGlobalVar(t->left->left);
+
+		fprintf(target, "MOV R%d, %d\n", p, var->address);
+		fprintf(target, "ADD R%d, R%d\n", p, offsetValueRegister);
+		fprintf(target, "MOV [R%d], R%d\n", p, q);
+		freeReg();
+		freeReg();
+	}
 	freeReg();
 	return 0;
 }
@@ -152,11 +208,22 @@ int variableNodeCodeGen(tnode *t)
 {
 	int p = getReg();
 	GSymbol *var = t->varLocation;
-	int offsetValueRegister = getOffset(t->left);
-	fprintf(target, "MOV R%d, %d\n", p, var->address);
-	fprintf(target, "ADD R%d, R%d\n", p, offsetValueRegister);
-	fprintf(target, "MOV R%d, [R%d]\n", p, p);
-	freeReg();
+	char* varName = var->name;
+
+	LSymbol* localSearch = findLocalVariable(varName);
+
+	if(localSearch != NULL){
+		fprintf(target, "MOV R%d, BP\n", p);
+		fprintf(target, "ADD R%d, %d\n", p, localSearch->binding);
+		fprintf(target, "MOV R%d, [R%d]\n", p, p);
+	} else {
+		GSymbol* globalSearch = findGlobalVariable(varName);
+		int offsetValueRegister = getOffsetGlobalVar(t->left);
+		fprintf(target, "MOV R%d, %d\n", p, var->address);
+		fprintf(target, "ADD R%d, R%d\n", p, offsetValueRegister);
+		fprintf(target, "MOV R%d, [R%d]\n", p, p);
+		freeReg();
+	}
 	return p;
 }
 
@@ -166,14 +233,25 @@ int operatorNodeCodeGen(tnode *t)
 	if (t->metadata == 0)
 	{
 		GSymbol *var = t->left->varLocation;
+		char* varName = var->name;
+
 		p = getReg();
 		q = codeGen(t->right);
-		int offsetValueRegister = getOffset(t->left->left);
 
-		fprintf(target, "MOV R%d, %d\n", p, var->address);
-		fprintf(target, "ADD R%d, R%d\n", p, offsetValueRegister);
-		fprintf(target, "MOV [R%d], R%d\n", p, q);
-		freeReg();
+		LSymbol* localSearch = findLocalVariable(varName);
+
+		if(localSearch != NULL){
+			fprintf(target, "MOV R%d, BP\n", p);
+			fprintf(target, "ADD R%d, %d\n", p, localSearch->binding);
+			fprintf(target, "MOV [R%d], R%d\n", p, q);
+		} else {
+			GSymbol* globalSearch = findGlobalVariable(varName);
+			int offsetValueRegister = getOffsetGlobalVar(t->left->left);
+			fprintf(target, "MOV R%d, %d\n", p, var->address);
+			fprintf(target, "ADD R%d, R%d\n", p, offsetValueRegister);
+			fprintf(target, "MOV [R%d], R%d\n", p, q);
+			freeReg();
+		}
 		freeReg();
 		freeReg();
 	}
@@ -306,6 +384,73 @@ int jumpNodeCodeGen(tnode *t)
 	}
 }
 
+int functionCallNodeCodeGen(tnode *t)
+{
+	int state_reg_count = getActiveRegIndex();
+
+	for(int i = state_reg_count; i >= 0; i--){
+		fprintf(target, "PUSH R%d\n", i);
+	}
+
+	for(tnode* arg = t->right; arg != NULL; arg = arg->left){
+		int argValue = codeGen(arg->right);
+		fprintf(target, "PUSH R%d\n", argValue);
+		freeReg();
+	}
+
+	fprintf(target, "PUSH R0\n");
+	setRegIndex(-1);
+	
+	fprintf(target, "CALL FUNCTION%d\n", t->val.decimal);
+	
+	setRegIndex(state_reg_count);
+	int result = getReg();
+
+	fprintf(target, "POP R%d\n", result);
+
+	int buffer = getReg();
+	for(tnode* arg = t->right; arg != NULL; arg = arg->left){
+		fprintf(target, "POP R%d\n", buffer);
+	}
+	freeReg();
+
+	for(int i = 0; i <= state_reg_count; i++){
+		fprintf(target, "POP R%d\n", i);
+	}
+}
+
+int returnNodeCodeGen(tnode* t) {
+
+	if(strcmp(CURRENT_FUNCTION, "main") == 0) {
+		fprintf(target, "INT 10\n");
+	}
+	else {
+		LSymbol* temp = getLocalSymbolTableHeader();
+		GSymbol* functionEntry = findGlobalVariable(CURRENT_FUNCTION);
+		Param* param = functionEntry->paramlist;
+		
+		while(param!=NULL) {
+			param = param->next;
+			temp = temp->next;
+		}
+		while(temp != NULL) {
+			fprintf(target, "POP R0\n");
+			temp = temp->next;
+		}
+
+		int p = codeGen(t->right);
+		int q = getReg();
+		fprintf(target, "MOV R%d, BP\n", q);
+		fprintf(target, "ADD R%d, -2\n", q);
+		fprintf(target, "MOV [R%d], R%d\n", q, p);
+		fprintf(target, "MOV BP, [BP]\n");
+		fprintf(target, "POP R0\n");
+		fprintf(target, "RET\n");
+		freeReg();
+		freeReg();
+	}
+}
+
 void printFromIndex(int index)
 {
 	int p = getReg();
@@ -347,7 +492,7 @@ void readToIndex(int index)
 	fprintf(target, "MOV R%d, [%d]\n", index, READ_WRITE_BUFFER);
 }
 
-int getOffset(tnode *t)
+int getOffsetGlobalVar(tnode *t)
 {
 	int p = getReg();
 	if (t->nodetype == 3)
@@ -357,7 +502,7 @@ int getOffset(tnode *t)
 	else if (t->nodetype == 4)
 	{
 		GSymbol *var = t->varLocation;
-		int offsetValueRegister = getOffset(t->left);
+		int offsetValueRegister = getOffsetGlobalVar(t->left);
 		fprintf(target, "MOV R%d, %d\n", p, var->address);
 		fprintf(target, "ADD R%d, R%d\n", p, offsetValueRegister);
 		fprintf(target, "MOV R%d, [R%d]\n", p, p);
@@ -377,6 +522,11 @@ int getReg()
 	return ++HIGHEST_REGISTER;
 }
 
+int getActiveRegIndex()
+{
+	return HIGHEST_REGISTER;
+}
+
 int getLabel()
 {
 	return ++LABEL_COUNTER;
@@ -385,4 +535,9 @@ int getLabel()
 void freeReg()
 {
 	--HIGHEST_REGISTER;
+}
+
+void setRegIndex(int index)
+{
+	HIGHEST_REGISTER = index;
 }

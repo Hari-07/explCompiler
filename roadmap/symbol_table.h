@@ -31,6 +31,8 @@ void addParamstoLSymbol(Param* param);
 
 struct GSymbol* findGlobalVariable(char* name);
 struct LSymbol* findLocalVariable(char* name);
+
+LSymbol* getLocalSymbolTableHeader();
 int getVarAddress();
 void test();
 

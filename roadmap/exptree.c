@@ -136,12 +136,15 @@ tnode* makeJumpStatement(int type) {
 	tnode* temp = createNode();
 	temp-> nodetype = 8;
 	temp-> metadata = type;
+	return temp;
 }
 
 tnode* makeFunctionCallNode(char* fName, tnode* arg) {
 	
+	GSymbol* reference = findGlobalVariable(fName);
+
 	tnode* iterator = arg;
-	Param* param = findGlobalVariable(fName)->paramlist;
+	Param* param = reference->paramlist;
 	
 	while(iterator != NULL){
 		if(param == NULL){
@@ -171,7 +174,21 @@ tnode* makeFunctionCallNode(char* fName, tnode* arg) {
 		exit(-1);
 	}
 
-	return makeConnectorNode(NULL, NULL);
+	tnode* temp = createNode();
+	temp->nodetype = 9;
+	temp->metadata = reference->type;
+	temp->varLocation = (GSymbol*)reference->paramlist;
+	temp->right = arg;
+	temp->val.decimal = reference->flabel;
+
+	return temp;
+}
+
+tnode* makeReturnNode(tnode* r) {
+	tnode* temp = createNode();
+	temp->nodetype = 10;
+	temp->metadata = r->metadata;
+	temp->right = r;
 }
 
 /*
@@ -230,7 +247,7 @@ void checkOperatorConditions(int meta, tnode*l, tnode* r){
 			printf("Can only assign to a variable");
 			exit(-1);
 		}
-		else if(r->nodetype != 3 && r->nodetype != 4 && r->nodetype != 5){
+		else if(r->nodetype != 3 && r->nodetype != 4 && r->nodetype != 5 && r->nodetype!= 9){
 			printf("Invalid Assignment Statement");
 			exit(-1);
 		}
@@ -243,8 +260,8 @@ void checkOperatorConditions(int meta, tnode*l, tnode* r){
 			exit(-1);
 		}
 	} else if(meta == 1){
-		if((l->nodetype != 3 && l->nodetype != 4 && l->nodetype != 5) ||
-		   (r->nodetype != 3 && r->nodetype != 4 && r->nodetype != 5)
+		if((l->nodetype != 3 && l->nodetype != 4 && l->nodetype != 5 && l->nodetype != 9) ||
+		   (r->nodetype != 3 && r->nodetype != 4 && r->nodetype != 5 && r->nodetype != 9)
 		) {
 			printf("Invalid Expression");
 			exit(-1);

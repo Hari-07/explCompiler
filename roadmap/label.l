@@ -4,6 +4,7 @@
 	FILE* target;
 	int address = 2040;
 	int pass = 0;
+	int main_address;
 	typedef struct node{
 		char* label;
 		int address;
@@ -14,14 +15,20 @@
 	void printLine(char* s);
 	void addLabel(char* s);
 	void printLabel(char* s);
+	void addMain();
+	void printMain();
 %}
 
 %%
 
+^MAIN\n				{	addMain(); 			}
 ^LABEL[0-9]+\n		{	addLabel(yytext);	};
+^FUNCTION[0-9]+\n	{	addLabel(yytext); 	};
+"CALL MAIN\n"		{	printMain(); 		};
 LABEL[0-9]+\n		{	printLabel(yytext);	};
+FUNCTION[0-9]+\n 	{ 	printLabel(yytext); };
 [-,a-zA-Z0-9"\[\]]+	{   printLine(yytext);	};
-[\n ]				{	printLine(yytext);  }
+[\n ]				{	printLine(yytext);  };
 %%
 
 void printLine(char* s){
@@ -52,6 +59,14 @@ void printLabel(char* s){
 	}
 }
 
+void printMain(){
+	if(pass == 1){
+		fprintf(target, "%d\n", main_address);
+	} else {
+		address += 2;
+	}
+}
+
 void addLabel(char* s){
 	if(pass == 0) {
 		node* temp = (node*)malloc(sizeof(node));
@@ -61,6 +76,10 @@ void addLabel(char* s){
 		temp -> address = address;
 		head = temp;
 	}
+}
+
+void addMain(){
+	main_address = address;
 }
 
 int yywrap(void){

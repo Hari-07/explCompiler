@@ -52,7 +52,9 @@ str 		{	return STR;		}
 decl		{	return DECL;	}
 enddecl		{	return ENDDECL;	}
 main		{	return MAIN;	}
-[a-z][a-z0-9]*		{	
+args 		{	return ARGS;	}
+return 		{	return RETURN;  }
+[a-zA-Z][a-zA-Z0-9]*		{	
 						char* temp = (char*)malloc(sizeof(char)*strlen(yytext));
 						strcpy(temp, yytext);
 						yylval.s = temp;
