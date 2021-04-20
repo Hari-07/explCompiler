@@ -34,6 +34,7 @@ int whileNodeCodeGen(tnode *t);
 int jumpNodeCodeGen(tnode *t);
 int functionCallNodeCodeGen(tnode *t);
 int returnNodeCodeGen(tnode *t);
+int fieldNodeCodeGen(tnode *t);
 
 // CODEGEN ABSTRACTIONS
 void printFromIndex(int index);
@@ -102,51 +103,55 @@ int codeGen(tnode *t)
 		return 0;
 	}
 
-	else if (t->nodetype == -1)
+	else if (t->nodeType == connectorNode)
 	{
 		codeGen(t->left);
 		codeGen(t->right);
 		return 0;
 	}
-	else if (t->nodetype == 1)
+	else if (t->nodeType == writeNode)
 	{
 		return writeNodeCodeGen(t);
 	}
-	else if (t->nodetype == 2)
+	else if (t->nodeType == readNode)
 	{
 		return readNodeCodeGen(t);
 	}
-	else if (t->nodetype == 3)
+	else if (t->nodeType == constantNode)
 	{
 		return constantNodeCodeGen(t);
 	}
-	else if (t->nodetype == 4)
+	else if (t->nodeType == variableNode)
 	{
 		return variableNodeCodeGen(t);
 	}
-	else if (t->nodetype == 5)
+	else if (t->nodeType == operatorNode)
 	{
 		return operatorNodeCodeGen(t);
 	}
-	else if (t->nodetype == 6)
+	else if (t->nodeType == ifNode)
 	{
 		return ifNodeCodeGen(t);
 	}
-	else if (t->nodetype == 7)
+	else if (t->nodeType == whileNode)
 	{
 		return whileNodeCodeGen(t);
 	}
-	else if (t->nodetype == 8)
+	else if (t->nodeType == jumpNode)
 	{
 		return jumpNodeCodeGen(t);
 	}
-	else if (t->nodetype == 9)
+	else if (t->nodeType == functionCallNode)
 	{
 		return functionCallNodeCodeGen(t);
 	}
-	else if (t->nodetype == 10)
+	else if (t->nodeType == functionReturnNode)
 	{
 		return returnNodeCodeGen(t);
+	}
+	else if (t->nodeType == fieldNode)
+	{
+		return fieldNodeCodeGen(t);
 	}
 	else
 	{
@@ -213,9 +218,13 @@ int variableNodeCodeGen(tnode *t)
 	LSymbol* localSearch = findLocalVariable(varName);
 
 	if(localSearch != NULL){
-		fprintf(target, "MOV R%d, BP\n", p);
-		fprintf(target, "ADD R%d, %d\n", p, localSearch->binding);
-		fprintf(target, "MOV R%d, [R%d]\n", p, p);
+		if(isUserDefined(localSearch->type)) {
+			printf("Hello");
+		} else {
+			fprintf(target, "MOV R%d, BP\n", p);
+			fprintf(target, "ADD R%d, %d\n", p, localSearch->binding);
+			fprintf(target, "MOV R%d, [R%d]\n", p, p);
+		}
 	} else {
 		GSymbol* globalSearch = findGlobalVariable(varName);
 		int offsetValueRegister = getOffsetGlobalVar(t->left);
@@ -451,8 +460,33 @@ int returnNodeCodeGen(tnode* t) {
 	}
 }
 
+int fieldNodeCodeGen(tnode *t){
+	GSymbol *var = t->left->varLocation;
+	char* varName = var->name;
+
+	LSymbol* localSearch = findLocalVariable(varName);
+	
+	int addressRegister = getReg(); //Holds adress variable in symbol table
+
+	if(localSearch != NULL){
+		fprintf(target, "MOV R%d, BP\n", addressRegister);
+		fprintf(target, "ADD R%d, %d\n", addressRegister, localSearch->binding);
+	} else {
+		GSymbol* globalSearch = findGlobalVariable(varName);
+		fprintf(target, "MOV R%d, %d\n", addressRegister, var->address);
+	}
+
+	fprintf(target, "BRKP\n");
+}
+
 void printFromIndex(int index)
 {
+	int state_reg_count = getActiveRegIndex();
+
+	for(int i = state_reg_count; i >= 0; i--){
+		fprintf(target, "PUSH R%d\n", i);
+	}
+
 	int p = getReg();
 	fprintf(target, "MOV R%d, \"Write\"\n", p);
 	fprintf(target, "PUSH R%d\n", p);
@@ -469,10 +503,20 @@ void printFromIndex(int index)
 	fprintf(target, "POP R%d\n", p);
 	fprintf(target, "POP R%d\n", p);
 	freeReg();
+
+	for(int i = 0; i <= state_reg_count; i++){
+		fprintf(target, "POP R%d\n", i);
+	}
 }
 
 void readToIndex(int index)
 {
+	int state_reg_count = getActiveRegIndex();
+
+	for(int i = state_reg_count; i >= 0; i--){
+		fprintf(target, "PUSH R%d\n", i);
+	}
+
 	int p = getReg();
 	fprintf(target, "MOV R%d, \"Read\"\n", p);
 	fprintf(target, "PUSH R%d\n", p);
@@ -489,17 +533,21 @@ void readToIndex(int index)
 	fprintf(target, "POP R%d\n", p);
 	fprintf(target, "POP R%d\n", p);
 	freeReg();
+
+	for(int i = state_reg_count; i >= 0; i--){
+		fprintf(target, "PUSH R%d\n", i);
+	}
 	fprintf(target, "MOV R%d, [%d]\n", index, READ_WRITE_BUFFER);
 }
 
 int getOffsetGlobalVar(tnode *t)
 {
 	int p = getReg();
-	if (t->nodetype == 3)
+	if (t->nodeType == constantNode)
 	{
 		fprintf(target, "MOV R%d, %d\n", p, t->val.decimal);
 	}
-	else if (t->nodetype == 4)
+	else if (t->nodeType == variableNode)
 	{
 		GSymbol *var = t->varLocation;
 		int offsetValueRegister = getOffsetGlobalVar(t->left);

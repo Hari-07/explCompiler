@@ -12,9 +12,15 @@
 	#include "symbol_table.h"
 	#endif
 
+	#ifndef TYPES_H
+	#define TYPES_H
+	#include "type_table.h"
+	#endif
+
 	#include "exptree.c"
 	#include "compiler.c"
 	#include "symbol_table.c"
+	#include "type_table.c"
 
 	int yylex(void);
 	void yyerror(const char *s);
@@ -28,170 +34,344 @@
 
 %union {
 	struct tnode* node;
-	int d;
-	char* s;
+	int integer;
+	char* string;
 	struct Param* fparams;
+	struct FieldlistNode* fieldnode;
+	struct TypetableNode* typenode;
 };
 
-%type <d> type varlist
-%type <node> expr program stmt slist inputStmt outputStmt assgStmt ifStmt whileStmt jmpStmts fnCallStmts declarations decllist decl fdef argList fbody returnStmt
-%type <fparams> paramlist param
+//TOP LEVEL 
+/*
+	TYPE DEFINITIONS
+	GLOBAL VARIABLE AND FUNCTION DECLARATIONS
+	FUNCTION DEFINITIONS
+	MAIN FUNCTION
+*/
+
+//TYPE DEFINITIONS
+%type<node> typedefSection
+%type<node> typedefList
+%type<node> typeDefinition
+%type<fieldnode> fieldList
+%type<fieldnode> fieldDeclaration
+%type<typenode> fieldType
+
+//GLOBAL VARIABLE AND FUNCTION DECLARATIONS
+%type<node> globalDeclarations
+%type<node> declarationList
+%type<node> declaration
+%type<typenode> dataType
+%type<node> variableList
+
+//FUNCTION DEFINITIONS
+%type<node> functionDefinitionList
+%type<node> functionDefinition
+%type<typenode> returnType
+%type<fparams> parameterList
+%type<fparams> parameter
+%type<node> localDeclarationBlock
+%type<node> localDeclarationList
+%type<node> localDeclaration
+%type<node> localVariableList
+%type<node> functionBody
+
+//MAIN FUNCTION AND CORE
+%type<node> mainFunction
+%type<node> statementList
+%type<node> statement
+%type<node> inputStatement	
+%type<node>	outputStatement
+%type<node>	assignmentStatement
+%type<node>	ifStatement
+%type<node>	whileStatement
+%type<node>	jumpStatement
+%type<node>	functionCallStatement
+%type<node>	returnStatement
+%type<node> expression
+%type<node> arithmeticExpression
+%type<node> logicalExpression
+%type<node> constant
+%type<node> variable
+%type<node> argList
+%type<fieldnode> field
+
 %token START END DECL ENDDECL
 %token IF THEN ELSE ENDIF WHILE DO ENDWHILE READ WRITE CONTINUE BREAK REPEAT UNTIL MAIN ARGS RETURN
-%token INT STR
+%token INT STR TYPE ENDTYPE
 %token NUM VAR ADD SUB MUL DIV EQUALS SLT SGT LTE GTE NEQ EQU STRING ARR_INDEX
 %nonassoc SLT SGT LTE GTE NEQ EQU
 %left ADD SUB
 %left MUL DIV
 
+
+
 %%
-code : declarations fdefblock program
-	 | declarations program
-	 | program
-	 ;
 
-declarations : DECL decllist ENDDECL	{}
-			 | DECL ENDDECL				{}
-			 ;
+//***************** PROGRAM STRUCTURE*****************
 
-decllist : decllist decl
-		 | decl
-		 ;
+	code : typedefSection globalDeclarations functionDefinitionList mainFunction
+		| globalDeclarations functionDefinitionList mainFunction
+		| globalDeclarations mainFunction
+		| mainFunction
+		;
 
-decl : type varlist						{}
-	 ;
+//*****************TYPE DEFINITION SECTION*****************
 
+	typedefSection : 
+		TYPE						
+			{
+				typeTableCreate();
+			}
+		typedefList 
+		ENDTYPE 					{} |
+		TYPE						
+			{
+				typeTableCreate();
+			}
+		ENDTYPE 					{}
+		;
 
-varlist: varlist ',' VAR				{	addGlobalVariable($<s>3, $<d>0, 1, -1, NULL);		}
-	   | varlist ',' VAR '['NUM']'		{	addGlobalVariable($<s>3, $<d>0, $<d>5, -1, NULL);	}
-	   | varlist ',' VAR '('paramlist')'{   addGlobalVariable($<s>3, $<d>0, 0, getfLabel(), $5);}
-	   | VAR							{	addGlobalVariable($<s>1, $<d>0, 1, -1, NULL); 		}
-	   | VAR '['NUM']'					{	addGlobalVariable($<s>1, $<d>0, $<d>2, -1, NULL);	}
-	   | VAR '('paramlist')'			{   addGlobalVariable($<s>1, $<d>0, 0, getfLabel(), $3);}
-	   ;
+	typedefList : 
+		typedefList',' typeDefinition		{} | 
+		typeDefinition						{} 
+		;
 
-fdefblock : fdefblock fdef
-		  | fdef
-		  ;
+	//VARIABLES TYPES ARE CREATED AND ADDED TO THE TYPE TABLE
+	typeDefinition : 
+		VAR '{' fieldList '}'';'	
+			{	
+				addToTypeTable($<string>1, $3); 
+			}
+		;
 
-fdef : 	type VAR '('paramlist')''{' ldeclarations 	{
-														if(checkNameEquivalence($<fparams>4, $<s>2) == 0){
-														printf("ILLEGAL FUNCTION DEFINITION\n");
-														exit(-1);
-												 		}
-														addParamstoLSymbol($<fparams>4);
-												    }	 
-		fbody'}' 									{
-														tnode* temp = $<node>9;
-														startCodeGen($<s>2, $<node>9);
-														free($<node>9);
-														terminateFunction();
-													}
-	 ;
+	//GENERATES A LINKED LIST OF MEMBER FIELDS
+	fieldList : 
+		fieldList fieldDeclaration 
+			{   
+				$$ = addToFieldList($2, $1);
+			} |
+		fieldDeclaration
+			{
+				$$ = addToFieldList($1, NULL);
+			}
+		;
 
-fbody : slist 							{ 	
-											tnode* temp = $<node>1;
-											$<node>$ = $<node>1; 
-										};
+	//CREATES A NODE REPRESENTING A SINGLE FIELD
+	fieldDeclaration : 
+		fieldType VAR ';'
+			{
+				$$ = createFieldNode($1, $<string>2);
+			}
+		; 
 
-paramlist : paramlist',' param			{ $$ = addParameter($1, $<fparams>3); }
-		  | param						{ $$ = $<fparams>1; }
-		  |								{}
-		  ;
+	//RETURNS POINTER TO TYPETABLE ENTRY
+	fieldType: 
+		INT	{	$$ = findTypeTableEntry($<string>1);	} |
+		STR	{	$$ = findTypeTableEntry($<string>1);	} |
+		VAR	{	$$ = findTypeTableEntry($<string>1);	} ;
 
-param : type VAR	{ 	$$ = createParameter($<s>2, $<d>1); 	}
-	  ;
+//*****************GLOBAL DECLARATIONS SECTION*****************
 
-ldeclarations : DECL ldecllist ENDDECL		{ 
-												$<node>$ = $<node>2; 
-											}
-			  | 							{}
-			  ;
+	globalDeclarations : 
+		DECL declarationList ENDDECL	{}  
+		;
 
-ldecllist : ldecllist ldecl
-		  | ldecl
-		  ;
+	declarationList : 
+		declarationList declaration		{} |
+		declaration						{}
+		;
 
-ldecl : type lvarlist
-	  ;
+	declaration : 
+		dataType variableList';'		{}
+		;
 
-lvarlist : lvarlist ',' VAR				{	addLocalVariable($<s>3, $<d>0);	}
-	     | VAR							{	addLocalVariable($<s>1, $<d>0); }
-	     ;
+	dataType: 
+		INT	{	$$ = findTypeTableEntry($<string>1);	} |
+		STR	{	$$ = findTypeTableEntry($<string>1);	} |
+		VAR	{	$$ = findTypeTableEntry($<string>1);	} ;
 
-type: INT 	{	$<d>$ = 0;	}
-	| STR	{	$<d>$ = 1;	}
-	;
+	variableList: 
+		variableList ',' VAR					{	addGlobalVariable($<string>3, $<typenode>0, 		1, 		  -1, NULL);	} |
+		variableList ',' VAR '['NUM']'			{	addGlobalVariable($<string>3, $<typenode>0, 	$<integer>5, -1, NULL);		} |
+		variableList ',' VAR '('parameterList')'{   addGlobalVariable($<string>3, $<typenode>0, 		0, getfLabel(), $5);	} |
+		VAR										{	addGlobalVariable($<string>1, $<typenode>0, 		1, 		  -1, NULL); 	} |
+		VAR '['NUM']'							{	addGlobalVariable($<string>1, $<typenode>0, 	$<integer>2, -1, NULL);		} |
+		VAR '('parameterList')'					{   addGlobalVariable($<string>1, $<typenode>0, 		0, getfLabel(), $3);	}
+		;
 
-program : INT MAIN '('')''{' ldeclarations slist'}'	
+//*****************FUNCTION DEFINITIONS SECTION*****************
+
+	functionDefinitionList :
+		functionDefinitionList functionDefinition | 
+		functionDefinition
+		;
+
+	functionDefinition : 	
+		returnType VAR '('parameterList')''{' 
+			localDeclarationBlock 	
+				{
+					if(checkNameEquivalence($4, $<string>2) == 0){
+						printf("ILLEGAL FUNCTION DEFINITION\n");
+						exit(-1);
+					}
+					addParamstoLSymbol($4);
+				}
+		functionBody '}'							
+			{
+				startCodeGen($<string>2, $9);
+				terminateFunction();
+			}
+		;
+	returnType: 
+		INT	{	$$ = findTypeTableEntry($<string>1);	} |
+		STR	{	$$ = findTypeTableEntry($<string>1);	} |
+		VAR	{	$$ = findTypeTableEntry($<string>1);	} 
+		;
+
+	parameterList : 
+		parameterList',' parameter		{ $$ = addParameter($1, $3); } |
+		parameter						{ $$ = $1; } |
+			{}
+		;
+
+	parameter : 
+		dataType VAR
+			{ 	
+				$$ = createParameter($<string>2, $1);
+			}
+		;
+
+	localDeclarationBlock : 
+		DECL localDeclarationList ENDDECL	{ $$ = $<node>2; } |
+			{}
+		;
+
+	localDeclarationList : 
+		localDeclarationList localDeclaration | 
+		localDeclaration
+		;
+
+	localDeclaration : 
+		dataType localVariableList';'		{}
+		;
+
+	localVariableList : 
+		localVariableList ',' VAR		{	addLocalVariable($<string>3, $<typenode>0);	}| 
+		VAR								{	addLocalVariable($<string>1, $<typenode>0); 	}
+		;
+
+	functionBody :
+		statementList 	{ 	$$ = $1;	}
+		;
+
+//*****************MAIN FUNCTION AND CORE COMPONENTS*****************
+
+	mainFunction : 
+		INT MAIN '('')''{' localDeclarationBlock statementList'}'	
 			{
 				startCodeGen("main", $7);
 				printf("COMPLETED\n");
 			}
-	    ;
+		;
 
 
-slist :	slist stmt		{	$$ = makeConnectorNode($1, $2);	}
-	  |	stmt			{	$$ = makeConnectorNode($1, NULL);	}
-	  ;
+	statementList :
+		statementList statement';'		{	$$ = makeConnectorNode($1, $2);		} |
+		statement ';'					{	$$ = makeConnectorNode($1, NULL);	}
+		;
 
-stmt :	inputStmt		{	$$ = $<node>1;	}
-	 |  outputStmt		{	$$ = $<node>1;	}
-	 |	assgStmt		{	$$ = $<node>1;	}
-	 |  ifStmt			{	$$ = $<node>1;	}
-	 |	whileStmt		{	$$ = $<node>1;	}
-	 | 	jmpStmts		{   $$ = $<node>1;	}
-	 | 	fnCallStmts		{   $$ = $<node>1;  }
-	 |  returnStmt		{   $$ = $<node>1;  }
-	 ;
+	statement :
+		inputStatement				{  $$ = $1; } |		
+		outputStatement				{  $$ = $1; } |
+		assignmentStatement			{  $$ = $1; } |
+		ifStatement					{  $$ = $1; } |
+		whileStatement				{  $$ = $1; } |
+		jumpStatement				{  $$ = $1; } |
+		functionCallStatement		{  $$ = $1; } |
+		returnStatement				{  $$ = $1; }
+		;
 
-inputStmt:	READ'('expr')'	{	$$ = makeReadNode($3);	};
+	inputStatement :	
+		READ'('expression')'	{	$$ = makeReadNode($3);	}
+		;
 
-outputStmt:	WRITE'('expr')' { 	$$ = makeWriteNode($3);	};
+	outputStatement :	
+		WRITE'('expression')' 	{ 	$$ = makeWriteNode($3);	}
+		;
 
-assgStmt: expr EQUALS expr	{	$$ = makeOperatorNode(0, "=",$1,$3);	};
+	assignmentStatement: 
+		expression EQUALS expression		{	$$ = makeOperatorNode(0, "=",$1,$3);	};
 
-ifStmt : IF '('expr')' THEN slist ELSE slist ENDIF	{ $$ = makeIfNode($3, $6, $8); }
-	   | IF '('expr')' THEN slist ENDIF				{ $$ = makeIfNode($3, $6, NULL); }
-	   ;
+	ifStatement 
+		: IF '('expression')' THEN statementList ELSE statementList ENDIF		{ 	$$ = makeIfNode($3, $6, $8); 	}
+		| IF '('expression')' THEN statementList ENDIF							{ 	$$ = makeIfNode($3, $6, NULL); 	}
+		;
 
-whileStmt	: WHILE '('expr')' DO slist ENDWHILE	{	$$ = makeWhileNode(0, $3, $6);	}
-			| DO slist WHILE '('expr')' ENDWHILE	{	$$ = makeWhileNode(1, $5, $2); 	}
-			| REPEAT slist UNTIL '('expr')'			{	$$ = makeWhileNode(2, $5, $2);	}
-			;
+	whileStatement : 
+		WHILE '('expression')' DO statementList ENDWHILE	{	$$ = makeWhileNode(0, $3, $6);	} |
+		DO statementList WHILE '('expression')' ENDWHILE	{	$$ = makeWhileNode(1, $5, $2); 	} |
+		REPEAT statementList UNTIL '('expression')'			{	$$ = makeWhileNode(2, $5, $2);	}
+		;
 
-jmpStmts	: CONTINUE	{	$$ = makeJumpStatement(0);	}
-			| BREAK		{	$$ = makeJumpStatement(1);	}
-			;
+	jumpStatement : 
+		CONTINUE	{	$$ = makeJumpStatement(0);	} |
+		BREAK		{	$$ = makeJumpStatement(1);	}
+		;
 
-fnCallStmts : VAR '('argList')' {	$$ = makeFunctionCallNode($<s>1, $<node>3); }
-			;
+	functionCallStatement :
+		VAR '('argList')' 	{	$$ = makeFunctionCallNode($<string>1, $3);	}
+		;
 
-returnStmt : RETURN expr		{ $$ = makeReturnNode($2); }
-		   ;
+	returnStatement : 
+		RETURN expression	{ 	$$ = makeReturnNode($2); }
+		;
 
-expr: '('expr')'		{	$$ = $<node>2; }
-	| expr	ADD	expr	{	$$ = makeOperatorNode(1, "+",  $1, $3);	}
-	| expr	SUB	expr	{	$$ = makeOperatorNode(1, "-",  $1, $3);	}
-	| expr	MUL	expr	{	$$ = makeOperatorNode(1, "*",  $1, $3);	}
-	| expr	DIV	expr	{	$$ = makeOperatorNode(1, "/",  $1, $3);	}
-	| expr 	SLT expr    {	$$ = makeOperatorNode(2, "<",  $1, $3);	}
-	| expr 	SGT expr    {	$$ = makeOperatorNode(2, ">",  $1, $3);	}
-	| expr 	LTE expr    {	$$ = makeOperatorNode(2, "<=", $1, $3);	}
-	| expr 	GTE expr    {	$$ = makeOperatorNode(2, ">=", $1, $3);	}
-	| expr 	NEQ expr    {	$$ = makeOperatorNode(2, "!=", $1, $3);	}
-	| expr 	EQU expr    {	$$ = makeOperatorNode(2, "==", $1, $3);	}
-	| NUM				{	$$ = makeConstantNode(0, $<d>1, NULL); 	}
-	| STRING			{	$$ = makeConstantNode(1, 0, $<s>1);		}
-	| VAR '['expr']'	{	$$ = makeVariableNode($<s>1, $<node>3);	}
-	| VAR ARGS '('argList')' {	$$ = makeFunctionCallNode($<s>1, $<node>4); }
-	| VAR				{	$$ = makeVariableNode($<s>1, makeConstantNode(0, 0, NULL)); }
-	;
+	expression:
+		'('expression')'		{  	$$ = $<node>2; 	} |
+		VAR '('argList')' 		{	$$ = makeFunctionCallNode($<string>1, $3);	} |
+		arithmeticExpression  	{  	$$ = $1; 		} |
+		logicalExpression		{  	$$ = $1; 		} |
+		constant  				{  	$$ = $1; 		} |
+		variable				{  	$$ = $1; 		}
+		;
 
-argList 
-		: 					{}
-		| argList',' expr	{ $$ = makeConnectorNode($<node>1, $<node>3);	}
-		| expr				{ $$ = makeConnectorNode(NULL, $<node>1);  }
+	arithmeticExpression :
+		expression ADD expression		{	$$ = makeOperatorNode(1, "+",  $1, $3);	} |
+		expression SUB expression		{	$$ = makeOperatorNode(1, "-",  $1, $3);	} |
+		expression MUL expression		{	$$ = makeOperatorNode(1, "*",  $1, $3);	} |
+		expression DIV expression		{	$$ = makeOperatorNode(1, "/",  $1, $3);	}
+		;
+
+	logicalExpression :
+		expression SLT expression    	{	$$ = makeOperatorNode(2, "<",  $1, $3);	} |
+		expression SGT expression    	{	$$ = makeOperatorNode(2, ">",  $1, $3);	} |
+		expression LTE expression    	{	$$ = makeOperatorNode(2, "<=", $1, $3);	} |
+		expression GTE expression    	{	$$ = makeOperatorNode(2, ">=", $1, $3);	} |
+		expression NEQ expression    	{	$$ = makeOperatorNode(2, "!=", $1, $3);	} |
+		expression EQU expression    	{	$$ = makeOperatorNode(2, "==", $1, $3);	}
+		;
+
+	constant :
+		NUM				{	$$ = makeConstantNode(findTypeTableEntry("int"), $<integer>1, NULL); 	} |
+		STRING			{	$$ = makeConstantNode(findTypeTableEntry("string"), 0, $<string>1);	}
+		;
+
+	variable :
+		VAR '['expression']'	{	$$ = makeVariableNode($<string>1, $<node>3);	} |
+		VAR						{	$$ = makeVariableNode($<string>1, makeConstantNode(findTypeTableEntry("int"), 0, NULL)); } |
+		field					{ 	$$ = makeFieldNode($1, makeConstantNode(findTypeTableEntry("int"), 0, NULL)); }
+		;
+
+	field : 
+		VAR'.'field			{	$$ = makeVariableChain($<string>1, NULL, $3); 			} |
+		VAR'.'VAR			{	$$ = makeVariableChain($<string>1, $<string>3, NULL); 	} 
+		;
+
+	argList : 
+		argList',' expression	{ $$ = makeConnectorNode($<node>1, $<node>3);	} |
+		expression				{ $$ = makeConnectorNode(NULL, $<node>1);  		} |
+			{}
 		;
 %%
 

@@ -71,21 +71,23 @@ extern int yydebug;
     RETURN = 277,
     INT = 278,
     STR = 279,
-    NUM = 280,
-    VAR = 281,
-    ADD = 282,
-    SUB = 283,
-    MUL = 284,
-    DIV = 285,
-    EQUALS = 286,
-    SLT = 287,
-    SGT = 288,
-    LTE = 289,
-    GTE = 290,
-    NEQ = 291,
-    EQU = 292,
-    STRING = 293,
-    ARR_INDEX = 294
+    TYPE = 280,
+    ENDTYPE = 281,
+    NUM = 282,
+    VAR = 283,
+    ADD = 284,
+    SUB = 285,
+    MUL = 286,
+    DIV = 287,
+    EQUALS = 288,
+    SLT = 289,
+    SGT = 290,
+    LTE = 291,
+    GTE = 292,
+    NEQ = 293,
+    EQU = 294,
+    STRING = 295,
+    ARR_INDEX = 296
   };
 #endif
 /* Tokens.  */
@@ -111,34 +113,38 @@ extern int yydebug;
 #define RETURN 277
 #define INT 278
 #define STR 279
-#define NUM 280
-#define VAR 281
-#define ADD 282
-#define SUB 283
-#define MUL 284
-#define DIV 285
-#define EQUALS 286
-#define SLT 287
-#define SGT 288
-#define LTE 289
-#define GTE 290
-#define NEQ 291
-#define EQU 292
-#define STRING 293
-#define ARR_INDEX 294
+#define TYPE 280
+#define ENDTYPE 281
+#define NUM 282
+#define VAR 283
+#define ADD 284
+#define SUB 285
+#define MUL 286
+#define DIV 287
+#define EQUALS 288
+#define SLT 289
+#define SGT 290
+#define LTE 291
+#define GTE 292
+#define NEQ 293
+#define EQU 294
+#define STRING 295
+#define ARR_INDEX 296
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 29 "parser.y"
+#line 35 "parser.y"
 
 	struct tnode* node;
-	int d;
-	char* s;
+	int integer;
+	char* string;
 	struct Param* fparams;
+	struct FieldlistNode* fieldnode;
+	struct TypetableNode* typenode;
 
-#line 142 "y.tab.h"
+#line 148 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

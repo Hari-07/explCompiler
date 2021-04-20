@@ -6,13 +6,13 @@
 #include "symbol_table.h"
 #endif
 
-GSymbol *head = NULL;
-LSymbol* headLocal = NULL;
+GSymbol *globalSymbolTableHead = NULL;
+LSymbol* localSymbolTableHead = NULL;
 int LOCAL_ADDRESS = 1;
 int VAR_ADDRESS = 4096;
 
-void addGlobalVariable(char* name, int type, int size, int flabel, Param* paramList){
-	GSymbol* temp = head;
+void addGlobalVariable(char* name, TypetableNode* type, int size, int flabel, Param* paramList){
+	GSymbol* temp = globalSymbolTableHead;
 	while(temp){
 		if(strcmp(temp->name, name) == 0){
 			printf("MULTIPLE DECLARATION\n");
@@ -29,13 +29,13 @@ void addGlobalVariable(char* name, int type, int size, int flabel, Param* paramL
 	temp->paramlist = paramList;
 	temp->address = VAR_ADDRESS;
 	VAR_ADDRESS += size;
-	temp->next = head;
-	head = temp;
+	temp->next = globalSymbolTableHead;
+	globalSymbolTableHead = temp;
 }
 
 
-void addLocalVariable (char* name, int type) {
-	LSymbol* temp = headLocal;
+void addLocalVariable (char* name, TypetableNode* type) {
+	LSymbol* temp = localSymbolTableHead;
 	while(temp){
 		if(strcmp(temp->name, name) == 0){
 			printf("MULTIPLE DECLARATION\n");
@@ -48,8 +48,8 @@ void addLocalVariable (char* name, int type) {
 	temp->name = name;
 	temp->type = type;
 	temp->binding = LOCAL_ADDRESS++;
-	temp->next = headLocal;
-	headLocal = temp;
+	temp->next = localSymbolTableHead;
+	localSymbolTableHead = temp;
 }
 
 int checkNameEquivalence(Param* params, char* fname) {
@@ -79,7 +79,7 @@ void addParamstoLSymbol(Param* param) {
 }
 
 struct GSymbol* findGlobalVariable(char* name){
-	GSymbol* temp = head;
+	GSymbol* temp = globalSymbolTableHead;
 	while(temp){
 		if(strcmp(temp->name, name) == 0){
 			return temp;
@@ -91,7 +91,7 @@ struct GSymbol* findGlobalVariable(char* name){
 }
 
 struct LSymbol* findLocalVariable(char* name){
-	LSymbol* temp = headLocal;
+	LSymbol* temp = localSymbolTableHead;
 	while(temp){
 		if(strcmp(temp->name, name) == 0){
 			return temp;
@@ -103,7 +103,7 @@ struct LSymbol* findLocalVariable(char* name){
 
 
 
-Param* createParameter(char *name, int type) {
+Param* createParameter(char *name, TypetableNode* type) {
 	Param* temp = (Param*)malloc(sizeof(Param));
 
 	temp->name = (char*)malloc(strlen(name)*sizeof(char));
@@ -120,7 +120,7 @@ Param* addParameter(Param* next, Param* paramNode) {
 }
 
 LSymbol* getLocalSymbolTableHeader(){
-	return headLocal;
+	return localSymbolTableHead;
 }
 
 int getVarAddress(){
@@ -128,11 +128,18 @@ int getVarAddress(){
 }
 
 void terminateFunction(){
-	free(headLocal);
-	headLocal = NULL;
+	free(localSymbolTableHead);
+	localSymbolTableHead = NULL;
 	LOCAL_ADDRESS = 1;
 }
 
 void test(){
 	printf("HELLO");
+}
+
+int isUserDefined(TypetableNode* type){
+	if(type->fields == NULL)
+		return 0;
+	else 
+		return 1;
 }

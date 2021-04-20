@@ -10,13 +10,13 @@
 
 %%
 
-[0-9]+		{
-				yylval.d = atoi(yytext);
+[-+]?[0-9]+	{
+				yylval.integer = atoi(yytext);
 				return NUM;
 			}
 			
 \"[:_a-zA-z 0-9]*\" {
-					yylval.s = yytext;
+					yylval.string = yytext;
 					return STRING;
 				}
 "+"			{	return ADD;	}
@@ -30,8 +30,8 @@
 ">="		{	return GTE;	}
 "!="		{	return NEQ;	}
 "=="		{	return EQU;	}
-[ \t\n;]	{}
-[(),\[\]{}]	{	return *yytext;	}
+[ \t\n]		{}
+[(),\[\]{};.] {	return *yytext;	}
 start		{	return START;	}
 end 		{	return END;		}
 read 		{	return READ; 	}
@@ -47,17 +47,29 @@ break		{	return BREAK;	}
 continue 	{	return CONTINUE;}
 repeat 		{	return REPEAT;	}
 until		{	return UNTIL;	}
-int			{	return INT;		}
-str 		{	return STR;		}
+int			{	
+				char* temp = (char*)malloc(sizeof(char)*strlen(yytext));
+				strcpy(temp, yytext);
+				yylval.string = temp;
+				return INT;		
+			}
+string		{	
+				char* temp = (char*)malloc(sizeof(char)*strlen(yytext));
+				strcpy(temp, yytext);
+				yylval.string = temp;
+				return STR;		
+			}
 decl		{	return DECL;	}
 enddecl		{	return ENDDECL;	}
 main		{	return MAIN;	}
 args 		{	return ARGS;	}
 return 		{	return RETURN;  }
+type		{	return TYPE;	}
+endtype		{ 	return ENDTYPE; }
 [a-zA-Z][a-zA-Z0-9]*		{	
 						char* temp = (char*)malloc(sizeof(char)*strlen(yytext));
 						strcpy(temp, yytext);
-						yylval.s = temp;
+						yylval.string = temp;
 						return VAR;
 					}
 .			{	printf("UNKNOWN CHARACTER\n %s", yytext); exit(1);	}
