@@ -88,6 +88,8 @@
 %type<node>	jumpStatement
 %type<node>	functionCallStatement
 %type<node>	returnStatement
+%type<node> allocStatement
+%type<node> deAllocStatement
 %type<node> expression
 %type<node> arithmeticExpression
 %type<node> logicalExpression
@@ -97,7 +99,7 @@
 %type<fieldnode> field
 
 %token START END DECL ENDDECL
-%token IF THEN ELSE ENDIF WHILE DO ENDWHILE READ WRITE CONTINUE BREAK REPEAT UNTIL MAIN ARGS RETURN
+%token IF THEN ELSE ENDIF WHILE DO ENDWHILE READ WRITE CONTINUE BREAK REPEAT UNTIL MAIN ARGS RETURN ALLOC DEALLOC
 %token INT STR TYPE ENDTYPE
 %token NUM VAR ADD SUB MUL DIV EQUALS SLT SGT LTE GTE NEQ EQU STRING ARR_INDEX
 %nonassoc SLT SGT LTE GTE NEQ EQU
@@ -289,7 +291,9 @@
 		whileStatement				{  $$ = $1; } |
 		jumpStatement				{  $$ = $1; } |
 		functionCallStatement		{  $$ = $1; } |
-		returnStatement				{  $$ = $1; }
+		returnStatement				{  $$ = $1; } |
+		allocStatement				{  $$ = $1; } |
+		deAllocStatement			{  $$ = $1; } 
 		;
 
 	inputStatement :	
@@ -299,6 +303,12 @@
 	outputStatement :	
 		WRITE'('expression')' 	{ 	$$ = makeWriteNode($3);	}
 		;
+
+	allocStatement :
+		expression EQUALS ALLOC'('')'		{  $$ = makeAllocNode($1); }
+
+	deAllocStatement:
+		DEALLOC '(' expression ')'			{  $$ = makeDeAllocNode($3); } 
 
 	assignmentStatement: 
 		expression EQUALS expression		{	$$ = makeOperatorNode(0, "=",$1,$3);	};

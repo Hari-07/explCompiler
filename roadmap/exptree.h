@@ -22,6 +22,8 @@ enum nodeType {
 	functionCallNode,
 	functionReturnNode,
 	fieldNode,
+	allocNode,
+	deAllocNode,
 };
 
 /*
@@ -70,6 +72,9 @@ tnode* makeConnectorNode(tnode* l, tnode* r);
 
 tnode* makeWriteNode(tnode* source);
 tnode* makeReadNode(tnode* target);
+tnode* makeAllocNode(tnode* target);
+tnode* makeDeAllocNode(tnode* target);
+
 tnode* makeConstantNode(TypetableNode* type, int number, char *s);
 tnode* makeVariableNode(char *s, tnode* offset);
 tnode* makeOperatorNode(int meta, char* op, tnode* l, tnode* r);
@@ -78,5 +83,7 @@ tnode* makeWhileNode(int looptype, tnode* condn, tnode* body);
 tnode* makeJumpStatement(int type);
 tnode* makeFunctionCallNode(char* fName, tnode* arg);
 tnode* makeReturnNode(tnode* r);
+
+
 FieldlistNode* makeVariableChain(char* parentFieldName, char* childFieldName, FieldlistNode* childFieldNode);
 tnode* makeFieldNode(FieldlistNode* variableChain, tnode* offset);

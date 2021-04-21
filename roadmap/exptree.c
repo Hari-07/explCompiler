@@ -67,6 +67,38 @@ tnode *makeWriteNode(tnode *source)
 	return temp;
 }
 
+tnode* makeAllocNode(tnode* target)
+{
+	if(target->type->fields == NULL) {
+		printf("Can only allocate to a struct");
+		exit(-1);
+	}
+
+	tnode* temp = createNode();
+	temp->nodeType = allocNode;
+
+	temp->left = target;
+	temp->right = NULL;
+
+	return temp;
+}
+
+tnode* makeDeAllocNode(tnode* target)
+{
+	if(target->type->fields == NULL) {
+		printf("Can only allocate to a struct");
+		exit(-1);
+	}
+
+	tnode* temp = createNode();
+	temp->nodeType = deAllocNode;
+
+	temp->left = target;
+	temp->right = NULL;
+
+	return temp;
+}
+
 tnode *makeConstantNode(TypetableNode* type, int number, char *s)
 {
 	tnode* temp = createNode();

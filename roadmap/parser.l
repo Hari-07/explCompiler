@@ -36,6 +36,8 @@ start		{	return START;	}
 end 		{	return END;		}
 read 		{	return READ; 	}
 write		{	return WRITE;	}
+alloc		{	return ALLOC;	}
+dealloc		{	return DEALLOC;	}
 if			{	return IF;		}
 then		{	return THEN;	}
 else		{	return ELSE;	}

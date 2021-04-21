@@ -35,6 +35,8 @@ int jumpNodeCodeGen(tnode *t);
 int functionCallNodeCodeGen(tnode *t);
 int returnNodeCodeGen(tnode *t);
 int fieldNodeCodeGen(tnode *t);
+int allocNodeCodeGen(tnode* t);
+int deAllocNodeCodeGen(tnode* t);
 
 // CODEGEN ABSTRACTIONS
 void printFromIndex(int index);
@@ -88,6 +90,18 @@ void startCodeGen(char* fName, tnode *t)
 			fprintf(target, "PUSH BP\n");
 			temp = temp->next;
 		}
+		fprintf(target, "MOV R0, \"Init\"\n");
+		fprintf(target, "PUSH R0\n");
+		fprintf(target, "PUSH R0\n");
+		fprintf(target, "PUSH R0\n");
+		fprintf(target, "PUSH R0\n");
+		fprintf(target, "PUSH R0\n");
+		fprintf(target, "CALL 0\n");
+		fprintf(target, "POP R0\n");
+		fprintf(target, "POP R0\n");
+		fprintf(target, "POP R0\n");
+		fprintf(target, "POP R0\n");
+		fprintf(target, "POP R0\n");
 	}
 	codeGen(t);
 
@@ -152,6 +166,14 @@ int codeGen(tnode *t)
 	else if (t->nodeType == fieldNode)
 	{
 		return fieldNodeCodeGen(t);
+	}
+	else if (t->nodeType == allocNode)
+	{
+		return allocNodeCodeGen(t);
+	}
+	else if (t->nodeType == deAllocNode)
+	{
+		return deAllocNodeCodeGen(t);
 	}
 	else
 	{
@@ -250,16 +272,42 @@ int operatorNodeCodeGen(tnode *t)
 		LSymbol* localSearch = findLocalVariable(varName);
 
 		if(localSearch != NULL){
-			fprintf(target, "MOV R%d, BP\n", p);
-			fprintf(target, "ADD R%d, %d\n", p, localSearch->binding);
-			fprintf(target, "MOV [R%d], R%d\n", p, q);
+			if(t->left->nodeType == fieldNode) {
+				fprintf(target, "MOV R%d, BP\n", p);
+				fprintf(target, "ADD R%d, %d\n", p, localSearch->binding);
+				if(t->nodeType == fieldNode){
+					FieldlistNode* temp = t->left->fieldChain;
+					while(temp->next != NULL) {
+						fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
+						fprintf(target, "MOV R%d, [R%d]\n", p, p);
+						temp = temp->next;
+					}
+				}
+				fprintf(target, "MOV [R%d], R%d\n", p, q);
+			} else {
+				fprintf(target, "MOV R%d, BP\n", p);
+				fprintf(target, "ADD R%d, %d\n", p, localSearch->binding);
+				fprintf(target, "MOV [R%d], R%d\n", p, q);
+			}
 		} else {
 			GSymbol* globalSearch = findGlobalVariable(varName);
-			int offsetValueRegister = getOffsetGlobalVar(t->left->left);
-			fprintf(target, "MOV R%d, %d\n", p, var->address);
-			fprintf(target, "ADD R%d, R%d\n", p, offsetValueRegister);
-			fprintf(target, "MOV [R%d], R%d\n", p, q);
-			freeReg();
+
+			if(t->left->nodeType == fieldNode) {
+				FieldlistNode* temp = t->left->fieldChain;
+				fprintf(target, "MOV R%d, %d\n", p, var->address);
+				while(temp->next != NULL) {
+					fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
+					fprintf(target, "MOV R%d, [R%d]\n", p, p);
+					temp = temp->next;
+				}
+				fprintf(target, "MOV [R%d], R%d\n", p, q);
+ 			} else {
+				int offsetValueRegister = getOffsetGlobalVar(t->left->left);
+				fprintf(target, "MOV R%d, %d\n", p, var->address);
+				fprintf(target, "ADD R%d, R%d\n", p, offsetValueRegister);
+				fprintf(target, "MOV [R%d], R%d\n", p, q);
+				freeReg();
+			}
 		}
 		freeReg();
 		freeReg();
@@ -461,22 +509,154 @@ int returnNodeCodeGen(tnode* t) {
 }
 
 int fieldNodeCodeGen(tnode *t){
-	GSymbol *var = t->left->varLocation;
+	GSymbol* var = t->varLocation;
 	char* varName = var->name;
+
+	int p = getReg();
 
 	LSymbol* localSearch = findLocalVariable(varName);
 	
-	int addressRegister = getReg(); //Holds adress variable in symbol table
-
 	if(localSearch != NULL){
-		fprintf(target, "MOV R%d, BP\n", addressRegister);
-		fprintf(target, "ADD R%d, %d\n", addressRegister, localSearch->binding);
+		FieldlistNode* temp = t->fieldChain;
+		fprintf(target, "MOV R%d, BP\n", p);
+		fprintf(target, "ADD R%d, %d\n", p, localSearch->binding);
+		while(temp->next != NULL) {
+			fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
+			fprintf(target, "MOV R%d, [R%d]\n", p, p);
+			temp = temp->next;
+		}
+		fprintf(target, "MOV R%d, [R%d]\n", p, p);
 	} else {
 		GSymbol* globalSearch = findGlobalVariable(varName);
-		fprintf(target, "MOV R%d, %d\n", addressRegister, var->address);
+		FieldlistNode* temp = t->fieldChain;
+		fprintf(target, "MOV R%d, %d\n", p, globalSearch->address);
+		while(temp->next != NULL) {
+			fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
+			fprintf(target, "MOV R%d, [R%d]\n", p, p);
+			temp = temp->next;
+		}
+		fprintf(target, "MOV R%d, [R%d]\n", p, p);
 	}
 
-	fprintf(target, "BRKP\n");
+	return p;
+}
+
+int allocNodeCodeGen(tnode* t){
+	int p = getReg();
+	
+	GSymbol* temp = t->left->varLocation;	
+	char* varName = temp->name;
+
+	LSymbol* localSymbolReference = findLocalVariable(varName);
+	if(localSymbolReference != NULL){
+		fprintf(target, "MOV R%d, BP\n", p);
+		fprintf(target, "ADD R%d, %d\n", p, localSymbolReference->binding);
+		fprintf(target, "MOV R%d, [R%d]\n", p, p);
+	} else {
+		GSymbol* globalSymbolReference = findGlobalVariable(varName);
+		int address = globalSymbolReference->address;
+
+		fprintf(target, "MOV R%d, %d\n", p, address);
+		if(t->nodeType == fieldNode){
+			FieldlistNode* temp = t->left->fieldChain;
+			while(temp->next != NULL) {
+				fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
+				fprintf(target, "MOV R%d, [R%d]\n", p, p);
+				temp = temp->next;
+			}
+		}
+	}
+		
+	int state_reg_count = getActiveRegIndex();
+	for(int i = state_reg_count; i >= 0; i--){
+		fprintf(target, "PUSH R%d\n", i);
+	}
+
+	int q = getReg();
+	int ret = getReg();
+	fprintf(target, "MOV R%d, \"Alloc\"\n", q);
+	fprintf(target, "PUSH R%d\n", q);
+	fprintf(target, "PUSH R%d\n", q);
+	fprintf(target, "PUSH R%d\n", q);
+	fprintf(target, "PUSH R%d\n", q);
+	fprintf(target, "PUSH R%d\n", q);
+	fprintf(target, "CALL 0\n");
+	fprintf(target, "POP R%d\n", ret);
+	fprintf(target, "POP R%d\n", q);
+	fprintf(target, "POP R%d\n", q);
+	fprintf(target, "POP R%d\n", q);
+	fprintf(target, "POP R%d\n", q);
+	
+	for(int i = 0; i <= state_reg_count; i++){
+		fprintf(target, "POP R%d\n", i);
+	}
+	
+	fprintf(target, "MOV [R%d], R%d\n", p, ret);
+	freeReg();
+	freeReg();
+	freeReg();
+}
+
+int deAllocNodeCodeGen(tnode* t){
+
+	int p = getReg();
+
+	GSymbol* temp = t->left->varLocation;	
+	char* varName = temp->name;
+
+	LSymbol* localSymbolReference = findLocalVariable(varName);
+	if(localSymbolReference != NULL){
+		fprintf(target, "MOV R%d, BP\n", p);
+		fprintf(target, "ADD R%d, %d\n", p, localSymbolReference->binding);
+		if(t->nodeType == fieldNode){
+			FieldlistNode* temp = t->left->fieldChain;
+			while(temp->next != NULL) {
+				fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
+				fprintf(target, "MOV R%d, [R%d]\n", p, p);
+				temp = temp->next;
+			}
+		}
+	} else {
+		GSymbol* globalSymbolReference = findGlobalVariable(varName);
+		int address = globalSymbolReference->address;
+
+		fprintf(target, "MOV R%d, %d\n", p, address);
+		if(t->nodeType == fieldNode){
+			FieldlistNode* temp = t->left->fieldChain;
+			while(temp->next != NULL) {
+				fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
+				fprintf(target, "MOV R%d, [R%d]\n", p, p);
+				temp = temp->next;
+			}
+		}
+	}
+		
+	int state_reg_count = getActiveRegIndex();
+	for(int i = state_reg_count; i >= 0; i--){
+		fprintf(target, "PUSH R%d\n", i);
+	}
+
+	int q = getReg();
+	fprintf(target, "MOV R%d, \"Dealloc\"\n", q);
+	fprintf(target, "PUSH R%d\n", q);
+	fprintf(target, "MOV R%d, [R%d]\n", q, p);
+	fprintf(target, "PUSH R%d\n", q);
+	fprintf(target, "PUSH R%d\n", q);
+	fprintf(target, "PUSH R%d\n", q);
+	fprintf(target, "PUSH R%d\n", q);
+	fprintf(target, "CALL 0\n");
+	fprintf(target, "POP R%d\n", q);
+	fprintf(target, "POP R%d\n", q);
+	fprintf(target, "POP R%d\n", q);
+	fprintf(target, "POP R%d\n", q);
+	fprintf(target, "POP R%d\n", q);
+	
+	for(int i = 0; i <= state_reg_count; i++){
+		fprintf(target, "POP R%d\n", i);
+	}
+	
+	freeReg();
+	freeReg();
 }
 
 void printFromIndex(int index)
