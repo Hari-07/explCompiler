@@ -570,7 +570,7 @@ int allocNodeCodeGen(tnode* t){
 	if(localSymbolReference != NULL){
 		fprintf(target, "MOV R%d, BP\n", p);
 		fprintf(target, "ADD R%d, %d\n", p, localSymbolReference->binding);
-		if(t->nodeType == fieldNode){
+		if(t->left->nodeType == fieldNode){
 			FieldlistNode* temp = t->left->fieldChain;
 			while(temp->next != NULL) {
 				fprintf(target, "MOV R%d, [R%d]\n", p, p);
@@ -583,7 +583,7 @@ int allocNodeCodeGen(tnode* t){
 		int address = globalSymbolReference->address;
 
 		fprintf(target, "MOV R%d, %d\n", p, address);
-		if(t->nodeType == fieldNode){
+		if(t->left->nodeType == fieldNode){
 			FieldlistNode* temp = t->left->fieldChain;
 			while(temp->next != NULL) {
 				fprintf(target, "MOV R%d, [R%d]\n", p, p);

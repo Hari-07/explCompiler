@@ -212,23 +212,23 @@ FieldlistNode* makeVariableChain(char* parentFieldName, char* childFieldName, Fi
 	parentField->name = (char*)malloc(sizeof(char)* strlen(parentFieldName));
 	strcpy(parentField->name, parentFieldName);
 
-	TypetableNode* parentTypeRef = NULL;
-	LSymbol* localRef = findLocalVariable(parentFieldName);
-	if(localRef != NULL){
-		parentTypeRef = localRef->type;
-	} else {
-		parentTypeRef = findGlobalVariable(parentFieldName)->type;
-	}
+	// TypetableNode* parentTypeRef = NULL;
+	// LSymbol* localRef = findLocalVariable(parentFieldName);
+	// if(localRef != NULL){
+	// 	parentTypeRef = localRef->type;
+	// } else {
+	// 	parentTypeRef = findGlobalVariable(parentFieldName)->type;
+	// }
 
 	
 	if(childFieldNode != NULL){
 		parentField->next = childFieldNode;
-		childFieldNode->fieldIndex = fieldLookup(parentTypeRef, childFieldNode->name)->fieldIndex;
+		// childFieldNode->fieldIndex = fieldLookup(parentTypeRef, childFieldNode->name)->fieldIndex;
 	} else {
 		FieldlistNode* temp = (FieldlistNode*)malloc(sizeof(FieldlistNode));
 		temp->name = (char*)malloc(sizeof(char)* strlen(childFieldName));
 		strcpy(temp->name, childFieldName);
-		temp->fieldIndex = fieldLookup(parentTypeRef, childFieldName)->fieldIndex;
+		// temp->fieldIndex = fieldLookup(parentTypeRef, childFieldName)->fieldIndex;
 		parentField->next = temp;
 	}
 	
@@ -255,14 +255,21 @@ tnode* makeFieldNode(FieldlistNode* variableChain, tnode* offset){
 	TypetableNode* parentType = NULL;
 	while(res != NULL) {
 		if(parentType != NULL){
-			res->type = fieldLookup(parentType, res->name)->type;
+			FieldlistNode* fieldRef = fieldLookup(parentType, res->name);
+			res->type = fieldRef->type;
+			res->fieldIndex = fieldRef->fieldIndex;
 		}
 		parentType = res->type;
 		res = res->next;
 	}
 	temp->type = parentType;
+
+	
+
 	temp->fieldChain = variableChain;
 	temp->left = offset;
+
+
 
 	return temp;
 }
@@ -320,7 +327,7 @@ Operator Conditions:
 void checkOperatorConditions(int meta, tnode*l, tnode* r){
 	if(meta == 0){
 		if(l->nodeType != variableNode && l->nodeType != fieldNode) {
-			printf("Can only assign to a variable");
+			printf("Can only assign to a variable\n");
 			exit(-1);
 		}
 		else if(r->nodeType != constantNode && 
@@ -329,39 +336,39 @@ void checkOperatorConditions(int meta, tnode*l, tnode* r){
 				r->nodeType != functionCallNode &&
 				r->nodeType != fieldNode
 		) {
-			printf("Invalid Assignment Statement");
+			printf("Invalid Assignment Statement\n");
 			exit(-1);
 		}
 		else if(r->nodeType == operatorNode && r->metadata != 1){
-			printf("Non arithmetic expressions cannot be assigned");
+			printf("Non arithmetic expressions cannot be assigned\n");
 			exit(-1);
 		}
 		else if((l->type != r->type)){
-			printf("Type Mismatch in Assignment Statement");
+			printf("Type Mismatch in Assignment Statement\n");
 			exit(-1);
 		}
 	} else if(meta == 1){
 		if(!((l->nodeType == constantNode || l->nodeType == variableNode || l->nodeType == operatorNode && l->nodeType == functionReturnNode || l->nodeType != fieldNode) &&
 		   	 (r->nodeType == constantNode || r->nodeType == variableNode || r->nodeType == operatorNode && r->nodeType == functionReturnNode || r->nodeType != fieldNode)
 		)) {
-			printf("Invalid Node in operation");
+			printf("Invalid Node in operation\n");
 			exit(-1);
 		}
 		else if((l->nodeType == operatorNode && l->metadata != 1) ||
 				(r->nodeType == operatorNode && r->metadata != 1)
 		) {
-			printf("Invalid Arithmetic Expresson");
+			printf("Invalid Arithmetic Expresson\n");
 			exit(-1);
 		}
 	} else if(meta == 2){
 		if((l->nodeType != constantNode && l->nodeType != variableNode) ||
 		   (r->nodeType != constantNode && r->nodeType != variableNode)
 		) {
-			printf("Invalid Expression");
+			printf("Invalid Expression\n");
 			exit(-1);
 		}
 		else if(l->type != findTypeTableEntry("int") || r->type != findTypeTableEntry("int")) {
-			printf("Invalid comparsion");
+			printf("Invalid comparsion\n");
 			exit(-1);
 		}
 	}
@@ -372,7 +379,7 @@ void checkConditionalValidity(tnode* condn){
 		return;
 	}
 	
-	printf("INVALID CONDITION EXPRESSION");
+	printf("INVALID CONDITION EXPRESSION\n");
 	exit(-1);
 }
 
@@ -380,14 +387,14 @@ void checkFunctionCallValidity(tnode* iterator, Param* param){
 
 	while(iterator != NULL){
 		if(param == NULL){
-			printf("INVALID FUNCTION CALL");
+			printf("INVALID FUNCTION CALL\n");
 			exit(-1);
 		}
 
 		tnode* temp = iterator->right;
 		if(temp->nodeType == constantNode ){
 			if(param->type != temp->type){
-				printf("INVALID FUNCTION CALL");
+				printf("INVALID FUNCTION CALL\n");
 				exit(-1);
 			}
 		}
@@ -396,19 +403,19 @@ void checkFunctionCallValidity(tnode* iterator, Param* param){
 			GSymbol* globalSymbolReference = (GSymbol*)temp->varLocation;
 			if(localSymbolReference != NULL){
 				if(param->type != localSymbolReference->type){
-					printf("INVALID FUNCTION CALL");
+					printf("INVALID FUNCTION CALL\n");
 					exit(-1);
 				}
 			} else {
 				if(param->type != globalSymbolReference->type){
-					printf("INVALID FUNCTION CALL");
+					printf("INVALID FUNCTION CALL\n");
 					exit(-1);
 				}
 			}
 		}
 		else if(temp->nodeType == operatorNode){
 			if(temp->metadata != 1 || strcmp(param->type->name,"int") != 0){
-				printf("INVALID FUNCTION CALL");
+				printf("INVALID FUNCTION CALL\n");
 				exit(-1);
 			}
 		}
@@ -417,7 +424,7 @@ void checkFunctionCallValidity(tnode* iterator, Param* param){
 	}
 
 	if(param != NULL){
-		printf("INVALID FUNCTION CALL");
+		printf("INVALID FUNCTION CALL\n");
 		exit(-1);
 	}
 }
