@@ -194,31 +194,52 @@ int readNodeCodeGen(tnode *t)
 {
 	int q = getReg();
 	readToIndex(q);
+	int p = getReg();
 
 	GSymbol *var = t->left->varLocation;
 	char* varName = var->name;
 
+
 	LSymbol* localSearch = findLocalVariable(varName);
 
 	if(localSearch != NULL){
-		int p = getReg();
-		fprintf(target, "MOV R%d, BP\n", p);
-		fprintf(target, "ADD R%d, %d\n", p, localSearch->binding);
-		fprintf(target, "MOV [R%d], R%d\n", p, q);
-		freeReg();
+		if(t->left->nodeType == fieldNode) {
+			FieldlistNode* temp = t->left->fieldChain;
+			fprintf(target, "MOV R%d, BP\n", p);
+			fprintf(target, "ADD R%d, %d\n", p, localSearch->binding);
+			while(temp->next != NULL) {
+				fprintf(target, "MOV R%d, [R%d]\n", p, p);
+				fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
+				temp = temp->next;
+			}
+			fprintf(target, "MOV [R%d], R%d\n", p, q);
+		} else {
+			fprintf(target, "MOV R%d, BP\n", p);
+			fprintf(target, "ADD R%d, %d\n", p, localSearch->binding);
+			fprintf(target, "MOV [R%d], R%d\n", p, q);
+		}
 	} else {
 		GSymbol* globalSearch = findGlobalVariable(varName);
-		int p = getReg();
-		int offsetValueRegister = getOffsetGlobalVar(t->left->left);
 
-		fprintf(target, "MOV R%d, %d\n", p, var->address);
-		fprintf(target, "ADD R%d, R%d\n", p, offsetValueRegister);
-		fprintf(target, "MOV [R%d], R%d\n", p, q);
-		freeReg();
-		freeReg();
+		if(t->left->nodeType == fieldNode) {
+			FieldlistNode* temp = t->left->fieldChain;
+			fprintf(target, "MOV R%d, %d\n", p, var->address);
+			while(temp->next != NULL) {
+				fprintf(target, "MOV R%d, [R%d]\n", p, p);
+				fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
+				temp = temp->next;
+			}
+			fprintf(target, "MOV [R%d], R%d\n", p, q);
+		} else {
+			int offsetValueRegister = getOffsetGlobalVar(t->left->left);
+			fprintf(target, "MOV R%d, %d\n", p, var->address);
+			fprintf(target, "ADD R%d, R%d\n", p, offsetValueRegister);
+			fprintf(target, "MOV [R%d], R%d\n", p, q);
+			freeReg();
+		}
 	}
 	freeReg();
-	return 0;
+	freeReg();
 }
 
 int constantNodeCodeGen(tnode *t)

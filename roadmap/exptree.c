@@ -272,7 +272,7 @@ Input Conditions:
 - Can only read to variable
 */
 void checkInputConditions(tnode* t){
-	if(t->nodeType != variableNode){
+	if(t->nodeType != variableNode && t->nodeType != fieldNode){
 		printf("INVALID READ STATEMENT");
 		exit(-1);
 	}
