@@ -65,8 +65,10 @@ FieldlistNode* addToFieldList(FieldlistNode* fieldNode, FieldlistNode* next) {
 
 	if(next == NULL){
 		fieldNode->fieldIndex = 0;
-	}
-	else {
+	} else if (next->fieldIndex == 7) {
+		printf("MAXIMUM 8 MEMBERS FOR A STRUCT\n");
+		exit(-1);
+	} else {
 		fieldNode->next = next;
 		fieldNode->fieldIndex = next->fieldIndex + 1;
 	}

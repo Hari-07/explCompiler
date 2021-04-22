@@ -277,8 +277,8 @@ int operatorNodeCodeGen(tnode *t)
 				fprintf(target, "MOV R%d, BP\n", p);
 				fprintf(target, "ADD R%d, %d\n", p, localSearch->binding);
 				while(temp->next != NULL) {
-					fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
 					fprintf(target, "MOV R%d, [R%d]\n", p, p);
+					fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
 					temp = temp->next;
 				}
 				fprintf(target, "MOV [R%d], R%d\n", p, q);
@@ -294,8 +294,8 @@ int operatorNodeCodeGen(tnode *t)
 				FieldlistNode* temp = t->left->fieldChain;
 				fprintf(target, "MOV R%d, %d\n", p, var->address);
 				while(temp->next != NULL) {
-					fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
 					fprintf(target, "MOV R%d, [R%d]\n", p, p);
+					fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
 					temp = temp->next;
 				}
 				fprintf(target, "MOV [R%d], R%d\n", p, q);
@@ -552,8 +552,8 @@ int allocNodeCodeGen(tnode* t){
 		if(t->nodeType == fieldNode){
 			FieldlistNode* temp = t->left->fieldChain;
 			while(temp->next != NULL) {
-				fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
 				fprintf(target, "MOV R%d, [R%d]\n", p, p);
+				fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
 				temp = temp->next;
 			}
 		}
@@ -565,8 +565,8 @@ int allocNodeCodeGen(tnode* t){
 		if(t->nodeType == fieldNode){
 			FieldlistNode* temp = t->left->fieldChain;
 			while(temp->next != NULL) {
-				fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
 				fprintf(target, "MOV R%d, [R%d]\n", p, p);
+				fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
 				temp = temp->next;
 			}
 		}
@@ -616,8 +616,8 @@ int deAllocNodeCodeGen(tnode* t){
 		if(t->nodeType == fieldNode){
 			FieldlistNode* temp = t->left->fieldChain;
 			while(temp->next != NULL) {
-				fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
 				fprintf(target, "MOV R%d, [R%d]\n", p, p);
+				fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
 				temp = temp->next;
 			}
 		}
@@ -629,8 +629,8 @@ int deAllocNodeCodeGen(tnode* t){
 		if(t->nodeType == fieldNode){
 			FieldlistNode* temp = t->left->fieldChain;
 			while(temp->next != NULL) {
-				fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
 				fprintf(target, "MOV R%d, [R%d]\n", p, p);
+				fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
 				temp = temp->next;
 			}
 		}

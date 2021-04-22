@@ -135,7 +135,7 @@
 		;
 
 	typedefList : 
-		typedefList',' typeDefinition		{} | 
+		typedefList typeDefinition			{} | 
 		typeDefinition						{} 
 		;
 
