@@ -273,15 +273,13 @@ int operatorNodeCodeGen(tnode *t)
 
 		if(localSearch != NULL){
 			if(t->left->nodeType == fieldNode) {
+				FieldlistNode* temp = t->left->fieldChain;
 				fprintf(target, "MOV R%d, BP\n", p);
 				fprintf(target, "ADD R%d, %d\n", p, localSearch->binding);
-				if(t->nodeType == fieldNode){
-					FieldlistNode* temp = t->left->fieldChain;
-					while(temp->next != NULL) {
-						fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
-						fprintf(target, "MOV R%d, [R%d]\n", p, p);
-						temp = temp->next;
-					}
+				while(temp->next != NULL) {
+					fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
+					fprintf(target, "MOV R%d, [R%d]\n", p, p);
+					temp = temp->next;
 				}
 				fprintf(target, "MOV [R%d], R%d\n", p, q);
 			} else {
@@ -521,8 +519,8 @@ int fieldNodeCodeGen(tnode *t){
 		fprintf(target, "MOV R%d, BP\n", p);
 		fprintf(target, "ADD R%d, %d\n", p, localSearch->binding);
 		while(temp->next != NULL) {
-			fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
 			fprintf(target, "MOV R%d, [R%d]\n", p, p);
+			fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
 			temp = temp->next;
 		}
 		fprintf(target, "MOV R%d, [R%d]\n", p, p);
@@ -531,8 +529,8 @@ int fieldNodeCodeGen(tnode *t){
 		FieldlistNode* temp = t->fieldChain;
 		fprintf(target, "MOV R%d, %d\n", p, globalSearch->address);
 		while(temp->next != NULL) {
-			fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
 			fprintf(target, "MOV R%d, [R%d]\n", p, p);
+			fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
 			temp = temp->next;
 		}
 		fprintf(target, "MOV R%d, [R%d]\n", p, p);
@@ -551,7 +549,14 @@ int allocNodeCodeGen(tnode* t){
 	if(localSymbolReference != NULL){
 		fprintf(target, "MOV R%d, BP\n", p);
 		fprintf(target, "ADD R%d, %d\n", p, localSymbolReference->binding);
-		fprintf(target, "MOV R%d, [R%d]\n", p, p);
+		if(t->nodeType == fieldNode){
+			FieldlistNode* temp = t->left->fieldChain;
+			while(temp->next != NULL) {
+				fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
+				fprintf(target, "MOV R%d, [R%d]\n", p, p);
+				temp = temp->next;
+			}
+		}
 	} else {
 		GSymbol* globalSymbolReference = findGlobalVariable(varName);
 		int address = globalSymbolReference->address;

@@ -211,13 +211,24 @@ FieldlistNode* makeVariableChain(char* parentFieldName, char* childFieldName, Fi
 	FieldlistNode* parentField = (FieldlistNode*)malloc(sizeof(FieldlistNode));
 	parentField->name = (char*)malloc(sizeof(char)* strlen(parentFieldName));
 	strcpy(parentField->name, parentFieldName);
+
+	TypetableNode* parentTypeRef = NULL;
+	LSymbol* localRef = findLocalVariable(parentFieldName);
+	if(localRef != NULL){
+		parentTypeRef = localRef->type;
+	} else {
+		parentTypeRef = findGlobalVariable(parentFieldName)->type;
+	}
+
 	
 	if(childFieldNode != NULL){
 		parentField->next = childFieldNode;
+		childFieldNode->fieldIndex = fieldLookup(parentTypeRef, childFieldNode->name)->fieldIndex;
 	} else {
 		FieldlistNode* temp = (FieldlistNode*)malloc(sizeof(FieldlistNode));
 		temp->name = (char*)malloc(sizeof(char)* strlen(childFieldName));
 		strcpy(temp->name, childFieldName);
+		temp->fieldIndex = fieldLookup(parentTypeRef, childFieldName)->fieldIndex;
 		parentField->next = temp;
 	}
 	

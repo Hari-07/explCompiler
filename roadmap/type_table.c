@@ -64,7 +64,7 @@ FieldlistNode* addToFieldList(FieldlistNode* fieldNode, FieldlistNode* next) {
 	FieldlistNode* temp = fieldNode;
 
 	if(next == NULL){
-		fieldNode->fieldIndex = 1;
+		fieldNode->fieldIndex = 0;
 	}
 	else {
 		fieldNode->next = next;
