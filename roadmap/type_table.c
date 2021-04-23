@@ -11,25 +11,33 @@ TypetableNode* typeTableHead = NULL;
 int getSize(FieldlistNode* fields);
 
 void typeTableCreate() {
-	addToTypeTable("int", NULL);
-	addToTypeTable("string", NULL);
-	addToTypeTable("bool", NULL);
-	addToTypeTable("void", NULL);
+	createTypeTableEntry("int");
+	addFieldsToTypeTable("int", NULL);
+	createTypeTableEntry("string");
+	addFieldsToTypeTable("string", NULL);
+	createTypeTableEntry("bool");
+	addFieldsToTypeTable("bool", NULL);
+	createTypeTableEntry("void");
+	addFieldsToTypeTable("void", NULL);
 }
 
-void addToTypeTable(char* name, FieldlistNode* fields) {
+void createTypeTableEntry(char* name){
 	TypetableNode* temp = (TypetableNode*)malloc(sizeof(TypetableNode));
 	temp->name = (char*)malloc(strlen(name) * sizeof(char));
 	strcpy(temp->name, name);
+
+	temp->next = typeTableHead;
+	typeTableHead = temp;
+}
+
+void addFieldsToTypeTable(char* name, FieldlistNode* fields) {
+	TypetableNode* temp = findTypeTableEntry(name);
 
 	temp->fields = fields;
 	if(strcmp(name, "void") == 0)
 		temp->size = 0;
 	else
 		temp->size = getSize(fields);
-
-	temp->next = typeTableHead;
-	typeTableHead = temp;
 }
 
 TypetableNode* findTypeTableEntry(char* name) {

@@ -141,9 +141,12 @@
 
 	//VARIABLES TYPES ARE CREATED AND ADDED TO THE TYPE TABLE
 	typeDefinition : 
-		VAR '{' fieldList '}'';'	
+		VAR {
+				createTypeTableEntry($<string>1);
+			}
+		'{' fieldList '}'';'	
 			{	
-				addToTypeTable($<string>1, $3); 
+				addFieldsToTypeTable($<string>1, $4); 
 			}
 		;
 

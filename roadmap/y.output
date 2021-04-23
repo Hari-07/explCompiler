@@ -26,192 +26,194 @@ Grammar
     9 typedefList: typedefList typeDefinition
    10            | typeDefinition
 
-   11 typeDefinition: VAR '{' fieldList '}' ';'
+   11 $@3: %empty
 
-   12 fieldList: fieldList fieldDeclaration
-   13          | fieldDeclaration
+   12 typeDefinition: VAR $@3 '{' fieldList '}' ';'
 
-   14 fieldDeclaration: fieldType VAR ';'
+   13 fieldList: fieldList fieldDeclaration
+   14          | fieldDeclaration
 
-   15 fieldType: INT
-   16          | STR
-   17          | VAR
+   15 fieldDeclaration: fieldType VAR ';'
 
-   18 globalDeclarations: DECL declarationList ENDDECL
+   16 fieldType: INT
+   17          | STR
+   18          | VAR
 
-   19 declarationList: declarationList declaration
-   20                | declaration
+   19 globalDeclarations: DECL declarationList ENDDECL
 
-   21 declaration: dataType variableList ';'
+   20 declarationList: declarationList declaration
+   21                | declaration
 
-   22 dataType: INT
-   23         | STR
-   24         | VAR
+   22 declaration: dataType variableList ';'
 
-   25 variableList: variableList ',' VAR
-   26             | variableList ',' VAR '[' NUM ']'
-   27             | variableList ',' VAR '(' parameterList ')'
-   28             | VAR
-   29             | VAR '[' NUM ']'
-   30             | VAR '(' parameterList ')'
+   23 dataType: INT
+   24         | STR
+   25         | VAR
 
-   31 functionDefinitionList: functionDefinitionList functionDefinition
-   32                       | functionDefinition
+   26 variableList: variableList ',' VAR
+   27             | variableList ',' VAR '[' NUM ']'
+   28             | variableList ',' VAR '(' parameterList ')'
+   29             | VAR
+   30             | VAR '[' NUM ']'
+   31             | VAR '(' parameterList ')'
 
-   33 $@3: %empty
+   32 functionDefinitionList: functionDefinitionList functionDefinition
+   33                       | functionDefinition
 
-   34 functionDefinition: returnType VAR '(' parameterList ')' '{' localDeclarationBlock $@3 functionBody '}'
+   34 $@4: %empty
 
-   35 returnType: INT
-   36           | STR
-   37           | VAR
+   35 functionDefinition: returnType VAR '(' parameterList ')' '{' localDeclarationBlock $@4 functionBody '}'
 
-   38 parameterList: parameterList ',' parameter
-   39              | parameter
-   40              | %empty
+   36 returnType: INT
+   37           | STR
+   38           | VAR
 
-   41 parameter: dataType VAR
+   39 parameterList: parameterList ',' parameter
+   40              | parameter
+   41              | %empty
 
-   42 localDeclarationBlock: DECL localDeclarationList ENDDECL
-   43                      | %empty
+   42 parameter: dataType VAR
 
-   44 localDeclarationList: localDeclarationList localDeclaration
-   45                     | localDeclaration
+   43 localDeclarationBlock: DECL localDeclarationList ENDDECL
+   44                      | %empty
 
-   46 localDeclaration: dataType localVariableList ';'
+   45 localDeclarationList: localDeclarationList localDeclaration
+   46                     | localDeclaration
 
-   47 localVariableList: localVariableList ',' VAR
-   48                  | VAR
+   47 localDeclaration: dataType localVariableList ';'
 
-   49 functionBody: statementList
+   48 localVariableList: localVariableList ',' VAR
+   49                  | VAR
 
-   50 mainFunction: INT MAIN '(' ')' '{' localDeclarationBlock statementList '}'
+   50 functionBody: statementList
 
-   51 statementList: statementList statement ';'
-   52              | statement ';'
+   51 mainFunction: INT MAIN '(' ')' '{' localDeclarationBlock statementList '}'
 
-   53 statement: inputStatement
-   54          | outputStatement
-   55          | assignmentStatement
-   56          | ifStatement
-   57          | whileStatement
-   58          | jumpStatement
-   59          | functionCallStatement
-   60          | returnStatement
-   61          | allocStatement
-   62          | deAllocStatement
+   52 statementList: statementList statement ';'
+   53              | statement ';'
 
-   63 inputStatement: READ '(' expression ')'
+   54 statement: inputStatement
+   55          | outputStatement
+   56          | assignmentStatement
+   57          | ifStatement
+   58          | whileStatement
+   59          | jumpStatement
+   60          | functionCallStatement
+   61          | returnStatement
+   62          | allocStatement
+   63          | deAllocStatement
 
-   64 outputStatement: WRITE '(' expression ')'
+   64 inputStatement: READ '(' expression ')'
 
-   65 allocStatement: expression EQUALS ALLOC '(' ')'
+   65 outputStatement: WRITE '(' expression ')'
 
-   66 deAllocStatement: DEALLOC '(' expression ')'
+   66 allocStatement: expression EQUALS ALLOC '(' ')'
 
-   67 assignmentStatement: expression EQUALS expression
+   67 deAllocStatement: DEALLOC '(' expression ')'
 
-   68 ifStatement: IF '(' expression ')' THEN statementList ELSE statementList ENDIF
-   69            | IF '(' expression ')' THEN statementList ENDIF
+   68 assignmentStatement: expression EQUALS expression
 
-   70 whileStatement: WHILE '(' expression ')' DO statementList ENDWHILE
-   71               | DO statementList WHILE '(' expression ')' ENDWHILE
-   72               | REPEAT statementList UNTIL '(' expression ')'
+   69 ifStatement: IF '(' expression ')' THEN statementList ELSE statementList ENDIF
+   70            | IF '(' expression ')' THEN statementList ENDIF
 
-   73 jumpStatement: CONTINUE
-   74              | BREAK
+   71 whileStatement: WHILE '(' expression ')' DO statementList ENDWHILE
+   72               | DO statementList WHILE '(' expression ')' ENDWHILE
+   73               | REPEAT statementList UNTIL '(' expression ')'
 
-   75 functionCallStatement: VAR '(' argList ')'
+   74 jumpStatement: CONTINUE
+   75              | BREAK
 
-   76 returnStatement: RETURN expression
+   76 functionCallStatement: VAR '(' argList ')'
 
-   77 expression: '(' expression ')'
-   78           | VAR '(' argList ')'
-   79           | arithmeticExpression
-   80           | logicalExpression
-   81           | constant
-   82           | variable
+   77 returnStatement: RETURN expression
 
-   83 arithmeticExpression: expression ADD expression
-   84                     | expression SUB expression
-   85                     | expression MUL expression
-   86                     | expression DIV expression
+   78 expression: '(' expression ')'
+   79           | VAR '(' argList ')'
+   80           | arithmeticExpression
+   81           | logicalExpression
+   82           | constant
+   83           | variable
 
-   87 logicalExpression: expression SLT expression
-   88                  | expression SGT expression
-   89                  | expression LTE expression
-   90                  | expression GTE expression
-   91                  | expression NEQ expression
-   92                  | expression EQU expression
+   84 arithmeticExpression: expression ADD expression
+   85                     | expression SUB expression
+   86                     | expression MUL expression
+   87                     | expression DIV expression
 
-   93 constant: NUM
-   94         | STRING
+   88 logicalExpression: expression SLT expression
+   89                  | expression SGT expression
+   90                  | expression LTE expression
+   91                  | expression GTE expression
+   92                  | expression NEQ expression
+   93                  | expression EQU expression
 
-   95 variable: VAR '[' expression ']'
-   96         | VAR
-   97         | field
+   94 constant: NUM
+   95         | STRING
 
-   98 field: VAR '.' field
-   99      | VAR '.' VAR
+   96 variable: VAR '[' expression ']'
+   97         | VAR
+   98         | field
 
-  100 argList: argList ',' expression
-  101        | expression
-  102        | %empty
+   99 field: VAR '.' field
+  100      | VAR '.' VAR
+
+  101 argList: argList ',' expression
+  102        | expression
+  103        | %empty
 
 
 Terminals, with rules where they appear
 
     $end (0) 0
-    '(' (40) 27 30 34 50 63 64 65 66 68 69 70 71 72 75 77 78
-    ')' (41) 27 30 34 50 63 64 65 66 68 69 70 71 72 75 77 78
-    ',' (44) 25 26 27 38 47 100
-    '.' (46) 98 99
-    ';' (59) 11 14 21 46 51 52
-    '[' (91) 26 29 95
-    ']' (93) 26 29 95
-    '{' (123) 11 34 50
-    '}' (125) 11 34 50
+    '(' (40) 28 31 35 51 64 65 66 67 69 70 71 72 73 76 78 79
+    ')' (41) 28 31 35 51 64 65 66 67 69 70 71 72 73 76 78 79
+    ',' (44) 26 27 28 39 48 101
+    '.' (46) 99 100
+    ';' (59) 12 15 22 47 52 53
+    '[' (91) 27 30 96
+    ']' (93) 27 30 96
+    '{' (123) 12 35 51
+    '}' (125) 12 35 51
     error (256)
     START (258)
     END (259)
-    DECL (260) 18 42
-    ENDDECL (261) 18 42
-    IF (262) 68 69
-    THEN (263) 68 69
-    ELSE (264) 68
-    ENDIF (265) 68 69
-    WHILE (266) 70 71
-    DO (267) 70 71
-    ENDWHILE (268) 70 71
-    READ (269) 63
-    WRITE (270) 64
-    CONTINUE (271) 73
-    BREAK (272) 74
-    REPEAT (273) 72
-    UNTIL (274) 72
-    MAIN (275) 50
+    DECL (260) 19 43
+    ENDDECL (261) 19 43
+    IF (262) 69 70
+    THEN (263) 69 70
+    ELSE (264) 69
+    ENDIF (265) 69 70
+    WHILE (266) 71 72
+    DO (267) 71 72
+    ENDWHILE (268) 71 72
+    READ (269) 64
+    WRITE (270) 65
+    CONTINUE (271) 74
+    BREAK (272) 75
+    REPEAT (273) 73
+    UNTIL (274) 73
+    MAIN (275) 51
     ARGS (276)
-    RETURN (277) 76
-    ALLOC (278) 65
-    DEALLOC (279) 66
-    INT (280) 15 22 35 50
-    STR (281) 16 23 36
+    RETURN (277) 77
+    ALLOC (278) 66
+    DEALLOC (279) 67
+    INT (280) 16 23 36 51
+    STR (281) 17 24 37
     TYPE (282) 6 8
     ENDTYPE (283) 6 8
-    NUM (284) 26 29 93
-    VAR (285) 11 14 17 24 25 26 27 28 29 30 34 37 41 47 48 75 78 95 96 98 99
-    ADD (286) 83
-    SUB (287) 84
-    MUL (288) 85
-    DIV (289) 86
-    EQUALS (290) 65 67
-    SLT (291) 87
-    SGT (292) 88
-    LTE (293) 89
-    GTE (294) 90
-    NEQ (295) 91
-    EQU (296) 92
-    STRING (297) 94
+    NUM (284) 27 30 94
+    VAR (285) 12 15 18 25 26 27 28 29 30 31 35 38 42 48 49 76 79 96 97 99 100
+    ADD (286) 84
+    SUB (287) 85
+    MUL (288) 86
+    DIV (289) 87
+    EQUALS (290) 66 68
+    SLT (291) 88
+    SGT (292) 89
+    LTE (293) 90
+    GTE (294) 91
+    NEQ (295) 92
+    EQU (296) 93
+    STRING (297) 95
     ARR_INDEX (298)
 
 
@@ -235,125 +237,128 @@ Nonterminals, with rules where they appear
         on left: 9 10
         on right: 6 9
     typeDefinition <node> (59)
-        on left: 11
+        on left: 12
         on right: 9 10
-    fieldList <fieldnode> (60)
-        on left: 12 13
-        on right: 11 12
-    fieldDeclaration <fieldnode> (61)
-        on left: 14
+    $@3 (60)
+        on left: 11
+        on right: 12
+    fieldList <fieldnode> (61)
+        on left: 13 14
         on right: 12 13
-    fieldType <typenode> (62)
-        on left: 15 16 17
-        on right: 14
-    globalDeclarations <node> (63)
-        on left: 18
+    fieldDeclaration <fieldnode> (62)
+        on left: 15
+        on right: 13 14
+    fieldType <typenode> (63)
+        on left: 16 17 18
+        on right: 15
+    globalDeclarations <node> (64)
+        on left: 19
         on right: 1 2 3
-    declarationList <node> (64)
-        on left: 19 20
-        on right: 18 19
-    declaration <node> (65)
-        on left: 21
+    declarationList <node> (65)
+        on left: 20 21
         on right: 19 20
-    dataType <typenode> (66)
-        on left: 22 23 24
-        on right: 21 41 46
-    variableList <node> (67)
-        on left: 25 26 27 28 29 30
-        on right: 21 25 26 27
-    functionDefinitionList <node> (68)
-        on left: 31 32
-        on right: 1 2 31
-    functionDefinition <node> (69)
+    declaration <node> (66)
+        on left: 22
+        on right: 20 21
+    dataType <typenode> (67)
+        on left: 23 24 25
+        on right: 22 42 47
+    variableList <node> (68)
+        on left: 26 27 28 29 30 31
+        on right: 22 26 27 28
+    functionDefinitionList <node> (69)
+        on left: 32 33
+        on right: 1 2 32
+    functionDefinition <node> (70)
+        on left: 35
+        on right: 32 33
+    $@4 (71)
         on left: 34
-        on right: 31 32
-    $@3 (70)
-        on left: 33
-        on right: 34
-    returnType <typenode> (71)
-        on left: 35 36 37
-        on right: 34
-    parameterList <fparams> (72)
-        on left: 38 39 40
-        on right: 27 30 34 38
-    parameter <fparams> (73)
-        on left: 41
-        on right: 38 39
-    localDeclarationBlock <node> (74)
-        on left: 42 43
-        on right: 34 50
-    localDeclarationList <node> (75)
-        on left: 44 45
-        on right: 42 44
-    localDeclaration <node> (76)
-        on left: 46
-        on right: 44 45
-    localVariableList <node> (77)
-        on left: 47 48
-        on right: 46 47
-    functionBody <node> (78)
-        on left: 49
-        on right: 34
-    mainFunction <node> (79)
+        on right: 35
+    returnType <typenode> (72)
+        on left: 36 37 38
+        on right: 35
+    parameterList <fparams> (73)
+        on left: 39 40 41
+        on right: 28 31 35 39
+    parameter <fparams> (74)
+        on left: 42
+        on right: 39 40
+    localDeclarationBlock <node> (75)
+        on left: 43 44
+        on right: 35 51
+    localDeclarationList <node> (76)
+        on left: 45 46
+        on right: 43 45
+    localDeclaration <node> (77)
+        on left: 47
+        on right: 45 46
+    localVariableList <node> (78)
+        on left: 48 49
+        on right: 47 48
+    functionBody <node> (79)
         on left: 50
+        on right: 35
+    mainFunction <node> (80)
+        on left: 51
         on right: 1 2 3 4
-    statementList <node> (80)
-        on left: 51 52
-        on right: 49 50 51 68 69 70 71 72
-    statement <node> (81)
-        on left: 53 54 55 56 57 58 59 60 61 62
-        on right: 51 52
-    inputStatement <node> (82)
-        on left: 63
-        on right: 53
-    outputStatement <node> (83)
+    statementList <node> (81)
+        on left: 52 53
+        on right: 50 51 52 69 70 71 72 73
+    statement <node> (82)
+        on left: 54 55 56 57 58 59 60 61 62 63
+        on right: 52 53
+    inputStatement <node> (83)
         on left: 64
         on right: 54
-    allocStatement <node> (84)
+    outputStatement <node> (84)
         on left: 65
-        on right: 61
-    deAllocStatement <node> (85)
+        on right: 55
+    allocStatement <node> (85)
         on left: 66
         on right: 62
-    assignmentStatement <node> (86)
+    deAllocStatement <node> (86)
         on left: 67
-        on right: 55
-    ifStatement <node> (87)
-        on left: 68 69
+        on right: 63
+    assignmentStatement <node> (87)
+        on left: 68
         on right: 56
-    whileStatement <node> (88)
-        on left: 70 71 72
+    ifStatement <node> (88)
+        on left: 69 70
         on right: 57
-    jumpStatement <node> (89)
-        on left: 73 74
+    whileStatement <node> (89)
+        on left: 71 72 73
         on right: 58
-    functionCallStatement <node> (90)
-        on left: 75
+    jumpStatement <node> (90)
+        on left: 74 75
         on right: 59
-    returnStatement <node> (91)
+    functionCallStatement <node> (91)
         on left: 76
         on right: 60
-    expression <node> (92)
-        on left: 77 78 79 80 81 82
-        on right: 63 64 65 66 67 68 69 70 71 72 76 77 83 84 85 86 87 88 89 90 91 92 95 100 101
-    arithmeticExpression <node> (93)
-        on left: 83 84 85 86
-        on right: 79
-    logicalExpression <node> (94)
-        on left: 87 88 89 90 91 92
+    returnStatement <node> (92)
+        on left: 77
+        on right: 61
+    expression <node> (93)
+        on left: 78 79 80 81 82 83
+        on right: 64 65 66 67 68 69 70 71 72 73 77 78 84 85 86 87 88 89 90 91 92 93 96 101 102
+    arithmeticExpression <node> (94)
+        on left: 84 85 86 87
         on right: 80
-    constant <node> (95)
-        on left: 93 94
+    logicalExpression <node> (95)
+        on left: 88 89 90 91 92 93
         on right: 81
-    variable <node> (96)
-        on left: 95 96 97
+    constant <node> (96)
+        on left: 94 95
         on right: 82
-    field <fieldnode> (97)
-        on left: 98 99
-        on right: 97 98
-    argList <node> (98)
-        on left: 100 101 102
-        on right: 75 78 100
+    variable <node> (97)
+        on left: 96 97 98
+        on right: 83
+    field <fieldnode> (98)
+        on left: 99 100
+        on right: 98 99
+    argList <node> (99)
+        on left: 101 102 103
+        on right: 76 79 101
 
 
 State 0
@@ -372,7 +377,7 @@ State 0
 
 State 1
 
-   18 globalDeclarations: DECL . declarationList ENDDECL
+   19 globalDeclarations: DECL . declarationList ENDDECL
 
     INT  shift, and go to state 8
     STR  shift, and go to state 9
@@ -385,7 +390,7 @@ State 1
 
 State 2
 
-   50 mainFunction: INT . MAIN '(' ')' '{' localDeclarationBlock statementList '}'
+   51 mainFunction: INT . MAIN '(' ')' '{' localDeclarationBlock statementList '}'
 
     MAIN  shift, and go to state 14
 
@@ -442,29 +447,29 @@ State 7
 
 State 8
 
-   22 dataType: INT .
-
-    $default  reduce using rule 22 (dataType)
-
-
-State 9
-
-   23 dataType: STR .
+   23 dataType: INT .
 
     $default  reduce using rule 23 (dataType)
 
 
-State 10
+State 9
 
-   24 dataType: VAR .
+   24 dataType: STR .
 
     $default  reduce using rule 24 (dataType)
 
 
+State 10
+
+   25 dataType: VAR .
+
+    $default  reduce using rule 25 (dataType)
+
+
 State 11
 
-   18 globalDeclarations: DECL declarationList . ENDDECL
-   19 declarationList: declarationList . declaration
+   19 globalDeclarations: DECL declarationList . ENDDECL
+   20 declarationList: declarationList . declaration
 
     ENDDECL  shift, and go to state 26
     INT      shift, and go to state 8
@@ -477,14 +482,14 @@ State 11
 
 State 12
 
-   20 declarationList: declaration .
+   21 declarationList: declaration .
 
-    $default  reduce using rule 20 (declarationList)
+    $default  reduce using rule 21 (declarationList)
 
 
 State 13
 
-   21 declaration: dataType . variableList ';'
+   22 declaration: dataType . variableList ';'
 
     VAR  shift, and go to state 28
 
@@ -493,7 +498,7 @@ State 13
 
 State 14
 
-   50 mainFunction: INT MAIN . '(' ')' '{' localDeclarationBlock statementList '}'
+   51 mainFunction: INT MAIN . '(' ')' '{' localDeclarationBlock statementList '}'
 
     '('  shift, and go to state 30
 
@@ -537,32 +542,32 @@ State 18
 
 State 19
 
-   35 returnType: INT .
-   50 mainFunction: INT . MAIN '(' ')' '{' localDeclarationBlock statementList '}'
+   36 returnType: INT .
+   51 mainFunction: INT . MAIN '(' ')' '{' localDeclarationBlock statementList '}'
 
     MAIN  shift, and go to state 14
-
-    $default  reduce using rule 35 (returnType)
-
-
-State 20
-
-   36 returnType: STR .
 
     $default  reduce using rule 36 (returnType)
 
 
-State 21
+State 20
 
-   37 returnType: VAR .
+   37 returnType: STR .
 
     $default  reduce using rule 37 (returnType)
+
+
+State 21
+
+   38 returnType: VAR .
+
+    $default  reduce using rule 38 (returnType)
 
 
 State 22
 
     2 code: globalDeclarations functionDefinitionList . mainFunction
-   31 functionDefinitionList: functionDefinitionList . functionDefinition
+   32 functionDefinitionList: functionDefinitionList . functionDefinition
 
     INT  shift, and go to state 19
     STR  shift, and go to state 20
@@ -575,14 +580,14 @@ State 22
 
 State 23
 
-   32 functionDefinitionList: functionDefinition .
+   33 functionDefinitionList: functionDefinition .
 
-    $default  reduce using rule 32 (functionDefinitionList)
+    $default  reduce using rule 33 (functionDefinitionList)
 
 
 State 24
 
-   34 functionDefinition: returnType . VAR '(' parameterList ')' '{' localDeclarationBlock $@3 functionBody '}'
+   35 functionDefinition: returnType . VAR '(' parameterList ')' '{' localDeclarationBlock $@4 functionBody '}'
 
     VAR  shift, and go to state 39
 
@@ -596,36 +601,36 @@ State 25
 
 State 26
 
-   18 globalDeclarations: DECL declarationList ENDDECL .
+   19 globalDeclarations: DECL declarationList ENDDECL .
 
-    $default  reduce using rule 18 (globalDeclarations)
+    $default  reduce using rule 19 (globalDeclarations)
 
 
 State 27
 
-   19 declarationList: declarationList declaration .
+   20 declarationList: declarationList declaration .
 
-    $default  reduce using rule 19 (declarationList)
+    $default  reduce using rule 20 (declarationList)
 
 
 State 28
 
-   28 variableList: VAR .
-   29             | VAR . '[' NUM ']'
-   30             | VAR . '(' parameterList ')'
+   29 variableList: VAR .
+   30             | VAR . '[' NUM ']'
+   31             | VAR . '(' parameterList ')'
 
     '['  shift, and go to state 40
     '('  shift, and go to state 41
 
-    $default  reduce using rule 28 (variableList)
+    $default  reduce using rule 29 (variableList)
 
 
 State 29
 
-   21 declaration: dataType variableList . ';'
-   25 variableList: variableList . ',' VAR
-   26             | variableList . ',' VAR '[' NUM ']'
-   27             | variableList . ',' VAR '(' parameterList ')'
+   22 declaration: dataType variableList . ';'
+   26 variableList: variableList . ',' VAR
+   27             | variableList . ',' VAR '[' NUM ']'
+   28             | variableList . ',' VAR '(' parameterList ')'
 
     ';'  shift, and go to state 42
     ','  shift, and go to state 43
@@ -633,16 +638,18 @@ State 29
 
 State 30
 
-   50 mainFunction: INT MAIN '(' . ')' '{' localDeclarationBlock statementList '}'
+   51 mainFunction: INT MAIN '(' . ')' '{' localDeclarationBlock statementList '}'
 
     ')'  shift, and go to state 44
 
 
 State 31
 
-   11 typeDefinition: VAR . '{' fieldList '}' ';'
+   12 typeDefinition: VAR . $@3 '{' fieldList '}' ';'
 
-    '{'  shift, and go to state 45
+    $default  reduce using rule 11 ($@3)
+
+    $@3  go to state 45
 
 
 State 32
@@ -672,15 +679,15 @@ State 34
 
 State 35
 
-   35 returnType: INT .
+   36 returnType: INT .
 
-    $default  reduce using rule 35 (returnType)
+    $default  reduce using rule 36 (returnType)
 
 
 State 36
 
     1 code: typedefSection globalDeclarations functionDefinitionList . mainFunction
-   31 functionDefinitionList: functionDefinitionList . functionDefinition
+   32 functionDefinitionList: functionDefinitionList . functionDefinition
 
     INT  shift, and go to state 19
     STR  shift, and go to state 20
@@ -693,9 +700,9 @@ State 36
 
 State 37
 
-   31 functionDefinitionList: functionDefinitionList functionDefinition .
+   32 functionDefinitionList: functionDefinitionList functionDefinition .
 
-    $default  reduce using rule 31 (functionDefinitionList)
+    $default  reduce using rule 32 (functionDefinitionList)
 
 
 State 38
@@ -707,27 +714,27 @@ State 38
 
 State 39
 
-   34 functionDefinition: returnType VAR . '(' parameterList ')' '{' localDeclarationBlock $@3 functionBody '}'
+   35 functionDefinition: returnType VAR . '(' parameterList ')' '{' localDeclarationBlock $@4 functionBody '}'
 
     '('  shift, and go to state 49
 
 
 State 40
 
-   29 variableList: VAR '[' . NUM ']'
+   30 variableList: VAR '[' . NUM ']'
 
     NUM  shift, and go to state 50
 
 
 State 41
 
-   30 variableList: VAR '(' . parameterList ')'
+   31 variableList: VAR '(' . parameterList ')'
 
     INT  shift, and go to state 8
     STR  shift, and go to state 9
     VAR  shift, and go to state 10
 
-    $default  reduce using rule 40 (parameterList)
+    $default  reduce using rule 41 (parameterList)
 
     dataType       go to state 51
     parameterList  go to state 52
@@ -736,38 +743,32 @@ State 41
 
 State 42
 
-   21 declaration: dataType variableList ';' .
+   22 declaration: dataType variableList ';' .
 
-    $default  reduce using rule 21 (declaration)
+    $default  reduce using rule 22 (declaration)
 
 
 State 43
 
-   25 variableList: variableList ',' . VAR
-   26             | variableList ',' . VAR '[' NUM ']'
-   27             | variableList ',' . VAR '(' parameterList ')'
+   26 variableList: variableList ',' . VAR
+   27             | variableList ',' . VAR '[' NUM ']'
+   28             | variableList ',' . VAR '(' parameterList ')'
 
     VAR  shift, and go to state 54
 
 
 State 44
 
-   50 mainFunction: INT MAIN '(' ')' . '{' localDeclarationBlock statementList '}'
+   51 mainFunction: INT MAIN '(' ')' . '{' localDeclarationBlock statementList '}'
 
     '{'  shift, and go to state 55
 
 
 State 45
 
-   11 typeDefinition: VAR '{' . fieldList '}' ';'
+   12 typeDefinition: VAR $@3 . '{' fieldList '}' ';'
 
-    INT  shift, and go to state 56
-    STR  shift, and go to state 57
-    VAR  shift, and go to state 58
-
-    fieldList         go to state 59
-    fieldDeclaration  go to state 60
-    fieldType         go to state 61
+    '{'  shift, and go to state 56
 
 
 State 46
@@ -793,1699 +794,1683 @@ State 48
 
 State 49
 
-   34 functionDefinition: returnType VAR '(' . parameterList ')' '{' localDeclarationBlock $@3 functionBody '}'
+   35 functionDefinition: returnType VAR '(' . parameterList ')' '{' localDeclarationBlock $@4 functionBody '}'
 
     INT  shift, and go to state 8
     STR  shift, and go to state 9
     VAR  shift, and go to state 10
 
-    $default  reduce using rule 40 (parameterList)
+    $default  reduce using rule 41 (parameterList)
 
     dataType       go to state 51
-    parameterList  go to state 62
+    parameterList  go to state 57
     parameter      go to state 53
 
 
 State 50
 
-   29 variableList: VAR '[' NUM . ']'
+   30 variableList: VAR '[' NUM . ']'
 
-    ']'  shift, and go to state 63
+    ']'  shift, and go to state 58
 
 
 State 51
 
-   41 parameter: dataType . VAR
+   42 parameter: dataType . VAR
 
-    VAR  shift, and go to state 64
+    VAR  shift, and go to state 59
 
 
 State 52
 
-   30 variableList: VAR '(' parameterList . ')'
-   38 parameterList: parameterList . ',' parameter
+   31 variableList: VAR '(' parameterList . ')'
+   39 parameterList: parameterList . ',' parameter
 
-    ','  shift, and go to state 65
-    ')'  shift, and go to state 66
+    ','  shift, and go to state 60
+    ')'  shift, and go to state 61
 
 
 State 53
 
-   39 parameterList: parameter .
+   40 parameterList: parameter .
 
-    $default  reduce using rule 39 (parameterList)
+    $default  reduce using rule 40 (parameterList)
 
 
 State 54
 
-   25 variableList: variableList ',' VAR .
-   26             | variableList ',' VAR . '[' NUM ']'
-   27             | variableList ',' VAR . '(' parameterList ')'
+   26 variableList: variableList ',' VAR .
+   27             | variableList ',' VAR . '[' NUM ']'
+   28             | variableList ',' VAR . '(' parameterList ')'
 
-    '['  shift, and go to state 67
-    '('  shift, and go to state 68
+    '['  shift, and go to state 62
+    '('  shift, and go to state 63
 
-    $default  reduce using rule 25 (variableList)
+    $default  reduce using rule 26 (variableList)
 
 
 State 55
 
-   50 mainFunction: INT MAIN '(' ')' '{' . localDeclarationBlock statementList '}'
+   51 mainFunction: INT MAIN '(' ')' '{' . localDeclarationBlock statementList '}'
 
-    DECL  shift, and go to state 69
+    DECL  shift, and go to state 64
 
-    $default  reduce using rule 43 (localDeclarationBlock)
+    $default  reduce using rule 44 (localDeclarationBlock)
 
-    localDeclarationBlock  go to state 70
+    localDeclarationBlock  go to state 65
 
 
 State 56
 
-   15 fieldType: INT .
+   12 typeDefinition: VAR $@3 '{' . fieldList '}' ';'
 
-    $default  reduce using rule 15 (fieldType)
+    INT  shift, and go to state 66
+    STR  shift, and go to state 67
+    VAR  shift, and go to state 68
+
+    fieldList         go to state 69
+    fieldDeclaration  go to state 70
+    fieldType         go to state 71
 
 
 State 57
 
-   16 fieldType: STR .
+   35 functionDefinition: returnType VAR '(' parameterList . ')' '{' localDeclarationBlock $@4 functionBody '}'
+   39 parameterList: parameterList . ',' parameter
 
-    $default  reduce using rule 16 (fieldType)
+    ','  shift, and go to state 60
+    ')'  shift, and go to state 72
 
 
 State 58
 
-   17 fieldType: VAR .
+   30 variableList: VAR '[' NUM ']' .
 
-    $default  reduce using rule 17 (fieldType)
+    $default  reduce using rule 30 (variableList)
 
 
 State 59
 
-   11 typeDefinition: VAR '{' fieldList . '}' ';'
-   12 fieldList: fieldList . fieldDeclaration
+   42 parameter: dataType VAR .
 
-    INT  shift, and go to state 56
-    STR  shift, and go to state 57
-    VAR  shift, and go to state 58
-    '}'  shift, and go to state 71
-
-    fieldDeclaration  go to state 72
-    fieldType         go to state 61
+    $default  reduce using rule 42 (parameter)
 
 
 State 60
 
-   13 fieldList: fieldDeclaration .
-
-    $default  reduce using rule 13 (fieldList)
-
-
-State 61
-
-   14 fieldDeclaration: fieldType . VAR ';'
-
-    VAR  shift, and go to state 73
-
-
-State 62
-
-   34 functionDefinition: returnType VAR '(' parameterList . ')' '{' localDeclarationBlock $@3 functionBody '}'
-   38 parameterList: parameterList . ',' parameter
-
-    ','  shift, and go to state 65
-    ')'  shift, and go to state 74
-
-
-State 63
-
-   29 variableList: VAR '[' NUM ']' .
-
-    $default  reduce using rule 29 (variableList)
-
-
-State 64
-
-   41 parameter: dataType VAR .
-
-    $default  reduce using rule 41 (parameter)
-
-
-State 65
-
-   38 parameterList: parameterList ',' . parameter
+   39 parameterList: parameterList ',' . parameter
 
     INT  shift, and go to state 8
     STR  shift, and go to state 9
     VAR  shift, and go to state 10
 
     dataType   go to state 51
-    parameter  go to state 75
+    parameter  go to state 73
+
+
+State 61
+
+   31 variableList: VAR '(' parameterList ')' .
+
+    $default  reduce using rule 31 (variableList)
+
+
+State 62
+
+   27 variableList: variableList ',' VAR '[' . NUM ']'
+
+    NUM  shift, and go to state 74
+
+
+State 63
+
+   28 variableList: variableList ',' VAR '(' . parameterList ')'
+
+    INT  shift, and go to state 8
+    STR  shift, and go to state 9
+    VAR  shift, and go to state 10
+
+    $default  reduce using rule 41 (parameterList)
+
+    dataType       go to state 51
+    parameterList  go to state 75
+    parameter      go to state 53
+
+
+State 64
+
+   43 localDeclarationBlock: DECL . localDeclarationList ENDDECL
+
+    INT  shift, and go to state 8
+    STR  shift, and go to state 9
+    VAR  shift, and go to state 10
+
+    dataType              go to state 76
+    localDeclarationList  go to state 77
+    localDeclaration      go to state 78
+
+
+State 65
+
+   51 mainFunction: INT MAIN '(' ')' '{' localDeclarationBlock . statementList '}'
+
+    IF        shift, and go to state 79
+    WHILE     shift, and go to state 80
+    DO        shift, and go to state 81
+    READ      shift, and go to state 82
+    WRITE     shift, and go to state 83
+    CONTINUE  shift, and go to state 84
+    BREAK     shift, and go to state 85
+    REPEAT    shift, and go to state 86
+    RETURN    shift, and go to state 87
+    DEALLOC   shift, and go to state 88
+    NUM       shift, and go to state 89
+    VAR       shift, and go to state 90
+    STRING    shift, and go to state 91
+    '('       shift, and go to state 92
+
+    statementList          go to state 93
+    statement              go to state 94
+    inputStatement         go to state 95
+    outputStatement        go to state 96
+    allocStatement         go to state 97
+    deAllocStatement       go to state 98
+    assignmentStatement    go to state 99
+    ifStatement            go to state 100
+    whileStatement         go to state 101
+    jumpStatement          go to state 102
+    functionCallStatement  go to state 103
+    returnStatement        go to state 104
+    expression             go to state 105
+    arithmeticExpression   go to state 106
+    logicalExpression      go to state 107
+    constant               go to state 108
+    variable               go to state 109
+    field                  go to state 110
 
 
 State 66
 
-   30 variableList: VAR '(' parameterList ')' .
+   16 fieldType: INT .
 
-    $default  reduce using rule 30 (variableList)
+    $default  reduce using rule 16 (fieldType)
 
 
 State 67
 
-   26 variableList: variableList ',' VAR '[' . NUM ']'
+   17 fieldType: STR .
 
-    NUM  shift, and go to state 76
+    $default  reduce using rule 17 (fieldType)
 
 
 State 68
 
-   27 variableList: variableList ',' VAR '(' . parameterList ')'
+   18 fieldType: VAR .
 
-    INT  shift, and go to state 8
-    STR  shift, and go to state 9
-    VAR  shift, and go to state 10
-
-    $default  reduce using rule 40 (parameterList)
-
-    dataType       go to state 51
-    parameterList  go to state 77
-    parameter      go to state 53
+    $default  reduce using rule 18 (fieldType)
 
 
 State 69
 
-   42 localDeclarationBlock: DECL . localDeclarationList ENDDECL
+   12 typeDefinition: VAR $@3 '{' fieldList . '}' ';'
+   13 fieldList: fieldList . fieldDeclaration
 
-    INT  shift, and go to state 8
-    STR  shift, and go to state 9
-    VAR  shift, and go to state 10
+    INT  shift, and go to state 66
+    STR  shift, and go to state 67
+    VAR  shift, and go to state 68
+    '}'  shift, and go to state 111
 
-    dataType              go to state 78
-    localDeclarationList  go to state 79
-    localDeclaration      go to state 80
+    fieldDeclaration  go to state 112
+    fieldType         go to state 71
 
 
 State 70
 
-   50 mainFunction: INT MAIN '(' ')' '{' localDeclarationBlock . statementList '}'
+   14 fieldList: fieldDeclaration .
 
-    IF        shift, and go to state 81
-    WHILE     shift, and go to state 82
-    DO        shift, and go to state 83
-    READ      shift, and go to state 84
-    WRITE     shift, and go to state 85
-    CONTINUE  shift, and go to state 86
-    BREAK     shift, and go to state 87
-    REPEAT    shift, and go to state 88
-    RETURN    shift, and go to state 89
-    DEALLOC   shift, and go to state 90
-    NUM       shift, and go to state 91
-    VAR       shift, and go to state 92
-    STRING    shift, and go to state 93
-    '('       shift, and go to state 94
-
-    statementList          go to state 95
-    statement              go to state 96
-    inputStatement         go to state 97
-    outputStatement        go to state 98
-    allocStatement         go to state 99
-    deAllocStatement       go to state 100
-    assignmentStatement    go to state 101
-    ifStatement            go to state 102
-    whileStatement         go to state 103
-    jumpStatement          go to state 104
-    functionCallStatement  go to state 105
-    returnStatement        go to state 106
-    expression             go to state 107
-    arithmeticExpression   go to state 108
-    logicalExpression      go to state 109
-    constant               go to state 110
-    variable               go to state 111
-    field                  go to state 112
+    $default  reduce using rule 14 (fieldList)
 
 
 State 71
 
-   11 typeDefinition: VAR '{' fieldList '}' . ';'
+   15 fieldDeclaration: fieldType . VAR ';'
 
-    ';'  shift, and go to state 113
+    VAR  shift, and go to state 113
 
 
 State 72
 
-   12 fieldList: fieldList fieldDeclaration .
+   35 functionDefinition: returnType VAR '(' parameterList ')' . '{' localDeclarationBlock $@4 functionBody '}'
 
-    $default  reduce using rule 12 (fieldList)
+    '{'  shift, and go to state 114
 
 
 State 73
 
-   14 fieldDeclaration: fieldType VAR . ';'
+   39 parameterList: parameterList ',' parameter .
 
-    ';'  shift, and go to state 114
+    $default  reduce using rule 39 (parameterList)
 
 
 State 74
 
-   34 functionDefinition: returnType VAR '(' parameterList ')' . '{' localDeclarationBlock $@3 functionBody '}'
+   27 variableList: variableList ',' VAR '[' NUM . ']'
 
-    '{'  shift, and go to state 115
+    ']'  shift, and go to state 115
 
 
 State 75
 
-   38 parameterList: parameterList ',' parameter .
+   28 variableList: variableList ',' VAR '(' parameterList . ')'
+   39 parameterList: parameterList . ',' parameter
 
-    $default  reduce using rule 38 (parameterList)
+    ','  shift, and go to state 60
+    ')'  shift, and go to state 116
 
 
 State 76
 
-   26 variableList: variableList ',' VAR '[' NUM . ']'
+   47 localDeclaration: dataType . localVariableList ';'
 
-    ']'  shift, and go to state 116
+    VAR  shift, and go to state 117
+
+    localVariableList  go to state 118
 
 
 State 77
 
-   27 variableList: variableList ',' VAR '(' parameterList . ')'
-   38 parameterList: parameterList . ',' parameter
+   43 localDeclarationBlock: DECL localDeclarationList . ENDDECL
+   45 localDeclarationList: localDeclarationList . localDeclaration
 
-    ','  shift, and go to state 65
-    ')'  shift, and go to state 117
-
-
-State 78
-
-   46 localDeclaration: dataType . localVariableList ';'
-
-    VAR  shift, and go to state 118
-
-    localVariableList  go to state 119
-
-
-State 79
-
-   42 localDeclarationBlock: DECL localDeclarationList . ENDDECL
-   44 localDeclarationList: localDeclarationList . localDeclaration
-
-    ENDDECL  shift, and go to state 120
+    ENDDECL  shift, and go to state 119
     INT      shift, and go to state 8
     STR      shift, and go to state 9
     VAR      shift, and go to state 10
 
-    dataType          go to state 78
-    localDeclaration  go to state 121
+    dataType          go to state 76
+    localDeclaration  go to state 120
+
+
+State 78
+
+   46 localDeclarationList: localDeclaration .
+
+    $default  reduce using rule 46 (localDeclarationList)
+
+
+State 79
+
+   69 ifStatement: IF . '(' expression ')' THEN statementList ELSE statementList ENDIF
+   70            | IF . '(' expression ')' THEN statementList ENDIF
+
+    '('  shift, and go to state 121
 
 
 State 80
 
-   45 localDeclarationList: localDeclaration .
-
-    $default  reduce using rule 45 (localDeclarationList)
-
-
-State 81
-
-   68 ifStatement: IF . '(' expression ')' THEN statementList ELSE statementList ENDIF
-   69            | IF . '(' expression ')' THEN statementList ENDIF
+   71 whileStatement: WHILE . '(' expression ')' DO statementList ENDWHILE
 
     '('  shift, and go to state 122
 
 
+State 81
+
+   72 whileStatement: DO . statementList WHILE '(' expression ')' ENDWHILE
+
+    IF        shift, and go to state 79
+    WHILE     shift, and go to state 80
+    DO        shift, and go to state 81
+    READ      shift, and go to state 82
+    WRITE     shift, and go to state 83
+    CONTINUE  shift, and go to state 84
+    BREAK     shift, and go to state 85
+    REPEAT    shift, and go to state 86
+    RETURN    shift, and go to state 87
+    DEALLOC   shift, and go to state 88
+    NUM       shift, and go to state 89
+    VAR       shift, and go to state 90
+    STRING    shift, and go to state 91
+    '('       shift, and go to state 92
+
+    statementList          go to state 123
+    statement              go to state 94
+    inputStatement         go to state 95
+    outputStatement        go to state 96
+    allocStatement         go to state 97
+    deAllocStatement       go to state 98
+    assignmentStatement    go to state 99
+    ifStatement            go to state 100
+    whileStatement         go to state 101
+    jumpStatement          go to state 102
+    functionCallStatement  go to state 103
+    returnStatement        go to state 104
+    expression             go to state 105
+    arithmeticExpression   go to state 106
+    logicalExpression      go to state 107
+    constant               go to state 108
+    variable               go to state 109
+    field                  go to state 110
+
+
 State 82
 
-   70 whileStatement: WHILE . '(' expression ')' DO statementList ENDWHILE
+   64 inputStatement: READ . '(' expression ')'
 
-    '('  shift, and go to state 123
+    '('  shift, and go to state 124
 
 
 State 83
 
-   71 whileStatement: DO . statementList WHILE '(' expression ')' ENDWHILE
-
-    IF        shift, and go to state 81
-    WHILE     shift, and go to state 82
-    DO        shift, and go to state 83
-    READ      shift, and go to state 84
-    WRITE     shift, and go to state 85
-    CONTINUE  shift, and go to state 86
-    BREAK     shift, and go to state 87
-    REPEAT    shift, and go to state 88
-    RETURN    shift, and go to state 89
-    DEALLOC   shift, and go to state 90
-    NUM       shift, and go to state 91
-    VAR       shift, and go to state 92
-    STRING    shift, and go to state 93
-    '('       shift, and go to state 94
-
-    statementList          go to state 124
-    statement              go to state 96
-    inputStatement         go to state 97
-    outputStatement        go to state 98
-    allocStatement         go to state 99
-    deAllocStatement       go to state 100
-    assignmentStatement    go to state 101
-    ifStatement            go to state 102
-    whileStatement         go to state 103
-    jumpStatement          go to state 104
-    functionCallStatement  go to state 105
-    returnStatement        go to state 106
-    expression             go to state 107
-    arithmeticExpression   go to state 108
-    logicalExpression      go to state 109
-    constant               go to state 110
-    variable               go to state 111
-    field                  go to state 112
-
-
-State 84
-
-   63 inputStatement: READ . '(' expression ')'
+   65 outputStatement: WRITE . '(' expression ')'
 
     '('  shift, and go to state 125
 
 
-State 85
+State 84
 
-   64 outputStatement: WRITE . '(' expression ')'
-
-    '('  shift, and go to state 126
-
-
-State 86
-
-   73 jumpStatement: CONTINUE .
-
-    $default  reduce using rule 73 (jumpStatement)
-
-
-State 87
-
-   74 jumpStatement: BREAK .
+   74 jumpStatement: CONTINUE .
 
     $default  reduce using rule 74 (jumpStatement)
 
 
+State 85
+
+   75 jumpStatement: BREAK .
+
+    $default  reduce using rule 75 (jumpStatement)
+
+
+State 86
+
+   73 whileStatement: REPEAT . statementList UNTIL '(' expression ')'
+
+    IF        shift, and go to state 79
+    WHILE     shift, and go to state 80
+    DO        shift, and go to state 81
+    READ      shift, and go to state 82
+    WRITE     shift, and go to state 83
+    CONTINUE  shift, and go to state 84
+    BREAK     shift, and go to state 85
+    REPEAT    shift, and go to state 86
+    RETURN    shift, and go to state 87
+    DEALLOC   shift, and go to state 88
+    NUM       shift, and go to state 89
+    VAR       shift, and go to state 90
+    STRING    shift, and go to state 91
+    '('       shift, and go to state 92
+
+    statementList          go to state 126
+    statement              go to state 94
+    inputStatement         go to state 95
+    outputStatement        go to state 96
+    allocStatement         go to state 97
+    deAllocStatement       go to state 98
+    assignmentStatement    go to state 99
+    ifStatement            go to state 100
+    whileStatement         go to state 101
+    jumpStatement          go to state 102
+    functionCallStatement  go to state 103
+    returnStatement        go to state 104
+    expression             go to state 105
+    arithmeticExpression   go to state 106
+    logicalExpression      go to state 107
+    constant               go to state 108
+    variable               go to state 109
+    field                  go to state 110
+
+
+State 87
+
+   77 returnStatement: RETURN . expression
+
+    NUM     shift, and go to state 89
+    VAR     shift, and go to state 127
+    STRING  shift, and go to state 91
+    '('     shift, and go to state 92
+
+    expression            go to state 128
+    arithmeticExpression  go to state 106
+    logicalExpression     go to state 107
+    constant              go to state 108
+    variable              go to state 109
+    field                 go to state 110
+
+
 State 88
 
-   72 whileStatement: REPEAT . statementList UNTIL '(' expression ')'
+   67 deAllocStatement: DEALLOC . '(' expression ')'
 
-    IF        shift, and go to state 81
-    WHILE     shift, and go to state 82
-    DO        shift, and go to state 83
-    READ      shift, and go to state 84
-    WRITE     shift, and go to state 85
-    CONTINUE  shift, and go to state 86
-    BREAK     shift, and go to state 87
-    REPEAT    shift, and go to state 88
-    RETURN    shift, and go to state 89
-    DEALLOC   shift, and go to state 90
-    NUM       shift, and go to state 91
-    VAR       shift, and go to state 92
-    STRING    shift, and go to state 93
-    '('       shift, and go to state 94
-
-    statementList          go to state 127
-    statement              go to state 96
-    inputStatement         go to state 97
-    outputStatement        go to state 98
-    allocStatement         go to state 99
-    deAllocStatement       go to state 100
-    assignmentStatement    go to state 101
-    ifStatement            go to state 102
-    whileStatement         go to state 103
-    jumpStatement          go to state 104
-    functionCallStatement  go to state 105
-    returnStatement        go to state 106
-    expression             go to state 107
-    arithmeticExpression   go to state 108
-    logicalExpression      go to state 109
-    constant               go to state 110
-    variable               go to state 111
-    field                  go to state 112
+    '('  shift, and go to state 129
 
 
 State 89
 
-   76 returnStatement: RETURN . expression
-
-    NUM     shift, and go to state 91
-    VAR     shift, and go to state 128
-    STRING  shift, and go to state 93
-    '('     shift, and go to state 94
-
-    expression            go to state 129
-    arithmeticExpression  go to state 108
-    logicalExpression     go to state 109
-    constant              go to state 110
-    variable              go to state 111
-    field                 go to state 112
-
-
-State 90
-
-   66 deAllocStatement: DEALLOC . '(' expression ')'
-
-    '('  shift, and go to state 130
-
-
-State 91
-
-   93 constant: NUM .
-
-    $default  reduce using rule 93 (constant)
-
-
-State 92
-
-   75 functionCallStatement: VAR . '(' argList ')'
-   78 expression: VAR . '(' argList ')'
-   95 variable: VAR . '[' expression ']'
-   96         | VAR .
-   98 field: VAR . '.' field
-   99      | VAR . '.' VAR
-
-    '['  shift, and go to state 131
-    '('  shift, and go to state 132
-    '.'  shift, and go to state 133
-
-    $default  reduce using rule 96 (variable)
-
-
-State 93
-
-   94 constant: STRING .
+   94 constant: NUM .
 
     $default  reduce using rule 94 (constant)
 
 
-State 94
-
-   77 expression: '(' . expression ')'
-
-    NUM     shift, and go to state 91
-    VAR     shift, and go to state 128
-    STRING  shift, and go to state 93
-    '('     shift, and go to state 94
-
-    expression            go to state 134
-    arithmeticExpression  go to state 108
-    logicalExpression     go to state 109
-    constant              go to state 110
-    variable              go to state 111
-    field                 go to state 112
-
-
-State 95
-
-   50 mainFunction: INT MAIN '(' ')' '{' localDeclarationBlock statementList . '}'
-   51 statementList: statementList . statement ';'
-
-    IF        shift, and go to state 81
-    WHILE     shift, and go to state 82
-    DO        shift, and go to state 83
-    READ      shift, and go to state 84
-    WRITE     shift, and go to state 85
-    CONTINUE  shift, and go to state 86
-    BREAK     shift, and go to state 87
-    REPEAT    shift, and go to state 88
-    RETURN    shift, and go to state 89
-    DEALLOC   shift, and go to state 90
-    NUM       shift, and go to state 91
-    VAR       shift, and go to state 92
-    STRING    shift, and go to state 93
-    '}'       shift, and go to state 135
-    '('       shift, and go to state 94
-
-    statement              go to state 136
-    inputStatement         go to state 97
-    outputStatement        go to state 98
-    allocStatement         go to state 99
-    deAllocStatement       go to state 100
-    assignmentStatement    go to state 101
-    ifStatement            go to state 102
-    whileStatement         go to state 103
-    jumpStatement          go to state 104
-    functionCallStatement  go to state 105
-    returnStatement        go to state 106
-    expression             go to state 107
-    arithmeticExpression   go to state 108
-    logicalExpression      go to state 109
-    constant               go to state 110
-    variable               go to state 111
-    field                  go to state 112
-
-
-State 96
-
-   52 statementList: statement . ';'
-
-    ';'  shift, and go to state 137
-
-
-State 97
-
-   53 statement: inputStatement .
-
-    $default  reduce using rule 53 (statement)
-
-
-State 98
-
-   54 statement: outputStatement .
-
-    $default  reduce using rule 54 (statement)
-
-
-State 99
-
-   61 statement: allocStatement .
-
-    $default  reduce using rule 61 (statement)
-
-
-State 100
-
-   62 statement: deAllocStatement .
-
-    $default  reduce using rule 62 (statement)
-
-
-State 101
-
-   55 statement: assignmentStatement .
-
-    $default  reduce using rule 55 (statement)
-
-
-State 102
-
-   56 statement: ifStatement .
-
-    $default  reduce using rule 56 (statement)
-
-
-State 103
-
-   57 statement: whileStatement .
-
-    $default  reduce using rule 57 (statement)
-
-
-State 104
-
-   58 statement: jumpStatement .
-
-    $default  reduce using rule 58 (statement)
-
-
-State 105
-
-   59 statement: functionCallStatement .
-
-    $default  reduce using rule 59 (statement)
-
-
-State 106
-
-   60 statement: returnStatement .
-
-    $default  reduce using rule 60 (statement)
-
-
-State 107
-
-   65 allocStatement: expression . EQUALS ALLOC '(' ')'
-   67 assignmentStatement: expression . EQUALS expression
-   83 arithmeticExpression: expression . ADD expression
-   84                     | expression . SUB expression
-   85                     | expression . MUL expression
-   86                     | expression . DIV expression
-   87 logicalExpression: expression . SLT expression
-   88                  | expression . SGT expression
-   89                  | expression . LTE expression
-   90                  | expression . GTE expression
-   91                  | expression . NEQ expression
-   92                  | expression . EQU expression
-
-    ADD     shift, and go to state 138
-    SUB     shift, and go to state 139
-    MUL     shift, and go to state 140
-    DIV     shift, and go to state 141
-    EQUALS  shift, and go to state 142
-    SLT     shift, and go to state 143
-    SGT     shift, and go to state 144
-    LTE     shift, and go to state 145
-    GTE     shift, and go to state 146
-    NEQ     shift, and go to state 147
-    EQU     shift, and go to state 148
-
-
-State 108
-
-   79 expression: arithmeticExpression .
-
-    $default  reduce using rule 79 (expression)
-
-
-State 109
-
-   80 expression: logicalExpression .
-
-    $default  reduce using rule 80 (expression)
-
-
-State 110
-
-   81 expression: constant .
-
-    $default  reduce using rule 81 (expression)
-
-
-State 111
-
-   82 expression: variable .
-
-    $default  reduce using rule 82 (expression)
-
-
-State 112
-
-   97 variable: field .
+State 90
+
+   76 functionCallStatement: VAR . '(' argList ')'
+   79 expression: VAR . '(' argList ')'
+   96 variable: VAR . '[' expression ']'
+   97         | VAR .
+   99 field: VAR . '.' field
+  100      | VAR . '.' VAR
+
+    '['  shift, and go to state 130
+    '('  shift, and go to state 131
+    '.'  shift, and go to state 132
 
     $default  reduce using rule 97 (variable)
 
 
+State 91
+
+   95 constant: STRING .
+
+    $default  reduce using rule 95 (constant)
+
+
+State 92
+
+   78 expression: '(' . expression ')'
+
+    NUM     shift, and go to state 89
+    VAR     shift, and go to state 127
+    STRING  shift, and go to state 91
+    '('     shift, and go to state 92
+
+    expression            go to state 133
+    arithmeticExpression  go to state 106
+    logicalExpression     go to state 107
+    constant              go to state 108
+    variable              go to state 109
+    field                 go to state 110
+
+
+State 93
+
+   51 mainFunction: INT MAIN '(' ')' '{' localDeclarationBlock statementList . '}'
+   52 statementList: statementList . statement ';'
+
+    IF        shift, and go to state 79
+    WHILE     shift, and go to state 80
+    DO        shift, and go to state 81
+    READ      shift, and go to state 82
+    WRITE     shift, and go to state 83
+    CONTINUE  shift, and go to state 84
+    BREAK     shift, and go to state 85
+    REPEAT    shift, and go to state 86
+    RETURN    shift, and go to state 87
+    DEALLOC   shift, and go to state 88
+    NUM       shift, and go to state 89
+    VAR       shift, and go to state 90
+    STRING    shift, and go to state 91
+    '}'       shift, and go to state 134
+    '('       shift, and go to state 92
+
+    statement              go to state 135
+    inputStatement         go to state 95
+    outputStatement        go to state 96
+    allocStatement         go to state 97
+    deAllocStatement       go to state 98
+    assignmentStatement    go to state 99
+    ifStatement            go to state 100
+    whileStatement         go to state 101
+    jumpStatement          go to state 102
+    functionCallStatement  go to state 103
+    returnStatement        go to state 104
+    expression             go to state 105
+    arithmeticExpression   go to state 106
+    logicalExpression      go to state 107
+    constant               go to state 108
+    variable               go to state 109
+    field                  go to state 110
+
+
+State 94
+
+   53 statementList: statement . ';'
+
+    ';'  shift, and go to state 136
+
+
+State 95
+
+   54 statement: inputStatement .
+
+    $default  reduce using rule 54 (statement)
+
+
+State 96
+
+   55 statement: outputStatement .
+
+    $default  reduce using rule 55 (statement)
+
+
+State 97
+
+   62 statement: allocStatement .
+
+    $default  reduce using rule 62 (statement)
+
+
+State 98
+
+   63 statement: deAllocStatement .
+
+    $default  reduce using rule 63 (statement)
+
+
+State 99
+
+   56 statement: assignmentStatement .
+
+    $default  reduce using rule 56 (statement)
+
+
+State 100
+
+   57 statement: ifStatement .
+
+    $default  reduce using rule 57 (statement)
+
+
+State 101
+
+   58 statement: whileStatement .
+
+    $default  reduce using rule 58 (statement)
+
+
+State 102
+
+   59 statement: jumpStatement .
+
+    $default  reduce using rule 59 (statement)
+
+
+State 103
+
+   60 statement: functionCallStatement .
+
+    $default  reduce using rule 60 (statement)
+
+
+State 104
+
+   61 statement: returnStatement .
+
+    $default  reduce using rule 61 (statement)
+
+
+State 105
+
+   66 allocStatement: expression . EQUALS ALLOC '(' ')'
+   68 assignmentStatement: expression . EQUALS expression
+   84 arithmeticExpression: expression . ADD expression
+   85                     | expression . SUB expression
+   86                     | expression . MUL expression
+   87                     | expression . DIV expression
+   88 logicalExpression: expression . SLT expression
+   89                  | expression . SGT expression
+   90                  | expression . LTE expression
+   91                  | expression . GTE expression
+   92                  | expression . NEQ expression
+   93                  | expression . EQU expression
+
+    ADD     shift, and go to state 137
+    SUB     shift, and go to state 138
+    MUL     shift, and go to state 139
+    DIV     shift, and go to state 140
+    EQUALS  shift, and go to state 141
+    SLT     shift, and go to state 142
+    SGT     shift, and go to state 143
+    LTE     shift, and go to state 144
+    GTE     shift, and go to state 145
+    NEQ     shift, and go to state 146
+    EQU     shift, and go to state 147
+
+
+State 106
+
+   80 expression: arithmeticExpression .
+
+    $default  reduce using rule 80 (expression)
+
+
+State 107
+
+   81 expression: logicalExpression .
+
+    $default  reduce using rule 81 (expression)
+
+
+State 108
+
+   82 expression: constant .
+
+    $default  reduce using rule 82 (expression)
+
+
+State 109
+
+   83 expression: variable .
+
+    $default  reduce using rule 83 (expression)
+
+
+State 110
+
+   98 variable: field .
+
+    $default  reduce using rule 98 (variable)
+
+
+State 111
+
+   12 typeDefinition: VAR $@3 '{' fieldList '}' . ';'
+
+    ';'  shift, and go to state 148
+
+
+State 112
+
+   13 fieldList: fieldList fieldDeclaration .
+
+    $default  reduce using rule 13 (fieldList)
+
+
 State 113
 
-   11 typeDefinition: VAR '{' fieldList '}' ';' .
+   15 fieldDeclaration: fieldType VAR . ';'
 
-    $default  reduce using rule 11 (typeDefinition)
+    ';'  shift, and go to state 149
 
 
 State 114
 
-   14 fieldDeclaration: fieldType VAR ';' .
+   35 functionDefinition: returnType VAR '(' parameterList ')' '{' . localDeclarationBlock $@4 functionBody '}'
 
-    $default  reduce using rule 14 (fieldDeclaration)
+    DECL  shift, and go to state 64
+
+    $default  reduce using rule 44 (localDeclarationBlock)
+
+    localDeclarationBlock  go to state 150
 
 
 State 115
 
-   34 functionDefinition: returnType VAR '(' parameterList ')' '{' . localDeclarationBlock $@3 functionBody '}'
-
-    DECL  shift, and go to state 69
-
-    $default  reduce using rule 43 (localDeclarationBlock)
-
-    localDeclarationBlock  go to state 149
-
-
-State 116
-
-   26 variableList: variableList ',' VAR '[' NUM ']' .
-
-    $default  reduce using rule 26 (variableList)
-
-
-State 117
-
-   27 variableList: variableList ',' VAR '(' parameterList ')' .
+   27 variableList: variableList ',' VAR '[' NUM ']' .
 
     $default  reduce using rule 27 (variableList)
 
 
+State 116
+
+   28 variableList: variableList ',' VAR '(' parameterList ')' .
+
+    $default  reduce using rule 28 (variableList)
+
+
+State 117
+
+   49 localVariableList: VAR .
+
+    $default  reduce using rule 49 (localVariableList)
+
+
 State 118
 
-   48 localVariableList: VAR .
+   47 localDeclaration: dataType localVariableList . ';'
+   48 localVariableList: localVariableList . ',' VAR
 
-    $default  reduce using rule 48 (localVariableList)
+    ';'  shift, and go to state 151
+    ','  shift, and go to state 152
 
 
 State 119
 
-   46 localDeclaration: dataType localVariableList . ';'
-   47 localVariableList: localVariableList . ',' VAR
+   43 localDeclarationBlock: DECL localDeclarationList ENDDECL .
 
-    ';'  shift, and go to state 150
-    ','  shift, and go to state 151
+    $default  reduce using rule 43 (localDeclarationBlock)
 
 
 State 120
 
-   42 localDeclarationBlock: DECL localDeclarationList ENDDECL .
+   45 localDeclarationList: localDeclarationList localDeclaration .
 
-    $default  reduce using rule 42 (localDeclarationBlock)
+    $default  reduce using rule 45 (localDeclarationList)
 
 
 State 121
 
-   44 localDeclarationList: localDeclarationList localDeclaration .
+   69 ifStatement: IF '(' . expression ')' THEN statementList ELSE statementList ENDIF
+   70            | IF '(' . expression ')' THEN statementList ENDIF
 
-    $default  reduce using rule 44 (localDeclarationList)
+    NUM     shift, and go to state 89
+    VAR     shift, and go to state 127
+    STRING  shift, and go to state 91
+    '('     shift, and go to state 92
+
+    expression            go to state 153
+    arithmeticExpression  go to state 106
+    logicalExpression     go to state 107
+    constant              go to state 108
+    variable              go to state 109
+    field                 go to state 110
 
 
 State 122
 
-   68 ifStatement: IF '(' . expression ')' THEN statementList ELSE statementList ENDIF
-   69            | IF '(' . expression ')' THEN statementList ENDIF
+   71 whileStatement: WHILE '(' . expression ')' DO statementList ENDWHILE
 
-    NUM     shift, and go to state 91
-    VAR     shift, and go to state 128
-    STRING  shift, and go to state 93
-    '('     shift, and go to state 94
+    NUM     shift, and go to state 89
+    VAR     shift, and go to state 127
+    STRING  shift, and go to state 91
+    '('     shift, and go to state 92
 
-    expression            go to state 152
-    arithmeticExpression  go to state 108
-    logicalExpression     go to state 109
-    constant              go to state 110
-    variable              go to state 111
-    field                 go to state 112
+    expression            go to state 154
+    arithmeticExpression  go to state 106
+    logicalExpression     go to state 107
+    constant              go to state 108
+    variable              go to state 109
+    field                 go to state 110
 
 
 State 123
 
-   70 whileStatement: WHILE '(' . expression ')' DO statementList ENDWHILE
+   52 statementList: statementList . statement ';'
+   72 whileStatement: DO statementList . WHILE '(' expression ')' ENDWHILE
 
-    NUM     shift, and go to state 91
-    VAR     shift, and go to state 128
-    STRING  shift, and go to state 93
-    '('     shift, and go to state 94
+    IF        shift, and go to state 79
+    WHILE     shift, and go to state 155
+    DO        shift, and go to state 81
+    READ      shift, and go to state 82
+    WRITE     shift, and go to state 83
+    CONTINUE  shift, and go to state 84
+    BREAK     shift, and go to state 85
+    REPEAT    shift, and go to state 86
+    RETURN    shift, and go to state 87
+    DEALLOC   shift, and go to state 88
+    NUM       shift, and go to state 89
+    VAR       shift, and go to state 90
+    STRING    shift, and go to state 91
+    '('       shift, and go to state 92
 
-    expression            go to state 153
-    arithmeticExpression  go to state 108
-    logicalExpression     go to state 109
-    constant              go to state 110
-    variable              go to state 111
-    field                 go to state 112
+    statement              go to state 135
+    inputStatement         go to state 95
+    outputStatement        go to state 96
+    allocStatement         go to state 97
+    deAllocStatement       go to state 98
+    assignmentStatement    go to state 99
+    ifStatement            go to state 100
+    whileStatement         go to state 101
+    jumpStatement          go to state 102
+    functionCallStatement  go to state 103
+    returnStatement        go to state 104
+    expression             go to state 105
+    arithmeticExpression   go to state 106
+    logicalExpression      go to state 107
+    constant               go to state 108
+    variable               go to state 109
+    field                  go to state 110
 
 
 State 124
 
-   51 statementList: statementList . statement ';'
-   71 whileStatement: DO statementList . WHILE '(' expression ')' ENDWHILE
+   64 inputStatement: READ '(' . expression ')'
 
-    IF        shift, and go to state 81
-    WHILE     shift, and go to state 154
-    DO        shift, and go to state 83
-    READ      shift, and go to state 84
-    WRITE     shift, and go to state 85
-    CONTINUE  shift, and go to state 86
-    BREAK     shift, and go to state 87
-    REPEAT    shift, and go to state 88
-    RETURN    shift, and go to state 89
-    DEALLOC   shift, and go to state 90
-    NUM       shift, and go to state 91
-    VAR       shift, and go to state 92
-    STRING    shift, and go to state 93
-    '('       shift, and go to state 94
+    NUM     shift, and go to state 89
+    VAR     shift, and go to state 127
+    STRING  shift, and go to state 91
+    '('     shift, and go to state 92
 
-    statement              go to state 136
-    inputStatement         go to state 97
-    outputStatement        go to state 98
-    allocStatement         go to state 99
-    deAllocStatement       go to state 100
-    assignmentStatement    go to state 101
-    ifStatement            go to state 102
-    whileStatement         go to state 103
-    jumpStatement          go to state 104
-    functionCallStatement  go to state 105
-    returnStatement        go to state 106
-    expression             go to state 107
-    arithmeticExpression   go to state 108
-    logicalExpression      go to state 109
-    constant               go to state 110
-    variable               go to state 111
-    field                  go to state 112
+    expression            go to state 156
+    arithmeticExpression  go to state 106
+    logicalExpression     go to state 107
+    constant              go to state 108
+    variable              go to state 109
+    field                 go to state 110
 
 
 State 125
 
-   63 inputStatement: READ '(' . expression ')'
+   65 outputStatement: WRITE '(' . expression ')'
 
-    NUM     shift, and go to state 91
-    VAR     shift, and go to state 128
-    STRING  shift, and go to state 93
-    '('     shift, and go to state 94
+    NUM     shift, and go to state 89
+    VAR     shift, and go to state 127
+    STRING  shift, and go to state 91
+    '('     shift, and go to state 92
 
-    expression            go to state 155
-    arithmeticExpression  go to state 108
-    logicalExpression     go to state 109
-    constant              go to state 110
-    variable              go to state 111
-    field                 go to state 112
+    expression            go to state 157
+    arithmeticExpression  go to state 106
+    logicalExpression     go to state 107
+    constant              go to state 108
+    variable              go to state 109
+    field                 go to state 110
 
 
 State 126
 
-   64 outputStatement: WRITE '(' . expression ')'
+   52 statementList: statementList . statement ';'
+   73 whileStatement: REPEAT statementList . UNTIL '(' expression ')'
 
-    NUM     shift, and go to state 91
-    VAR     shift, and go to state 128
-    STRING  shift, and go to state 93
-    '('     shift, and go to state 94
+    IF        shift, and go to state 79
+    WHILE     shift, and go to state 80
+    DO        shift, and go to state 81
+    READ      shift, and go to state 82
+    WRITE     shift, and go to state 83
+    CONTINUE  shift, and go to state 84
+    BREAK     shift, and go to state 85
+    REPEAT    shift, and go to state 86
+    UNTIL     shift, and go to state 158
+    RETURN    shift, and go to state 87
+    DEALLOC   shift, and go to state 88
+    NUM       shift, and go to state 89
+    VAR       shift, and go to state 90
+    STRING    shift, and go to state 91
+    '('       shift, and go to state 92
 
-    expression            go to state 156
-    arithmeticExpression  go to state 108
-    logicalExpression     go to state 109
-    constant              go to state 110
-    variable              go to state 111
-    field                 go to state 112
+    statement              go to state 135
+    inputStatement         go to state 95
+    outputStatement        go to state 96
+    allocStatement         go to state 97
+    deAllocStatement       go to state 98
+    assignmentStatement    go to state 99
+    ifStatement            go to state 100
+    whileStatement         go to state 101
+    jumpStatement          go to state 102
+    functionCallStatement  go to state 103
+    returnStatement        go to state 104
+    expression             go to state 105
+    arithmeticExpression   go to state 106
+    logicalExpression      go to state 107
+    constant               go to state 108
+    variable               go to state 109
+    field                  go to state 110
 
 
 State 127
 
-   51 statementList: statementList . statement ';'
-   72 whileStatement: REPEAT statementList . UNTIL '(' expression ')'
+   79 expression: VAR . '(' argList ')'
+   96 variable: VAR . '[' expression ']'
+   97         | VAR .
+   99 field: VAR . '.' field
+  100      | VAR . '.' VAR
 
-    IF        shift, and go to state 81
-    WHILE     shift, and go to state 82
-    DO        shift, and go to state 83
-    READ      shift, and go to state 84
-    WRITE     shift, and go to state 85
-    CONTINUE  shift, and go to state 86
-    BREAK     shift, and go to state 87
-    REPEAT    shift, and go to state 88
-    UNTIL     shift, and go to state 157
-    RETURN    shift, and go to state 89
-    DEALLOC   shift, and go to state 90
-    NUM       shift, and go to state 91
-    VAR       shift, and go to state 92
-    STRING    shift, and go to state 93
-    '('       shift, and go to state 94
+    '['  shift, and go to state 130
+    '('  shift, and go to state 159
+    '.'  shift, and go to state 132
 
-    statement              go to state 136
-    inputStatement         go to state 97
-    outputStatement        go to state 98
-    allocStatement         go to state 99
-    deAllocStatement       go to state 100
-    assignmentStatement    go to state 101
-    ifStatement            go to state 102
-    whileStatement         go to state 103
-    jumpStatement          go to state 104
-    functionCallStatement  go to state 105
-    returnStatement        go to state 106
-    expression             go to state 107
-    arithmeticExpression   go to state 108
-    logicalExpression      go to state 109
-    constant               go to state 110
-    variable               go to state 111
-    field                  go to state 112
+    $default  reduce using rule 97 (variable)
 
 
 State 128
 
-   78 expression: VAR . '(' argList ')'
-   95 variable: VAR . '[' expression ']'
-   96         | VAR .
-   98 field: VAR . '.' field
-   99      | VAR . '.' VAR
+   77 returnStatement: RETURN expression .
+   84 arithmeticExpression: expression . ADD expression
+   85                     | expression . SUB expression
+   86                     | expression . MUL expression
+   87                     | expression . DIV expression
+   88 logicalExpression: expression . SLT expression
+   89                  | expression . SGT expression
+   90                  | expression . LTE expression
+   91                  | expression . GTE expression
+   92                  | expression . NEQ expression
+   93                  | expression . EQU expression
 
-    '['  shift, and go to state 131
-    '('  shift, and go to state 158
-    '.'  shift, and go to state 133
+    ADD  shift, and go to state 137
+    SUB  shift, and go to state 138
+    MUL  shift, and go to state 139
+    DIV  shift, and go to state 140
+    SLT  shift, and go to state 142
+    SGT  shift, and go to state 143
+    LTE  shift, and go to state 144
+    GTE  shift, and go to state 145
+    NEQ  shift, and go to state 146
+    EQU  shift, and go to state 147
 
-    $default  reduce using rule 96 (variable)
+    $default  reduce using rule 77 (returnStatement)
 
 
 State 129
 
-   76 returnStatement: RETURN expression .
-   83 arithmeticExpression: expression . ADD expression
-   84                     | expression . SUB expression
-   85                     | expression . MUL expression
-   86                     | expression . DIV expression
-   87 logicalExpression: expression . SLT expression
-   88                  | expression . SGT expression
-   89                  | expression . LTE expression
-   90                  | expression . GTE expression
-   91                  | expression . NEQ expression
-   92                  | expression . EQU expression
+   67 deAllocStatement: DEALLOC '(' . expression ')'
 
-    ADD  shift, and go to state 138
-    SUB  shift, and go to state 139
-    MUL  shift, and go to state 140
-    DIV  shift, and go to state 141
-    SLT  shift, and go to state 143
-    SGT  shift, and go to state 144
-    LTE  shift, and go to state 145
-    GTE  shift, and go to state 146
-    NEQ  shift, and go to state 147
-    EQU  shift, and go to state 148
+    NUM     shift, and go to state 89
+    VAR     shift, and go to state 127
+    STRING  shift, and go to state 91
+    '('     shift, and go to state 92
 
-    $default  reduce using rule 76 (returnStatement)
+    expression            go to state 160
+    arithmeticExpression  go to state 106
+    logicalExpression     go to state 107
+    constant              go to state 108
+    variable              go to state 109
+    field                 go to state 110
 
 
 State 130
 
-   66 deAllocStatement: DEALLOC '(' . expression ')'
+   96 variable: VAR '[' . expression ']'
 
-    NUM     shift, and go to state 91
-    VAR     shift, and go to state 128
-    STRING  shift, and go to state 93
-    '('     shift, and go to state 94
+    NUM     shift, and go to state 89
+    VAR     shift, and go to state 127
+    STRING  shift, and go to state 91
+    '('     shift, and go to state 92
 
-    expression            go to state 159
-    arithmeticExpression  go to state 108
-    logicalExpression     go to state 109
-    constant              go to state 110
-    variable              go to state 111
-    field                 go to state 112
+    expression            go to state 161
+    arithmeticExpression  go to state 106
+    logicalExpression     go to state 107
+    constant              go to state 108
+    variable              go to state 109
+    field                 go to state 110
 
 
 State 131
 
-   95 variable: VAR '[' . expression ']'
+   76 functionCallStatement: VAR '(' . argList ')'
+   79 expression: VAR '(' . argList ')'
 
-    NUM     shift, and go to state 91
-    VAR     shift, and go to state 128
-    STRING  shift, and go to state 93
-    '('     shift, and go to state 94
+    NUM     shift, and go to state 89
+    VAR     shift, and go to state 127
+    STRING  shift, and go to state 91
+    '('     shift, and go to state 92
 
-    expression            go to state 160
-    arithmeticExpression  go to state 108
-    logicalExpression     go to state 109
-    constant              go to state 110
-    variable              go to state 111
-    field                 go to state 112
+    $default  reduce using rule 103 (argList)
+
+    expression            go to state 162
+    arithmeticExpression  go to state 106
+    logicalExpression     go to state 107
+    constant              go to state 108
+    variable              go to state 109
+    field                 go to state 110
+    argList               go to state 163
 
 
 State 132
 
-   75 functionCallStatement: VAR '(' . argList ')'
-   78 expression: VAR '(' . argList ')'
+   99 field: VAR '.' . field
+  100      | VAR '.' . VAR
 
-    NUM     shift, and go to state 91
-    VAR     shift, and go to state 128
-    STRING  shift, and go to state 93
-    '('     shift, and go to state 94
+    VAR  shift, and go to state 164
 
-    $default  reduce using rule 102 (argList)
-
-    expression            go to state 161
-    arithmeticExpression  go to state 108
-    logicalExpression     go to state 109
-    constant              go to state 110
-    variable              go to state 111
-    field                 go to state 112
-    argList               go to state 162
+    field  go to state 165
 
 
 State 133
 
-   98 field: VAR '.' . field
-   99      | VAR '.' . VAR
+   78 expression: '(' expression . ')'
+   84 arithmeticExpression: expression . ADD expression
+   85                     | expression . SUB expression
+   86                     | expression . MUL expression
+   87                     | expression . DIV expression
+   88 logicalExpression: expression . SLT expression
+   89                  | expression . SGT expression
+   90                  | expression . LTE expression
+   91                  | expression . GTE expression
+   92                  | expression . NEQ expression
+   93                  | expression . EQU expression
 
-    VAR  shift, and go to state 163
-
-    field  go to state 164
+    ADD  shift, and go to state 137
+    SUB  shift, and go to state 138
+    MUL  shift, and go to state 139
+    DIV  shift, and go to state 140
+    SLT  shift, and go to state 142
+    SGT  shift, and go to state 143
+    LTE  shift, and go to state 144
+    GTE  shift, and go to state 145
+    NEQ  shift, and go to state 146
+    EQU  shift, and go to state 147
+    ')'  shift, and go to state 166
 
 
 State 134
 
-   77 expression: '(' expression . ')'
-   83 arithmeticExpression: expression . ADD expression
-   84                     | expression . SUB expression
-   85                     | expression . MUL expression
-   86                     | expression . DIV expression
-   87 logicalExpression: expression . SLT expression
-   88                  | expression . SGT expression
-   89                  | expression . LTE expression
-   90                  | expression . GTE expression
-   91                  | expression . NEQ expression
-   92                  | expression . EQU expression
+   51 mainFunction: INT MAIN '(' ')' '{' localDeclarationBlock statementList '}' .
 
-    ADD  shift, and go to state 138
-    SUB  shift, and go to state 139
-    MUL  shift, and go to state 140
-    DIV  shift, and go to state 141
-    SLT  shift, and go to state 143
-    SGT  shift, and go to state 144
-    LTE  shift, and go to state 145
-    GTE  shift, and go to state 146
-    NEQ  shift, and go to state 147
-    EQU  shift, and go to state 148
-    ')'  shift, and go to state 165
+    $default  reduce using rule 51 (mainFunction)
 
 
 State 135
 
-   50 mainFunction: INT MAIN '(' ')' '{' localDeclarationBlock statementList '}' .
+   52 statementList: statementList statement . ';'
 
-    $default  reduce using rule 50 (mainFunction)
+    ';'  shift, and go to state 167
 
 
 State 136
 
-   51 statementList: statementList statement . ';'
+   53 statementList: statement ';' .
 
-    ';'  shift, and go to state 166
+    $default  reduce using rule 53 (statementList)
 
 
 State 137
 
-   52 statementList: statement ';' .
+   84 arithmeticExpression: expression ADD . expression
 
-    $default  reduce using rule 52 (statementList)
+    NUM     shift, and go to state 89
+    VAR     shift, and go to state 127
+    STRING  shift, and go to state 91
+    '('     shift, and go to state 92
+
+    expression            go to state 168
+    arithmeticExpression  go to state 106
+    logicalExpression     go to state 107
+    constant              go to state 108
+    variable              go to state 109
+    field                 go to state 110
 
 
 State 138
 
-   83 arithmeticExpression: expression ADD . expression
+   85 arithmeticExpression: expression SUB . expression
 
-    NUM     shift, and go to state 91
-    VAR     shift, and go to state 128
-    STRING  shift, and go to state 93
-    '('     shift, and go to state 94
+    NUM     shift, and go to state 89
+    VAR     shift, and go to state 127
+    STRING  shift, and go to state 91
+    '('     shift, and go to state 92
 
-    expression            go to state 167
-    arithmeticExpression  go to state 108
-    logicalExpression     go to state 109
-    constant              go to state 110
-    variable              go to state 111
-    field                 go to state 112
+    expression            go to state 169
+    arithmeticExpression  go to state 106
+    logicalExpression     go to state 107
+    constant              go to state 108
+    variable              go to state 109
+    field                 go to state 110
 
 
 State 139
 
-   84 arithmeticExpression: expression SUB . expression
+   86 arithmeticExpression: expression MUL . expression
 
-    NUM     shift, and go to state 91
-    VAR     shift, and go to state 128
-    STRING  shift, and go to state 93
-    '('     shift, and go to state 94
+    NUM     shift, and go to state 89
+    VAR     shift, and go to state 127
+    STRING  shift, and go to state 91
+    '('     shift, and go to state 92
 
-    expression            go to state 168
-    arithmeticExpression  go to state 108
-    logicalExpression     go to state 109
-    constant              go to state 110
-    variable              go to state 111
-    field                 go to state 112
+    expression            go to state 170
+    arithmeticExpression  go to state 106
+    logicalExpression     go to state 107
+    constant              go to state 108
+    variable              go to state 109
+    field                 go to state 110
 
 
 State 140
 
-   85 arithmeticExpression: expression MUL . expression
+   87 arithmeticExpression: expression DIV . expression
 
-    NUM     shift, and go to state 91
-    VAR     shift, and go to state 128
-    STRING  shift, and go to state 93
-    '('     shift, and go to state 94
+    NUM     shift, and go to state 89
+    VAR     shift, and go to state 127
+    STRING  shift, and go to state 91
+    '('     shift, and go to state 92
 
-    expression            go to state 169
-    arithmeticExpression  go to state 108
-    logicalExpression     go to state 109
-    constant              go to state 110
-    variable              go to state 111
-    field                 go to state 112
+    expression            go to state 171
+    arithmeticExpression  go to state 106
+    logicalExpression     go to state 107
+    constant              go to state 108
+    variable              go to state 109
+    field                 go to state 110
 
 
 State 141
 
-   86 arithmeticExpression: expression DIV . expression
+   66 allocStatement: expression EQUALS . ALLOC '(' ')'
+   68 assignmentStatement: expression EQUALS . expression
 
-    NUM     shift, and go to state 91
-    VAR     shift, and go to state 128
-    STRING  shift, and go to state 93
-    '('     shift, and go to state 94
+    ALLOC   shift, and go to state 172
+    NUM     shift, and go to state 89
+    VAR     shift, and go to state 127
+    STRING  shift, and go to state 91
+    '('     shift, and go to state 92
 
-    expression            go to state 170
-    arithmeticExpression  go to state 108
-    logicalExpression     go to state 109
-    constant              go to state 110
-    variable              go to state 111
-    field                 go to state 112
+    expression            go to state 173
+    arithmeticExpression  go to state 106
+    logicalExpression     go to state 107
+    constant              go to state 108
+    variable              go to state 109
+    field                 go to state 110
 
 
 State 142
 
-   65 allocStatement: expression EQUALS . ALLOC '(' ')'
-   67 assignmentStatement: expression EQUALS . expression
+   88 logicalExpression: expression SLT . expression
 
-    ALLOC   shift, and go to state 171
-    NUM     shift, and go to state 91
-    VAR     shift, and go to state 128
-    STRING  shift, and go to state 93
-    '('     shift, and go to state 94
+    NUM     shift, and go to state 89
+    VAR     shift, and go to state 127
+    STRING  shift, and go to state 91
+    '('     shift, and go to state 92
 
-    expression            go to state 172
-    arithmeticExpression  go to state 108
-    logicalExpression     go to state 109
-    constant              go to state 110
-    variable              go to state 111
-    field                 go to state 112
+    expression            go to state 174
+    arithmeticExpression  go to state 106
+    logicalExpression     go to state 107
+    constant              go to state 108
+    variable              go to state 109
+    field                 go to state 110
 
 
 State 143
 
-   87 logicalExpression: expression SLT . expression
+   89 logicalExpression: expression SGT . expression
 
-    NUM     shift, and go to state 91
-    VAR     shift, and go to state 128
-    STRING  shift, and go to state 93
-    '('     shift, and go to state 94
+    NUM     shift, and go to state 89
+    VAR     shift, and go to state 127
+    STRING  shift, and go to state 91
+    '('     shift, and go to state 92
 
-    expression            go to state 173
-    arithmeticExpression  go to state 108
-    logicalExpression     go to state 109
-    constant              go to state 110
-    variable              go to state 111
-    field                 go to state 112
+    expression            go to state 175
+    arithmeticExpression  go to state 106
+    logicalExpression     go to state 107
+    constant              go to state 108
+    variable              go to state 109
+    field                 go to state 110
 
 
 State 144
 
-   88 logicalExpression: expression SGT . expression
+   90 logicalExpression: expression LTE . expression
 
-    NUM     shift, and go to state 91
-    VAR     shift, and go to state 128
-    STRING  shift, and go to state 93
-    '('     shift, and go to state 94
+    NUM     shift, and go to state 89
+    VAR     shift, and go to state 127
+    STRING  shift, and go to state 91
+    '('     shift, and go to state 92
 
-    expression            go to state 174
-    arithmeticExpression  go to state 108
-    logicalExpression     go to state 109
-    constant              go to state 110
-    variable              go to state 111
-    field                 go to state 112
+    expression            go to state 176
+    arithmeticExpression  go to state 106
+    logicalExpression     go to state 107
+    constant              go to state 108
+    variable              go to state 109
+    field                 go to state 110
 
 
 State 145
 
-   89 logicalExpression: expression LTE . expression
+   91 logicalExpression: expression GTE . expression
 
-    NUM     shift, and go to state 91
-    VAR     shift, and go to state 128
-    STRING  shift, and go to state 93
-    '('     shift, and go to state 94
+    NUM     shift, and go to state 89
+    VAR     shift, and go to state 127
+    STRING  shift, and go to state 91
+    '('     shift, and go to state 92
 
-    expression            go to state 175
-    arithmeticExpression  go to state 108
-    logicalExpression     go to state 109
-    constant              go to state 110
-    variable              go to state 111
-    field                 go to state 112
+    expression            go to state 177
+    arithmeticExpression  go to state 106
+    logicalExpression     go to state 107
+    constant              go to state 108
+    variable              go to state 109
+    field                 go to state 110
 
 
 State 146
 
-   90 logicalExpression: expression GTE . expression
+   92 logicalExpression: expression NEQ . expression
 
-    NUM     shift, and go to state 91
-    VAR     shift, and go to state 128
-    STRING  shift, and go to state 93
-    '('     shift, and go to state 94
+    NUM     shift, and go to state 89
+    VAR     shift, and go to state 127
+    STRING  shift, and go to state 91
+    '('     shift, and go to state 92
 
-    expression            go to state 176
-    arithmeticExpression  go to state 108
-    logicalExpression     go to state 109
-    constant              go to state 110
-    variable              go to state 111
-    field                 go to state 112
+    expression            go to state 178
+    arithmeticExpression  go to state 106
+    logicalExpression     go to state 107
+    constant              go to state 108
+    variable              go to state 109
+    field                 go to state 110
 
 
 State 147
 
-   91 logicalExpression: expression NEQ . expression
+   93 logicalExpression: expression EQU . expression
 
-    NUM     shift, and go to state 91
-    VAR     shift, and go to state 128
-    STRING  shift, and go to state 93
-    '('     shift, and go to state 94
+    NUM     shift, and go to state 89
+    VAR     shift, and go to state 127
+    STRING  shift, and go to state 91
+    '('     shift, and go to state 92
 
-    expression            go to state 177
-    arithmeticExpression  go to state 108
-    logicalExpression     go to state 109
-    constant              go to state 110
-    variable              go to state 111
-    field                 go to state 112
+    expression            go to state 179
+    arithmeticExpression  go to state 106
+    logicalExpression     go to state 107
+    constant              go to state 108
+    variable              go to state 109
+    field                 go to state 110
 
 
 State 148
 
-   92 logicalExpression: expression EQU . expression
+   12 typeDefinition: VAR $@3 '{' fieldList '}' ';' .
 
-    NUM     shift, and go to state 91
-    VAR     shift, and go to state 128
-    STRING  shift, and go to state 93
-    '('     shift, and go to state 94
-
-    expression            go to state 178
-    arithmeticExpression  go to state 108
-    logicalExpression     go to state 109
-    constant              go to state 110
-    variable              go to state 111
-    field                 go to state 112
+    $default  reduce using rule 12 (typeDefinition)
 
 
 State 149
 
-   34 functionDefinition: returnType VAR '(' parameterList ')' '{' localDeclarationBlock . $@3 functionBody '}'
+   15 fieldDeclaration: fieldType VAR ';' .
 
-    $default  reduce using rule 33 ($@3)
-
-    $@3  go to state 179
+    $default  reduce using rule 15 (fieldDeclaration)
 
 
 State 150
 
-   46 localDeclaration: dataType localVariableList ';' .
+   35 functionDefinition: returnType VAR '(' parameterList ')' '{' localDeclarationBlock . $@4 functionBody '}'
 
-    $default  reduce using rule 46 (localDeclaration)
+    $default  reduce using rule 34 ($@4)
+
+    $@4  go to state 180
 
 
 State 151
 
-   47 localVariableList: localVariableList ',' . VAR
+   47 localDeclaration: dataType localVariableList ';' .
 
-    VAR  shift, and go to state 180
+    $default  reduce using rule 47 (localDeclaration)
 
 
 State 152
 
-   68 ifStatement: IF '(' expression . ')' THEN statementList ELSE statementList ENDIF
-   69            | IF '(' expression . ')' THEN statementList ENDIF
-   83 arithmeticExpression: expression . ADD expression
-   84                     | expression . SUB expression
-   85                     | expression . MUL expression
-   86                     | expression . DIV expression
-   87 logicalExpression: expression . SLT expression
-   88                  | expression . SGT expression
-   89                  | expression . LTE expression
-   90                  | expression . GTE expression
-   91                  | expression . NEQ expression
-   92                  | expression . EQU expression
+   48 localVariableList: localVariableList ',' . VAR
 
-    ADD  shift, and go to state 138
-    SUB  shift, and go to state 139
-    MUL  shift, and go to state 140
-    DIV  shift, and go to state 141
-    SLT  shift, and go to state 143
-    SGT  shift, and go to state 144
-    LTE  shift, and go to state 145
-    GTE  shift, and go to state 146
-    NEQ  shift, and go to state 147
-    EQU  shift, and go to state 148
-    ')'  shift, and go to state 181
+    VAR  shift, and go to state 181
 
 
 State 153
 
-   70 whileStatement: WHILE '(' expression . ')' DO statementList ENDWHILE
-   83 arithmeticExpression: expression . ADD expression
-   84                     | expression . SUB expression
-   85                     | expression . MUL expression
-   86                     | expression . DIV expression
-   87 logicalExpression: expression . SLT expression
-   88                  | expression . SGT expression
-   89                  | expression . LTE expression
-   90                  | expression . GTE expression
-   91                  | expression . NEQ expression
-   92                  | expression . EQU expression
+   69 ifStatement: IF '(' expression . ')' THEN statementList ELSE statementList ENDIF
+   70            | IF '(' expression . ')' THEN statementList ENDIF
+   84 arithmeticExpression: expression . ADD expression
+   85                     | expression . SUB expression
+   86                     | expression . MUL expression
+   87                     | expression . DIV expression
+   88 logicalExpression: expression . SLT expression
+   89                  | expression . SGT expression
+   90                  | expression . LTE expression
+   91                  | expression . GTE expression
+   92                  | expression . NEQ expression
+   93                  | expression . EQU expression
 
-    ADD  shift, and go to state 138
-    SUB  shift, and go to state 139
-    MUL  shift, and go to state 140
-    DIV  shift, and go to state 141
-    SLT  shift, and go to state 143
-    SGT  shift, and go to state 144
-    LTE  shift, and go to state 145
-    GTE  shift, and go to state 146
-    NEQ  shift, and go to state 147
-    EQU  shift, and go to state 148
+    ADD  shift, and go to state 137
+    SUB  shift, and go to state 138
+    MUL  shift, and go to state 139
+    DIV  shift, and go to state 140
+    SLT  shift, and go to state 142
+    SGT  shift, and go to state 143
+    LTE  shift, and go to state 144
+    GTE  shift, and go to state 145
+    NEQ  shift, and go to state 146
+    EQU  shift, and go to state 147
     ')'  shift, and go to state 182
 
 
 State 154
 
-   70 whileStatement: WHILE . '(' expression ')' DO statementList ENDWHILE
-   71               | DO statementList WHILE . '(' expression ')' ENDWHILE
+   71 whileStatement: WHILE '(' expression . ')' DO statementList ENDWHILE
+   84 arithmeticExpression: expression . ADD expression
+   85                     | expression . SUB expression
+   86                     | expression . MUL expression
+   87                     | expression . DIV expression
+   88 logicalExpression: expression . SLT expression
+   89                  | expression . SGT expression
+   90                  | expression . LTE expression
+   91                  | expression . GTE expression
+   92                  | expression . NEQ expression
+   93                  | expression . EQU expression
 
-    '('  shift, and go to state 183
+    ADD  shift, and go to state 137
+    SUB  shift, and go to state 138
+    MUL  shift, and go to state 139
+    DIV  shift, and go to state 140
+    SLT  shift, and go to state 142
+    SGT  shift, and go to state 143
+    LTE  shift, and go to state 144
+    GTE  shift, and go to state 145
+    NEQ  shift, and go to state 146
+    EQU  shift, and go to state 147
+    ')'  shift, and go to state 183
 
 
 State 155
 
-   63 inputStatement: READ '(' expression . ')'
-   83 arithmeticExpression: expression . ADD expression
-   84                     | expression . SUB expression
-   85                     | expression . MUL expression
-   86                     | expression . DIV expression
-   87 logicalExpression: expression . SLT expression
-   88                  | expression . SGT expression
-   89                  | expression . LTE expression
-   90                  | expression . GTE expression
-   91                  | expression . NEQ expression
-   92                  | expression . EQU expression
+   71 whileStatement: WHILE . '(' expression ')' DO statementList ENDWHILE
+   72               | DO statementList WHILE . '(' expression ')' ENDWHILE
 
-    ADD  shift, and go to state 138
-    SUB  shift, and go to state 139
-    MUL  shift, and go to state 140
-    DIV  shift, and go to state 141
-    SLT  shift, and go to state 143
-    SGT  shift, and go to state 144
-    LTE  shift, and go to state 145
-    GTE  shift, and go to state 146
-    NEQ  shift, and go to state 147
-    EQU  shift, and go to state 148
-    ')'  shift, and go to state 184
+    '('  shift, and go to state 184
 
 
 State 156
 
-   64 outputStatement: WRITE '(' expression . ')'
-   83 arithmeticExpression: expression . ADD expression
-   84                     | expression . SUB expression
-   85                     | expression . MUL expression
-   86                     | expression . DIV expression
-   87 logicalExpression: expression . SLT expression
-   88                  | expression . SGT expression
-   89                  | expression . LTE expression
-   90                  | expression . GTE expression
-   91                  | expression . NEQ expression
-   92                  | expression . EQU expression
+   64 inputStatement: READ '(' expression . ')'
+   84 arithmeticExpression: expression . ADD expression
+   85                     | expression . SUB expression
+   86                     | expression . MUL expression
+   87                     | expression . DIV expression
+   88 logicalExpression: expression . SLT expression
+   89                  | expression . SGT expression
+   90                  | expression . LTE expression
+   91                  | expression . GTE expression
+   92                  | expression . NEQ expression
+   93                  | expression . EQU expression
 
-    ADD  shift, and go to state 138
-    SUB  shift, and go to state 139
-    MUL  shift, and go to state 140
-    DIV  shift, and go to state 141
-    SLT  shift, and go to state 143
-    SGT  shift, and go to state 144
-    LTE  shift, and go to state 145
-    GTE  shift, and go to state 146
-    NEQ  shift, and go to state 147
-    EQU  shift, and go to state 148
+    ADD  shift, and go to state 137
+    SUB  shift, and go to state 138
+    MUL  shift, and go to state 139
+    DIV  shift, and go to state 140
+    SLT  shift, and go to state 142
+    SGT  shift, and go to state 143
+    LTE  shift, and go to state 144
+    GTE  shift, and go to state 145
+    NEQ  shift, and go to state 146
+    EQU  shift, and go to state 147
     ')'  shift, and go to state 185
 
 
 State 157
 
-   72 whileStatement: REPEAT statementList UNTIL . '(' expression ')'
+   65 outputStatement: WRITE '(' expression . ')'
+   84 arithmeticExpression: expression . ADD expression
+   85                     | expression . SUB expression
+   86                     | expression . MUL expression
+   87                     | expression . DIV expression
+   88 logicalExpression: expression . SLT expression
+   89                  | expression . SGT expression
+   90                  | expression . LTE expression
+   91                  | expression . GTE expression
+   92                  | expression . NEQ expression
+   93                  | expression . EQU expression
 
-    '('  shift, and go to state 186
+    ADD  shift, and go to state 137
+    SUB  shift, and go to state 138
+    MUL  shift, and go to state 139
+    DIV  shift, and go to state 140
+    SLT  shift, and go to state 142
+    SGT  shift, and go to state 143
+    LTE  shift, and go to state 144
+    GTE  shift, and go to state 145
+    NEQ  shift, and go to state 146
+    EQU  shift, and go to state 147
+    ')'  shift, and go to state 186
 
 
 State 158
 
-   78 expression: VAR '(' . argList ')'
+   73 whileStatement: REPEAT statementList UNTIL . '(' expression ')'
 
-    NUM     shift, and go to state 91
-    VAR     shift, and go to state 128
-    STRING  shift, and go to state 93
-    '('     shift, and go to state 94
-
-    $default  reduce using rule 102 (argList)
-
-    expression            go to state 161
-    arithmeticExpression  go to state 108
-    logicalExpression     go to state 109
-    constant              go to state 110
-    variable              go to state 111
-    field                 go to state 112
-    argList               go to state 187
+    '('  shift, and go to state 187
 
 
 State 159
 
-   66 deAllocStatement: DEALLOC '(' expression . ')'
-   83 arithmeticExpression: expression . ADD expression
-   84                     | expression . SUB expression
-   85                     | expression . MUL expression
-   86                     | expression . DIV expression
-   87 logicalExpression: expression . SLT expression
-   88                  | expression . SGT expression
-   89                  | expression . LTE expression
-   90                  | expression . GTE expression
-   91                  | expression . NEQ expression
-   92                  | expression . EQU expression
+   79 expression: VAR '(' . argList ')'
 
-    ADD  shift, and go to state 138
-    SUB  shift, and go to state 139
-    MUL  shift, and go to state 140
-    DIV  shift, and go to state 141
-    SLT  shift, and go to state 143
-    SGT  shift, and go to state 144
-    LTE  shift, and go to state 145
-    GTE  shift, and go to state 146
-    NEQ  shift, and go to state 147
-    EQU  shift, and go to state 148
-    ')'  shift, and go to state 188
+    NUM     shift, and go to state 89
+    VAR     shift, and go to state 127
+    STRING  shift, and go to state 91
+    '('     shift, and go to state 92
+
+    $default  reduce using rule 103 (argList)
+
+    expression            go to state 162
+    arithmeticExpression  go to state 106
+    logicalExpression     go to state 107
+    constant              go to state 108
+    variable              go to state 109
+    field                 go to state 110
+    argList               go to state 188
 
 
 State 160
 
-   83 arithmeticExpression: expression . ADD expression
-   84                     | expression . SUB expression
-   85                     | expression . MUL expression
-   86                     | expression . DIV expression
-   87 logicalExpression: expression . SLT expression
-   88                  | expression . SGT expression
-   89                  | expression . LTE expression
-   90                  | expression . GTE expression
-   91                  | expression . NEQ expression
-   92                  | expression . EQU expression
-   95 variable: VAR '[' expression . ']'
+   67 deAllocStatement: DEALLOC '(' expression . ')'
+   84 arithmeticExpression: expression . ADD expression
+   85                     | expression . SUB expression
+   86                     | expression . MUL expression
+   87                     | expression . DIV expression
+   88 logicalExpression: expression . SLT expression
+   89                  | expression . SGT expression
+   90                  | expression . LTE expression
+   91                  | expression . GTE expression
+   92                  | expression . NEQ expression
+   93                  | expression . EQU expression
 
-    ADD  shift, and go to state 138
-    SUB  shift, and go to state 139
-    MUL  shift, and go to state 140
-    DIV  shift, and go to state 141
-    SLT  shift, and go to state 143
-    SGT  shift, and go to state 144
-    LTE  shift, and go to state 145
-    GTE  shift, and go to state 146
-    NEQ  shift, and go to state 147
-    EQU  shift, and go to state 148
-    ']'  shift, and go to state 189
+    ADD  shift, and go to state 137
+    SUB  shift, and go to state 138
+    MUL  shift, and go to state 139
+    DIV  shift, and go to state 140
+    SLT  shift, and go to state 142
+    SGT  shift, and go to state 143
+    LTE  shift, and go to state 144
+    GTE  shift, and go to state 145
+    NEQ  shift, and go to state 146
+    EQU  shift, and go to state 147
+    ')'  shift, and go to state 189
 
 
 State 161
 
-   83 arithmeticExpression: expression . ADD expression
-   84                     | expression . SUB expression
-   85                     | expression . MUL expression
-   86                     | expression . DIV expression
-   87 logicalExpression: expression . SLT expression
-   88                  | expression . SGT expression
-   89                  | expression . LTE expression
-   90                  | expression . GTE expression
-   91                  | expression . NEQ expression
-   92                  | expression . EQU expression
-  101 argList: expression .
+   84 arithmeticExpression: expression . ADD expression
+   85                     | expression . SUB expression
+   86                     | expression . MUL expression
+   87                     | expression . DIV expression
+   88 logicalExpression: expression . SLT expression
+   89                  | expression . SGT expression
+   90                  | expression . LTE expression
+   91                  | expression . GTE expression
+   92                  | expression . NEQ expression
+   93                  | expression . EQU expression
+   96 variable: VAR '[' expression . ']'
 
-    ADD  shift, and go to state 138
-    SUB  shift, and go to state 139
-    MUL  shift, and go to state 140
-    DIV  shift, and go to state 141
-    SLT  shift, and go to state 143
-    SGT  shift, and go to state 144
-    LTE  shift, and go to state 145
-    GTE  shift, and go to state 146
-    NEQ  shift, and go to state 147
-    EQU  shift, and go to state 148
-
-    $default  reduce using rule 101 (argList)
+    ADD  shift, and go to state 137
+    SUB  shift, and go to state 138
+    MUL  shift, and go to state 139
+    DIV  shift, and go to state 140
+    SLT  shift, and go to state 142
+    SGT  shift, and go to state 143
+    LTE  shift, and go to state 144
+    GTE  shift, and go to state 145
+    NEQ  shift, and go to state 146
+    EQU  shift, and go to state 147
+    ']'  shift, and go to state 190
 
 
 State 162
 
-   75 functionCallStatement: VAR '(' argList . ')'
-   78 expression: VAR '(' argList . ')'
-  100 argList: argList . ',' expression
+   84 arithmeticExpression: expression . ADD expression
+   85                     | expression . SUB expression
+   86                     | expression . MUL expression
+   87                     | expression . DIV expression
+   88 logicalExpression: expression . SLT expression
+   89                  | expression . SGT expression
+   90                  | expression . LTE expression
+   91                  | expression . GTE expression
+   92                  | expression . NEQ expression
+   93                  | expression . EQU expression
+  102 argList: expression .
 
-    ','  shift, and go to state 190
-    ')'  shift, and go to state 191
+    ADD  shift, and go to state 137
+    SUB  shift, and go to state 138
+    MUL  shift, and go to state 139
+    DIV  shift, and go to state 140
+    SLT  shift, and go to state 142
+    SGT  shift, and go to state 143
+    LTE  shift, and go to state 144
+    GTE  shift, and go to state 145
+    NEQ  shift, and go to state 146
+    EQU  shift, and go to state 147
+
+    $default  reduce using rule 102 (argList)
 
 
 State 163
 
-   98 field: VAR . '.' field
-   99      | VAR . '.' VAR
-   99      | VAR '.' VAR .
+   76 functionCallStatement: VAR '(' argList . ')'
+   79 expression: VAR '(' argList . ')'
+  101 argList: argList . ',' expression
 
-    '.'  shift, and go to state 133
-
-    $default  reduce using rule 99 (field)
+    ','  shift, and go to state 191
+    ')'  shift, and go to state 192
 
 
 State 164
 
-   98 field: VAR '.' field .
+   99 field: VAR . '.' field
+  100      | VAR . '.' VAR
+  100      | VAR '.' VAR .
 
-    $default  reduce using rule 98 (field)
+    '.'  shift, and go to state 132
+
+    $default  reduce using rule 100 (field)
 
 
 State 165
 
-   77 expression: '(' expression ')' .
+   99 field: VAR '.' field .
 
-    $default  reduce using rule 77 (expression)
+    $default  reduce using rule 99 (field)
 
 
 State 166
 
-   51 statementList: statementList statement ';' .
+   78 expression: '(' expression ')' .
 
-    $default  reduce using rule 51 (statementList)
+    $default  reduce using rule 78 (expression)
 
 
 State 167
 
-   83 arithmeticExpression: expression . ADD expression
-   83                     | expression ADD expression .
-   84                     | expression . SUB expression
-   85                     | expression . MUL expression
-   86                     | expression . DIV expression
-   87 logicalExpression: expression . SLT expression
-   88                  | expression . SGT expression
-   89                  | expression . LTE expression
-   90                  | expression . GTE expression
-   91                  | expression . NEQ expression
-   92                  | expression . EQU expression
+   52 statementList: statementList statement ';' .
 
-    MUL  shift, and go to state 140
-    DIV  shift, and go to state 141
-
-    $default  reduce using rule 83 (arithmeticExpression)
+    $default  reduce using rule 52 (statementList)
 
 
 State 168
 
-   83 arithmeticExpression: expression . ADD expression
-   84                     | expression . SUB expression
-   84                     | expression SUB expression .
-   85                     | expression . MUL expression
-   86                     | expression . DIV expression
-   87 logicalExpression: expression . SLT expression
-   88                  | expression . SGT expression
-   89                  | expression . LTE expression
-   90                  | expression . GTE expression
-   91                  | expression . NEQ expression
-   92                  | expression . EQU expression
+   84 arithmeticExpression: expression . ADD expression
+   84                     | expression ADD expression .
+   85                     | expression . SUB expression
+   86                     | expression . MUL expression
+   87                     | expression . DIV expression
+   88 logicalExpression: expression . SLT expression
+   89                  | expression . SGT expression
+   90                  | expression . LTE expression
+   91                  | expression . GTE expression
+   92                  | expression . NEQ expression
+   93                  | expression . EQU expression
 
-    MUL  shift, and go to state 140
-    DIV  shift, and go to state 141
+    MUL  shift, and go to state 139
+    DIV  shift, and go to state 140
 
     $default  reduce using rule 84 (arithmeticExpression)
 
 
 State 169
 
-   83 arithmeticExpression: expression . ADD expression
-   84                     | expression . SUB expression
-   85                     | expression . MUL expression
-   85                     | expression MUL expression .
-   86                     | expression . DIV expression
-   87 logicalExpression: expression . SLT expression
-   88                  | expression . SGT expression
-   89                  | expression . LTE expression
-   90                  | expression . GTE expression
-   91                  | expression . NEQ expression
-   92                  | expression . EQU expression
+   84 arithmeticExpression: expression . ADD expression
+   85                     | expression . SUB expression
+   85                     | expression SUB expression .
+   86                     | expression . MUL expression
+   87                     | expression . DIV expression
+   88 logicalExpression: expression . SLT expression
+   89                  | expression . SGT expression
+   90                  | expression . LTE expression
+   91                  | expression . GTE expression
+   92                  | expression . NEQ expression
+   93                  | expression . EQU expression
+
+    MUL  shift, and go to state 139
+    DIV  shift, and go to state 140
 
     $default  reduce using rule 85 (arithmeticExpression)
 
 
 State 170
 
-   83 arithmeticExpression: expression . ADD expression
-   84                     | expression . SUB expression
-   85                     | expression . MUL expression
-   86                     | expression . DIV expression
-   86                     | expression DIV expression .
-   87 logicalExpression: expression . SLT expression
-   88                  | expression . SGT expression
-   89                  | expression . LTE expression
-   90                  | expression . GTE expression
-   91                  | expression . NEQ expression
-   92                  | expression . EQU expression
+   84 arithmeticExpression: expression . ADD expression
+   85                     | expression . SUB expression
+   86                     | expression . MUL expression
+   86                     | expression MUL expression .
+   87                     | expression . DIV expression
+   88 logicalExpression: expression . SLT expression
+   89                  | expression . SGT expression
+   90                  | expression . LTE expression
+   91                  | expression . GTE expression
+   92                  | expression . NEQ expression
+   93                  | expression . EQU expression
 
     $default  reduce using rule 86 (arithmeticExpression)
 
 
 State 171
 
-   65 allocStatement: expression EQUALS ALLOC . '(' ')'
+   84 arithmeticExpression: expression . ADD expression
+   85                     | expression . SUB expression
+   86                     | expression . MUL expression
+   87                     | expression . DIV expression
+   87                     | expression DIV expression .
+   88 logicalExpression: expression . SLT expression
+   89                  | expression . SGT expression
+   90                  | expression . LTE expression
+   91                  | expression . GTE expression
+   92                  | expression . NEQ expression
+   93                  | expression . EQU expression
 
-    '('  shift, and go to state 192
+    $default  reduce using rule 87 (arithmeticExpression)
 
 
 State 172
 
-   67 assignmentStatement: expression EQUALS expression .
-   83 arithmeticExpression: expression . ADD expression
-   84                     | expression . SUB expression
-   85                     | expression . MUL expression
-   86                     | expression . DIV expression
-   87 logicalExpression: expression . SLT expression
-   88                  | expression . SGT expression
-   89                  | expression . LTE expression
-   90                  | expression . GTE expression
-   91                  | expression . NEQ expression
-   92                  | expression . EQU expression
+   66 allocStatement: expression EQUALS ALLOC . '(' ')'
 
-    ADD  shift, and go to state 138
-    SUB  shift, and go to state 139
-    MUL  shift, and go to state 140
-    DIV  shift, and go to state 141
-    SLT  shift, and go to state 143
-    SGT  shift, and go to state 144
-    LTE  shift, and go to state 145
-    GTE  shift, and go to state 146
-    NEQ  shift, and go to state 147
-    EQU  shift, and go to state 148
-
-    $default  reduce using rule 67 (assignmentStatement)
+    '('  shift, and go to state 193
 
 
 State 173
 
-   83 arithmeticExpression: expression . ADD expression
-   84                     | expression . SUB expression
-   85                     | expression . MUL expression
-   86                     | expression . DIV expression
-   87 logicalExpression: expression . SLT expression
-   87                  | expression SLT expression .
-   88                  | expression . SGT expression
-   89                  | expression . LTE expression
-   90                  | expression . GTE expression
-   91                  | expression . NEQ expression
-   92                  | expression . EQU expression
+   68 assignmentStatement: expression EQUALS expression .
+   84 arithmeticExpression: expression . ADD expression
+   85                     | expression . SUB expression
+   86                     | expression . MUL expression
+   87                     | expression . DIV expression
+   88 logicalExpression: expression . SLT expression
+   89                  | expression . SGT expression
+   90                  | expression . LTE expression
+   91                  | expression . GTE expression
+   92                  | expression . NEQ expression
+   93                  | expression . EQU expression
 
-    ADD  shift, and go to state 138
-    SUB  shift, and go to state 139
-    MUL  shift, and go to state 140
-    DIV  shift, and go to state 141
+    ADD  shift, and go to state 137
+    SUB  shift, and go to state 138
+    MUL  shift, and go to state 139
+    DIV  shift, and go to state 140
+    SLT  shift, and go to state 142
+    SGT  shift, and go to state 143
+    LTE  shift, and go to state 144
+    GTE  shift, and go to state 145
+    NEQ  shift, and go to state 146
+    EQU  shift, and go to state 147
 
-    SLT  error (nonassociative)
-    SGT  error (nonassociative)
-    LTE  error (nonassociative)
-    GTE  error (nonassociative)
-    NEQ  error (nonassociative)
-    EQU  error (nonassociative)
-
-    $default  reduce using rule 87 (logicalExpression)
+    $default  reduce using rule 68 (assignmentStatement)
 
 
 State 174
 
-   83 arithmeticExpression: expression . ADD expression
-   84                     | expression . SUB expression
-   85                     | expression . MUL expression
-   86                     | expression . DIV expression
-   87 logicalExpression: expression . SLT expression
-   88                  | expression . SGT expression
-   88                  | expression SGT expression .
-   89                  | expression . LTE expression
-   90                  | expression . GTE expression
-   91                  | expression . NEQ expression
-   92                  | expression . EQU expression
+   84 arithmeticExpression: expression . ADD expression
+   85                     | expression . SUB expression
+   86                     | expression . MUL expression
+   87                     | expression . DIV expression
+   88 logicalExpression: expression . SLT expression
+   88                  | expression SLT expression .
+   89                  | expression . SGT expression
+   90                  | expression . LTE expression
+   91                  | expression . GTE expression
+   92                  | expression . NEQ expression
+   93                  | expression . EQU expression
 
-    ADD  shift, and go to state 138
-    SUB  shift, and go to state 139
-    MUL  shift, and go to state 140
-    DIV  shift, and go to state 141
+    ADD  shift, and go to state 137
+    SUB  shift, and go to state 138
+    MUL  shift, and go to state 139
+    DIV  shift, and go to state 140
 
     SLT  error (nonassociative)
     SGT  error (nonassociative)
@@ -2499,22 +2484,22 @@ State 174
 
 State 175
 
-   83 arithmeticExpression: expression . ADD expression
-   84                     | expression . SUB expression
-   85                     | expression . MUL expression
-   86                     | expression . DIV expression
-   87 logicalExpression: expression . SLT expression
-   88                  | expression . SGT expression
-   89                  | expression . LTE expression
-   89                  | expression LTE expression .
-   90                  | expression . GTE expression
-   91                  | expression . NEQ expression
-   92                  | expression . EQU expression
+   84 arithmeticExpression: expression . ADD expression
+   85                     | expression . SUB expression
+   86                     | expression . MUL expression
+   87                     | expression . DIV expression
+   88 logicalExpression: expression . SLT expression
+   89                  | expression . SGT expression
+   89                  | expression SGT expression .
+   90                  | expression . LTE expression
+   91                  | expression . GTE expression
+   92                  | expression . NEQ expression
+   93                  | expression . EQU expression
 
-    ADD  shift, and go to state 138
-    SUB  shift, and go to state 139
-    MUL  shift, and go to state 140
-    DIV  shift, and go to state 141
+    ADD  shift, and go to state 137
+    SUB  shift, and go to state 138
+    MUL  shift, and go to state 139
+    DIV  shift, and go to state 140
 
     SLT  error (nonassociative)
     SGT  error (nonassociative)
@@ -2528,22 +2513,22 @@ State 175
 
 State 176
 
-   83 arithmeticExpression: expression . ADD expression
-   84                     | expression . SUB expression
-   85                     | expression . MUL expression
-   86                     | expression . DIV expression
-   87 logicalExpression: expression . SLT expression
-   88                  | expression . SGT expression
-   89                  | expression . LTE expression
-   90                  | expression . GTE expression
-   90                  | expression GTE expression .
-   91                  | expression . NEQ expression
-   92                  | expression . EQU expression
+   84 arithmeticExpression: expression . ADD expression
+   85                     | expression . SUB expression
+   86                     | expression . MUL expression
+   87                     | expression . DIV expression
+   88 logicalExpression: expression . SLT expression
+   89                  | expression . SGT expression
+   90                  | expression . LTE expression
+   90                  | expression LTE expression .
+   91                  | expression . GTE expression
+   92                  | expression . NEQ expression
+   93                  | expression . EQU expression
 
-    ADD  shift, and go to state 138
-    SUB  shift, and go to state 139
-    MUL  shift, and go to state 140
-    DIV  shift, and go to state 141
+    ADD  shift, and go to state 137
+    SUB  shift, and go to state 138
+    MUL  shift, and go to state 139
+    DIV  shift, and go to state 140
 
     SLT  error (nonassociative)
     SGT  error (nonassociative)
@@ -2557,22 +2542,22 @@ State 176
 
 State 177
 
-   83 arithmeticExpression: expression . ADD expression
-   84                     | expression . SUB expression
-   85                     | expression . MUL expression
-   86                     | expression . DIV expression
-   87 logicalExpression: expression . SLT expression
-   88                  | expression . SGT expression
-   89                  | expression . LTE expression
-   90                  | expression . GTE expression
-   91                  | expression . NEQ expression
-   91                  | expression NEQ expression .
-   92                  | expression . EQU expression
+   84 arithmeticExpression: expression . ADD expression
+   85                     | expression . SUB expression
+   86                     | expression . MUL expression
+   87                     | expression . DIV expression
+   88 logicalExpression: expression . SLT expression
+   89                  | expression . SGT expression
+   90                  | expression . LTE expression
+   91                  | expression . GTE expression
+   91                  | expression GTE expression .
+   92                  | expression . NEQ expression
+   93                  | expression . EQU expression
 
-    ADD  shift, and go to state 138
-    SUB  shift, and go to state 139
-    MUL  shift, and go to state 140
-    DIV  shift, and go to state 141
+    ADD  shift, and go to state 137
+    SUB  shift, and go to state 138
+    MUL  shift, and go to state 139
+    DIV  shift, and go to state 140
 
     SLT  error (nonassociative)
     SGT  error (nonassociative)
@@ -2586,22 +2571,22 @@ State 177
 
 State 178
 
-   83 arithmeticExpression: expression . ADD expression
-   84                     | expression . SUB expression
-   85                     | expression . MUL expression
-   86                     | expression . DIV expression
-   87 logicalExpression: expression . SLT expression
-   88                  | expression . SGT expression
-   89                  | expression . LTE expression
-   90                  | expression . GTE expression
-   91                  | expression . NEQ expression
-   92                  | expression . EQU expression
-   92                  | expression EQU expression .
+   84 arithmeticExpression: expression . ADD expression
+   85                     | expression . SUB expression
+   86                     | expression . MUL expression
+   87                     | expression . DIV expression
+   88 logicalExpression: expression . SLT expression
+   89                  | expression . SGT expression
+   90                  | expression . LTE expression
+   91                  | expression . GTE expression
+   92                  | expression . NEQ expression
+   92                  | expression NEQ expression .
+   93                  | expression . EQU expression
 
-    ADD  shift, and go to state 138
-    SUB  shift, and go to state 139
-    MUL  shift, and go to state 140
-    DIV  shift, and go to state 141
+    ADD  shift, and go to state 137
+    SUB  shift, and go to state 138
+    MUL  shift, and go to state 139
+    DIV  shift, and go to state 140
 
     SLT  error (nonassociative)
     SGT  error (nonassociative)
@@ -2615,602 +2600,631 @@ State 178
 
 State 179
 
-   34 functionDefinition: returnType VAR '(' parameterList ')' '{' localDeclarationBlock $@3 . functionBody '}'
+   84 arithmeticExpression: expression . ADD expression
+   85                     | expression . SUB expression
+   86                     | expression . MUL expression
+   87                     | expression . DIV expression
+   88 logicalExpression: expression . SLT expression
+   89                  | expression . SGT expression
+   90                  | expression . LTE expression
+   91                  | expression . GTE expression
+   92                  | expression . NEQ expression
+   93                  | expression . EQU expression
+   93                  | expression EQU expression .
 
-    IF        shift, and go to state 81
-    WHILE     shift, and go to state 82
-    DO        shift, and go to state 83
-    READ      shift, and go to state 84
-    WRITE     shift, and go to state 85
-    CONTINUE  shift, and go to state 86
-    BREAK     shift, and go to state 87
-    REPEAT    shift, and go to state 88
-    RETURN    shift, and go to state 89
-    DEALLOC   shift, and go to state 90
-    NUM       shift, and go to state 91
-    VAR       shift, and go to state 92
-    STRING    shift, and go to state 93
-    '('       shift, and go to state 94
+    ADD  shift, and go to state 137
+    SUB  shift, and go to state 138
+    MUL  shift, and go to state 139
+    DIV  shift, and go to state 140
 
-    functionBody           go to state 193
-    statementList          go to state 194
-    statement              go to state 96
-    inputStatement         go to state 97
-    outputStatement        go to state 98
-    allocStatement         go to state 99
-    deAllocStatement       go to state 100
-    assignmentStatement    go to state 101
-    ifStatement            go to state 102
-    whileStatement         go to state 103
-    jumpStatement          go to state 104
-    functionCallStatement  go to state 105
-    returnStatement        go to state 106
-    expression             go to state 107
-    arithmeticExpression   go to state 108
-    logicalExpression      go to state 109
-    constant               go to state 110
-    variable               go to state 111
-    field                  go to state 112
+    SLT  error (nonassociative)
+    SGT  error (nonassociative)
+    LTE  error (nonassociative)
+    GTE  error (nonassociative)
+    NEQ  error (nonassociative)
+    EQU  error (nonassociative)
+
+    $default  reduce using rule 93 (logicalExpression)
 
 
 State 180
 
-   47 localVariableList: localVariableList ',' VAR .
+   35 functionDefinition: returnType VAR '(' parameterList ')' '{' localDeclarationBlock $@4 . functionBody '}'
 
-    $default  reduce using rule 47 (localVariableList)
+    IF        shift, and go to state 79
+    WHILE     shift, and go to state 80
+    DO        shift, and go to state 81
+    READ      shift, and go to state 82
+    WRITE     shift, and go to state 83
+    CONTINUE  shift, and go to state 84
+    BREAK     shift, and go to state 85
+    REPEAT    shift, and go to state 86
+    RETURN    shift, and go to state 87
+    DEALLOC   shift, and go to state 88
+    NUM       shift, and go to state 89
+    VAR       shift, and go to state 90
+    STRING    shift, and go to state 91
+    '('       shift, and go to state 92
+
+    functionBody           go to state 194
+    statementList          go to state 195
+    statement              go to state 94
+    inputStatement         go to state 95
+    outputStatement        go to state 96
+    allocStatement         go to state 97
+    deAllocStatement       go to state 98
+    assignmentStatement    go to state 99
+    ifStatement            go to state 100
+    whileStatement         go to state 101
+    jumpStatement          go to state 102
+    functionCallStatement  go to state 103
+    returnStatement        go to state 104
+    expression             go to state 105
+    arithmeticExpression   go to state 106
+    logicalExpression      go to state 107
+    constant               go to state 108
+    variable               go to state 109
+    field                  go to state 110
 
 
 State 181
 
-   68 ifStatement: IF '(' expression ')' . THEN statementList ELSE statementList ENDIF
-   69            | IF '(' expression ')' . THEN statementList ENDIF
+   48 localVariableList: localVariableList ',' VAR .
 
-    THEN  shift, and go to state 195
+    $default  reduce using rule 48 (localVariableList)
 
 
 State 182
 
-   70 whileStatement: WHILE '(' expression ')' . DO statementList ENDWHILE
+   69 ifStatement: IF '(' expression ')' . THEN statementList ELSE statementList ENDIF
+   70            | IF '(' expression ')' . THEN statementList ENDIF
 
-    DO  shift, and go to state 196
+    THEN  shift, and go to state 196
 
 
 State 183
 
-   70 whileStatement: WHILE '(' . expression ')' DO statementList ENDWHILE
-   71               | DO statementList WHILE '(' . expression ')' ENDWHILE
+   71 whileStatement: WHILE '(' expression ')' . DO statementList ENDWHILE
 
-    NUM     shift, and go to state 91
-    VAR     shift, and go to state 128
-    STRING  shift, and go to state 93
-    '('     shift, and go to state 94
-
-    expression            go to state 197
-    arithmeticExpression  go to state 108
-    logicalExpression     go to state 109
-    constant              go to state 110
-    variable              go to state 111
-    field                 go to state 112
+    DO  shift, and go to state 197
 
 
 State 184
 
-   63 inputStatement: READ '(' expression ')' .
+   71 whileStatement: WHILE '(' . expression ')' DO statementList ENDWHILE
+   72               | DO statementList WHILE '(' . expression ')' ENDWHILE
 
-    $default  reduce using rule 63 (inputStatement)
+    NUM     shift, and go to state 89
+    VAR     shift, and go to state 127
+    STRING  shift, and go to state 91
+    '('     shift, and go to state 92
+
+    expression            go to state 198
+    arithmeticExpression  go to state 106
+    logicalExpression     go to state 107
+    constant              go to state 108
+    variable              go to state 109
+    field                 go to state 110
 
 
 State 185
 
-   64 outputStatement: WRITE '(' expression ')' .
+   64 inputStatement: READ '(' expression ')' .
 
-    $default  reduce using rule 64 (outputStatement)
+    $default  reduce using rule 64 (inputStatement)
 
 
 State 186
 
-   72 whileStatement: REPEAT statementList UNTIL '(' . expression ')'
+   65 outputStatement: WRITE '(' expression ')' .
 
-    NUM     shift, and go to state 91
-    VAR     shift, and go to state 128
-    STRING  shift, and go to state 93
-    '('     shift, and go to state 94
-
-    expression            go to state 198
-    arithmeticExpression  go to state 108
-    logicalExpression     go to state 109
-    constant              go to state 110
-    variable              go to state 111
-    field                 go to state 112
+    $default  reduce using rule 65 (outputStatement)
 
 
 State 187
 
-   78 expression: VAR '(' argList . ')'
-  100 argList: argList . ',' expression
+   73 whileStatement: REPEAT statementList UNTIL '(' . expression ')'
 
-    ','  shift, and go to state 190
-    ')'  shift, and go to state 199
+    NUM     shift, and go to state 89
+    VAR     shift, and go to state 127
+    STRING  shift, and go to state 91
+    '('     shift, and go to state 92
+
+    expression            go to state 199
+    arithmeticExpression  go to state 106
+    logicalExpression     go to state 107
+    constant              go to state 108
+    variable              go to state 109
+    field                 go to state 110
 
 
 State 188
 
-   66 deAllocStatement: DEALLOC '(' expression ')' .
+   79 expression: VAR '(' argList . ')'
+  101 argList: argList . ',' expression
 
-    $default  reduce using rule 66 (deAllocStatement)
+    ','  shift, and go to state 191
+    ')'  shift, and go to state 200
 
 
 State 189
 
-   95 variable: VAR '[' expression ']' .
+   67 deAllocStatement: DEALLOC '(' expression ')' .
 
-    $default  reduce using rule 95 (variable)
+    $default  reduce using rule 67 (deAllocStatement)
 
 
 State 190
 
-  100 argList: argList ',' . expression
+   96 variable: VAR '[' expression ']' .
 
-    NUM     shift, and go to state 91
-    VAR     shift, and go to state 128
-    STRING  shift, and go to state 93
-    '('     shift, and go to state 94
-
-    expression            go to state 200
-    arithmeticExpression  go to state 108
-    logicalExpression     go to state 109
-    constant              go to state 110
-    variable              go to state 111
-    field                 go to state 112
+    $default  reduce using rule 96 (variable)
 
 
 State 191
 
-   75 functionCallStatement: VAR '(' argList ')' .
-   78 expression: VAR '(' argList ')' .
+  101 argList: argList ',' . expression
 
-    ';'       reduce using rule 75 (functionCallStatement)
-    $default  reduce using rule 78 (expression)
+    NUM     shift, and go to state 89
+    VAR     shift, and go to state 127
+    STRING  shift, and go to state 91
+    '('     shift, and go to state 92
+
+    expression            go to state 201
+    arithmeticExpression  go to state 106
+    logicalExpression     go to state 107
+    constant              go to state 108
+    variable              go to state 109
+    field                 go to state 110
 
 
 State 192
 
-   65 allocStatement: expression EQUALS ALLOC '(' . ')'
+   76 functionCallStatement: VAR '(' argList ')' .
+   79 expression: VAR '(' argList ')' .
 
-    ')'  shift, and go to state 201
+    ';'       reduce using rule 76 (functionCallStatement)
+    $default  reduce using rule 79 (expression)
 
 
 State 193
 
-   34 functionDefinition: returnType VAR '(' parameterList ')' '{' localDeclarationBlock $@3 functionBody . '}'
+   66 allocStatement: expression EQUALS ALLOC '(' . ')'
 
-    '}'  shift, and go to state 202
+    ')'  shift, and go to state 202
 
 
 State 194
 
-   49 functionBody: statementList .
-   51 statementList: statementList . statement ';'
+   35 functionDefinition: returnType VAR '(' parameterList ')' '{' localDeclarationBlock $@4 functionBody . '}'
 
-    IF        shift, and go to state 81
-    WHILE     shift, and go to state 82
-    DO        shift, and go to state 83
-    READ      shift, and go to state 84
-    WRITE     shift, and go to state 85
-    CONTINUE  shift, and go to state 86
-    BREAK     shift, and go to state 87
-    REPEAT    shift, and go to state 88
-    RETURN    shift, and go to state 89
-    DEALLOC   shift, and go to state 90
-    NUM       shift, and go to state 91
-    VAR       shift, and go to state 92
-    STRING    shift, and go to state 93
-    '('       shift, and go to state 94
-
-    $default  reduce using rule 49 (functionBody)
-
-    statement              go to state 136
-    inputStatement         go to state 97
-    outputStatement        go to state 98
-    allocStatement         go to state 99
-    deAllocStatement       go to state 100
-    assignmentStatement    go to state 101
-    ifStatement            go to state 102
-    whileStatement         go to state 103
-    jumpStatement          go to state 104
-    functionCallStatement  go to state 105
-    returnStatement        go to state 106
-    expression             go to state 107
-    arithmeticExpression   go to state 108
-    logicalExpression      go to state 109
-    constant               go to state 110
-    variable               go to state 111
-    field                  go to state 112
+    '}'  shift, and go to state 203
 
 
 State 195
 
-   68 ifStatement: IF '(' expression ')' THEN . statementList ELSE statementList ENDIF
-   69            | IF '(' expression ')' THEN . statementList ENDIF
+   50 functionBody: statementList .
+   52 statementList: statementList . statement ';'
 
-    IF        shift, and go to state 81
-    WHILE     shift, and go to state 82
-    DO        shift, and go to state 83
-    READ      shift, and go to state 84
-    WRITE     shift, and go to state 85
-    CONTINUE  shift, and go to state 86
-    BREAK     shift, and go to state 87
-    REPEAT    shift, and go to state 88
-    RETURN    shift, and go to state 89
-    DEALLOC   shift, and go to state 90
-    NUM       shift, and go to state 91
-    VAR       shift, and go to state 92
-    STRING    shift, and go to state 93
-    '('       shift, and go to state 94
+    IF        shift, and go to state 79
+    WHILE     shift, and go to state 80
+    DO        shift, and go to state 81
+    READ      shift, and go to state 82
+    WRITE     shift, and go to state 83
+    CONTINUE  shift, and go to state 84
+    BREAK     shift, and go to state 85
+    REPEAT    shift, and go to state 86
+    RETURN    shift, and go to state 87
+    DEALLOC   shift, and go to state 88
+    NUM       shift, and go to state 89
+    VAR       shift, and go to state 90
+    STRING    shift, and go to state 91
+    '('       shift, and go to state 92
 
-    statementList          go to state 203
-    statement              go to state 96
-    inputStatement         go to state 97
-    outputStatement        go to state 98
-    allocStatement         go to state 99
-    deAllocStatement       go to state 100
-    assignmentStatement    go to state 101
-    ifStatement            go to state 102
-    whileStatement         go to state 103
-    jumpStatement          go to state 104
-    functionCallStatement  go to state 105
-    returnStatement        go to state 106
-    expression             go to state 107
-    arithmeticExpression   go to state 108
-    logicalExpression      go to state 109
-    constant               go to state 110
-    variable               go to state 111
-    field                  go to state 112
+    $default  reduce using rule 50 (functionBody)
+
+    statement              go to state 135
+    inputStatement         go to state 95
+    outputStatement        go to state 96
+    allocStatement         go to state 97
+    deAllocStatement       go to state 98
+    assignmentStatement    go to state 99
+    ifStatement            go to state 100
+    whileStatement         go to state 101
+    jumpStatement          go to state 102
+    functionCallStatement  go to state 103
+    returnStatement        go to state 104
+    expression             go to state 105
+    arithmeticExpression   go to state 106
+    logicalExpression      go to state 107
+    constant               go to state 108
+    variable               go to state 109
+    field                  go to state 110
 
 
 State 196
 
-   70 whileStatement: WHILE '(' expression ')' DO . statementList ENDWHILE
+   69 ifStatement: IF '(' expression ')' THEN . statementList ELSE statementList ENDIF
+   70            | IF '(' expression ')' THEN . statementList ENDIF
 
-    IF        shift, and go to state 81
-    WHILE     shift, and go to state 82
-    DO        shift, and go to state 83
-    READ      shift, and go to state 84
-    WRITE     shift, and go to state 85
-    CONTINUE  shift, and go to state 86
-    BREAK     shift, and go to state 87
-    REPEAT    shift, and go to state 88
-    RETURN    shift, and go to state 89
-    DEALLOC   shift, and go to state 90
-    NUM       shift, and go to state 91
-    VAR       shift, and go to state 92
-    STRING    shift, and go to state 93
-    '('       shift, and go to state 94
+    IF        shift, and go to state 79
+    WHILE     shift, and go to state 80
+    DO        shift, and go to state 81
+    READ      shift, and go to state 82
+    WRITE     shift, and go to state 83
+    CONTINUE  shift, and go to state 84
+    BREAK     shift, and go to state 85
+    REPEAT    shift, and go to state 86
+    RETURN    shift, and go to state 87
+    DEALLOC   shift, and go to state 88
+    NUM       shift, and go to state 89
+    VAR       shift, and go to state 90
+    STRING    shift, and go to state 91
+    '('       shift, and go to state 92
 
     statementList          go to state 204
-    statement              go to state 96
-    inputStatement         go to state 97
-    outputStatement        go to state 98
-    allocStatement         go to state 99
-    deAllocStatement       go to state 100
-    assignmentStatement    go to state 101
-    ifStatement            go to state 102
-    whileStatement         go to state 103
-    jumpStatement          go to state 104
-    functionCallStatement  go to state 105
-    returnStatement        go to state 106
-    expression             go to state 107
-    arithmeticExpression   go to state 108
-    logicalExpression      go to state 109
-    constant               go to state 110
-    variable               go to state 111
-    field                  go to state 112
+    statement              go to state 94
+    inputStatement         go to state 95
+    outputStatement        go to state 96
+    allocStatement         go to state 97
+    deAllocStatement       go to state 98
+    assignmentStatement    go to state 99
+    ifStatement            go to state 100
+    whileStatement         go to state 101
+    jumpStatement          go to state 102
+    functionCallStatement  go to state 103
+    returnStatement        go to state 104
+    expression             go to state 105
+    arithmeticExpression   go to state 106
+    logicalExpression      go to state 107
+    constant               go to state 108
+    variable               go to state 109
+    field                  go to state 110
 
 
 State 197
 
-   70 whileStatement: WHILE '(' expression . ')' DO statementList ENDWHILE
-   71               | DO statementList WHILE '(' expression . ')' ENDWHILE
-   83 arithmeticExpression: expression . ADD expression
-   84                     | expression . SUB expression
-   85                     | expression . MUL expression
-   86                     | expression . DIV expression
-   87 logicalExpression: expression . SLT expression
-   88                  | expression . SGT expression
-   89                  | expression . LTE expression
-   90                  | expression . GTE expression
-   91                  | expression . NEQ expression
-   92                  | expression . EQU expression
+   71 whileStatement: WHILE '(' expression ')' DO . statementList ENDWHILE
 
-    ADD  shift, and go to state 138
-    SUB  shift, and go to state 139
-    MUL  shift, and go to state 140
-    DIV  shift, and go to state 141
-    SLT  shift, and go to state 143
-    SGT  shift, and go to state 144
-    LTE  shift, and go to state 145
-    GTE  shift, and go to state 146
-    NEQ  shift, and go to state 147
-    EQU  shift, and go to state 148
-    ')'  shift, and go to state 205
+    IF        shift, and go to state 79
+    WHILE     shift, and go to state 80
+    DO        shift, and go to state 81
+    READ      shift, and go to state 82
+    WRITE     shift, and go to state 83
+    CONTINUE  shift, and go to state 84
+    BREAK     shift, and go to state 85
+    REPEAT    shift, and go to state 86
+    RETURN    shift, and go to state 87
+    DEALLOC   shift, and go to state 88
+    NUM       shift, and go to state 89
+    VAR       shift, and go to state 90
+    STRING    shift, and go to state 91
+    '('       shift, and go to state 92
+
+    statementList          go to state 205
+    statement              go to state 94
+    inputStatement         go to state 95
+    outputStatement        go to state 96
+    allocStatement         go to state 97
+    deAllocStatement       go to state 98
+    assignmentStatement    go to state 99
+    ifStatement            go to state 100
+    whileStatement         go to state 101
+    jumpStatement          go to state 102
+    functionCallStatement  go to state 103
+    returnStatement        go to state 104
+    expression             go to state 105
+    arithmeticExpression   go to state 106
+    logicalExpression      go to state 107
+    constant               go to state 108
+    variable               go to state 109
+    field                  go to state 110
 
 
 State 198
 
-   72 whileStatement: REPEAT statementList UNTIL '(' expression . ')'
-   83 arithmeticExpression: expression . ADD expression
-   84                     | expression . SUB expression
-   85                     | expression . MUL expression
-   86                     | expression . DIV expression
-   87 logicalExpression: expression . SLT expression
-   88                  | expression . SGT expression
-   89                  | expression . LTE expression
-   90                  | expression . GTE expression
-   91                  | expression . NEQ expression
-   92                  | expression . EQU expression
+   71 whileStatement: WHILE '(' expression . ')' DO statementList ENDWHILE
+   72               | DO statementList WHILE '(' expression . ')' ENDWHILE
+   84 arithmeticExpression: expression . ADD expression
+   85                     | expression . SUB expression
+   86                     | expression . MUL expression
+   87                     | expression . DIV expression
+   88 logicalExpression: expression . SLT expression
+   89                  | expression . SGT expression
+   90                  | expression . LTE expression
+   91                  | expression . GTE expression
+   92                  | expression . NEQ expression
+   93                  | expression . EQU expression
 
-    ADD  shift, and go to state 138
-    SUB  shift, and go to state 139
-    MUL  shift, and go to state 140
-    DIV  shift, and go to state 141
-    SLT  shift, and go to state 143
-    SGT  shift, and go to state 144
-    LTE  shift, and go to state 145
-    GTE  shift, and go to state 146
-    NEQ  shift, and go to state 147
-    EQU  shift, and go to state 148
+    ADD  shift, and go to state 137
+    SUB  shift, and go to state 138
+    MUL  shift, and go to state 139
+    DIV  shift, and go to state 140
+    SLT  shift, and go to state 142
+    SGT  shift, and go to state 143
+    LTE  shift, and go to state 144
+    GTE  shift, and go to state 145
+    NEQ  shift, and go to state 146
+    EQU  shift, and go to state 147
     ')'  shift, and go to state 206
 
 
 State 199
 
-   78 expression: VAR '(' argList ')' .
+   73 whileStatement: REPEAT statementList UNTIL '(' expression . ')'
+   84 arithmeticExpression: expression . ADD expression
+   85                     | expression . SUB expression
+   86                     | expression . MUL expression
+   87                     | expression . DIV expression
+   88 logicalExpression: expression . SLT expression
+   89                  | expression . SGT expression
+   90                  | expression . LTE expression
+   91                  | expression . GTE expression
+   92                  | expression . NEQ expression
+   93                  | expression . EQU expression
 
-    $default  reduce using rule 78 (expression)
+    ADD  shift, and go to state 137
+    SUB  shift, and go to state 138
+    MUL  shift, and go to state 139
+    DIV  shift, and go to state 140
+    SLT  shift, and go to state 142
+    SGT  shift, and go to state 143
+    LTE  shift, and go to state 144
+    GTE  shift, and go to state 145
+    NEQ  shift, and go to state 146
+    EQU  shift, and go to state 147
+    ')'  shift, and go to state 207
 
 
 State 200
 
-   83 arithmeticExpression: expression . ADD expression
-   84                     | expression . SUB expression
-   85                     | expression . MUL expression
-   86                     | expression . DIV expression
-   87 logicalExpression: expression . SLT expression
-   88                  | expression . SGT expression
-   89                  | expression . LTE expression
-   90                  | expression . GTE expression
-   91                  | expression . NEQ expression
-   92                  | expression . EQU expression
-  100 argList: argList ',' expression .
+   79 expression: VAR '(' argList ')' .
 
-    ADD  shift, and go to state 138
-    SUB  shift, and go to state 139
-    MUL  shift, and go to state 140
-    DIV  shift, and go to state 141
-    SLT  shift, and go to state 143
-    SGT  shift, and go to state 144
-    LTE  shift, and go to state 145
-    GTE  shift, and go to state 146
-    NEQ  shift, and go to state 147
-    EQU  shift, and go to state 148
-
-    $default  reduce using rule 100 (argList)
+    $default  reduce using rule 79 (expression)
 
 
 State 201
 
-   65 allocStatement: expression EQUALS ALLOC '(' ')' .
+   84 arithmeticExpression: expression . ADD expression
+   85                     | expression . SUB expression
+   86                     | expression . MUL expression
+   87                     | expression . DIV expression
+   88 logicalExpression: expression . SLT expression
+   89                  | expression . SGT expression
+   90                  | expression . LTE expression
+   91                  | expression . GTE expression
+   92                  | expression . NEQ expression
+   93                  | expression . EQU expression
+  101 argList: argList ',' expression .
 
-    $default  reduce using rule 65 (allocStatement)
+    ADD  shift, and go to state 137
+    SUB  shift, and go to state 138
+    MUL  shift, and go to state 139
+    DIV  shift, and go to state 140
+    SLT  shift, and go to state 142
+    SGT  shift, and go to state 143
+    LTE  shift, and go to state 144
+    GTE  shift, and go to state 145
+    NEQ  shift, and go to state 146
+    EQU  shift, and go to state 147
+
+    $default  reduce using rule 101 (argList)
 
 
 State 202
 
-   34 functionDefinition: returnType VAR '(' parameterList ')' '{' localDeclarationBlock $@3 functionBody '}' .
+   66 allocStatement: expression EQUALS ALLOC '(' ')' .
 
-    $default  reduce using rule 34 (functionDefinition)
+    $default  reduce using rule 66 (allocStatement)
 
 
 State 203
 
-   51 statementList: statementList . statement ';'
-   68 ifStatement: IF '(' expression ')' THEN statementList . ELSE statementList ENDIF
-   69            | IF '(' expression ')' THEN statementList . ENDIF
+   35 functionDefinition: returnType VAR '(' parameterList ')' '{' localDeclarationBlock $@4 functionBody '}' .
 
-    IF        shift, and go to state 81
-    ELSE      shift, and go to state 207
-    ENDIF     shift, and go to state 208
-    WHILE     shift, and go to state 82
-    DO        shift, and go to state 83
-    READ      shift, and go to state 84
-    WRITE     shift, and go to state 85
-    CONTINUE  shift, and go to state 86
-    BREAK     shift, and go to state 87
-    REPEAT    shift, and go to state 88
-    RETURN    shift, and go to state 89
-    DEALLOC   shift, and go to state 90
-    NUM       shift, and go to state 91
-    VAR       shift, and go to state 92
-    STRING    shift, and go to state 93
-    '('       shift, and go to state 94
-
-    statement              go to state 136
-    inputStatement         go to state 97
-    outputStatement        go to state 98
-    allocStatement         go to state 99
-    deAllocStatement       go to state 100
-    assignmentStatement    go to state 101
-    ifStatement            go to state 102
-    whileStatement         go to state 103
-    jumpStatement          go to state 104
-    functionCallStatement  go to state 105
-    returnStatement        go to state 106
-    expression             go to state 107
-    arithmeticExpression   go to state 108
-    logicalExpression      go to state 109
-    constant               go to state 110
-    variable               go to state 111
-    field                  go to state 112
+    $default  reduce using rule 35 (functionDefinition)
 
 
 State 204
 
-   51 statementList: statementList . statement ';'
-   70 whileStatement: WHILE '(' expression ')' DO statementList . ENDWHILE
+   52 statementList: statementList . statement ';'
+   69 ifStatement: IF '(' expression ')' THEN statementList . ELSE statementList ENDIF
+   70            | IF '(' expression ')' THEN statementList . ENDIF
 
-    IF        shift, and go to state 81
-    WHILE     shift, and go to state 82
-    DO        shift, and go to state 83
-    ENDWHILE  shift, and go to state 209
-    READ      shift, and go to state 84
-    WRITE     shift, and go to state 85
-    CONTINUE  shift, and go to state 86
-    BREAK     shift, and go to state 87
-    REPEAT    shift, and go to state 88
-    RETURN    shift, and go to state 89
-    DEALLOC   shift, and go to state 90
-    NUM       shift, and go to state 91
-    VAR       shift, and go to state 92
-    STRING    shift, and go to state 93
-    '('       shift, and go to state 94
+    IF        shift, and go to state 79
+    ELSE      shift, and go to state 208
+    ENDIF     shift, and go to state 209
+    WHILE     shift, and go to state 80
+    DO        shift, and go to state 81
+    READ      shift, and go to state 82
+    WRITE     shift, and go to state 83
+    CONTINUE  shift, and go to state 84
+    BREAK     shift, and go to state 85
+    REPEAT    shift, and go to state 86
+    RETURN    shift, and go to state 87
+    DEALLOC   shift, and go to state 88
+    NUM       shift, and go to state 89
+    VAR       shift, and go to state 90
+    STRING    shift, and go to state 91
+    '('       shift, and go to state 92
 
-    statement              go to state 136
-    inputStatement         go to state 97
-    outputStatement        go to state 98
-    allocStatement         go to state 99
-    deAllocStatement       go to state 100
-    assignmentStatement    go to state 101
-    ifStatement            go to state 102
-    whileStatement         go to state 103
-    jumpStatement          go to state 104
-    functionCallStatement  go to state 105
-    returnStatement        go to state 106
-    expression             go to state 107
-    arithmeticExpression   go to state 108
-    logicalExpression      go to state 109
-    constant               go to state 110
-    variable               go to state 111
-    field                  go to state 112
+    statement              go to state 135
+    inputStatement         go to state 95
+    outputStatement        go to state 96
+    allocStatement         go to state 97
+    deAllocStatement       go to state 98
+    assignmentStatement    go to state 99
+    ifStatement            go to state 100
+    whileStatement         go to state 101
+    jumpStatement          go to state 102
+    functionCallStatement  go to state 103
+    returnStatement        go to state 104
+    expression             go to state 105
+    arithmeticExpression   go to state 106
+    logicalExpression      go to state 107
+    constant               go to state 108
+    variable               go to state 109
+    field                  go to state 110
 
 
 State 205
 
-   70 whileStatement: WHILE '(' expression ')' . DO statementList ENDWHILE
-   71               | DO statementList WHILE '(' expression ')' . ENDWHILE
+   52 statementList: statementList . statement ';'
+   71 whileStatement: WHILE '(' expression ')' DO statementList . ENDWHILE
 
-    DO        shift, and go to state 196
+    IF        shift, and go to state 79
+    WHILE     shift, and go to state 80
+    DO        shift, and go to state 81
     ENDWHILE  shift, and go to state 210
+    READ      shift, and go to state 82
+    WRITE     shift, and go to state 83
+    CONTINUE  shift, and go to state 84
+    BREAK     shift, and go to state 85
+    REPEAT    shift, and go to state 86
+    RETURN    shift, and go to state 87
+    DEALLOC   shift, and go to state 88
+    NUM       shift, and go to state 89
+    VAR       shift, and go to state 90
+    STRING    shift, and go to state 91
+    '('       shift, and go to state 92
+
+    statement              go to state 135
+    inputStatement         go to state 95
+    outputStatement        go to state 96
+    allocStatement         go to state 97
+    deAllocStatement       go to state 98
+    assignmentStatement    go to state 99
+    ifStatement            go to state 100
+    whileStatement         go to state 101
+    jumpStatement          go to state 102
+    functionCallStatement  go to state 103
+    returnStatement        go to state 104
+    expression             go to state 105
+    arithmeticExpression   go to state 106
+    logicalExpression      go to state 107
+    constant               go to state 108
+    variable               go to state 109
+    field                  go to state 110
 
 
 State 206
 
-   72 whileStatement: REPEAT statementList UNTIL '(' expression ')' .
+   71 whileStatement: WHILE '(' expression ')' . DO statementList ENDWHILE
+   72               | DO statementList WHILE '(' expression ')' . ENDWHILE
 
-    $default  reduce using rule 72 (whileStatement)
+    DO        shift, and go to state 197
+    ENDWHILE  shift, and go to state 211
 
 
 State 207
 
-   68 ifStatement: IF '(' expression ')' THEN statementList ELSE . statementList ENDIF
+   73 whileStatement: REPEAT statementList UNTIL '(' expression ')' .
 
-    IF        shift, and go to state 81
-    WHILE     shift, and go to state 82
-    DO        shift, and go to state 83
-    READ      shift, and go to state 84
-    WRITE     shift, and go to state 85
-    CONTINUE  shift, and go to state 86
-    BREAK     shift, and go to state 87
-    REPEAT    shift, and go to state 88
-    RETURN    shift, and go to state 89
-    DEALLOC   shift, and go to state 90
-    NUM       shift, and go to state 91
-    VAR       shift, and go to state 92
-    STRING    shift, and go to state 93
-    '('       shift, and go to state 94
-
-    statementList          go to state 211
-    statement              go to state 96
-    inputStatement         go to state 97
-    outputStatement        go to state 98
-    allocStatement         go to state 99
-    deAllocStatement       go to state 100
-    assignmentStatement    go to state 101
-    ifStatement            go to state 102
-    whileStatement         go to state 103
-    jumpStatement          go to state 104
-    functionCallStatement  go to state 105
-    returnStatement        go to state 106
-    expression             go to state 107
-    arithmeticExpression   go to state 108
-    logicalExpression      go to state 109
-    constant               go to state 110
-    variable               go to state 111
-    field                  go to state 112
+    $default  reduce using rule 73 (whileStatement)
 
 
 State 208
 
-   69 ifStatement: IF '(' expression ')' THEN statementList ENDIF .
+   69 ifStatement: IF '(' expression ')' THEN statementList ELSE . statementList ENDIF
 
-    $default  reduce using rule 69 (ifStatement)
+    IF        shift, and go to state 79
+    WHILE     shift, and go to state 80
+    DO        shift, and go to state 81
+    READ      shift, and go to state 82
+    WRITE     shift, and go to state 83
+    CONTINUE  shift, and go to state 84
+    BREAK     shift, and go to state 85
+    REPEAT    shift, and go to state 86
+    RETURN    shift, and go to state 87
+    DEALLOC   shift, and go to state 88
+    NUM       shift, and go to state 89
+    VAR       shift, and go to state 90
+    STRING    shift, and go to state 91
+    '('       shift, and go to state 92
+
+    statementList          go to state 212
+    statement              go to state 94
+    inputStatement         go to state 95
+    outputStatement        go to state 96
+    allocStatement         go to state 97
+    deAllocStatement       go to state 98
+    assignmentStatement    go to state 99
+    ifStatement            go to state 100
+    whileStatement         go to state 101
+    jumpStatement          go to state 102
+    functionCallStatement  go to state 103
+    returnStatement        go to state 104
+    expression             go to state 105
+    arithmeticExpression   go to state 106
+    logicalExpression      go to state 107
+    constant               go to state 108
+    variable               go to state 109
+    field                  go to state 110
 
 
 State 209
 
-   70 whileStatement: WHILE '(' expression ')' DO statementList ENDWHILE .
+   70 ifStatement: IF '(' expression ')' THEN statementList ENDIF .
 
-    $default  reduce using rule 70 (whileStatement)
+    $default  reduce using rule 70 (ifStatement)
 
 
 State 210
 
-   71 whileStatement: DO statementList WHILE '(' expression ')' ENDWHILE .
+   71 whileStatement: WHILE '(' expression ')' DO statementList ENDWHILE .
 
     $default  reduce using rule 71 (whileStatement)
 
 
 State 211
 
-   51 statementList: statementList . statement ';'
-   68 ifStatement: IF '(' expression ')' THEN statementList ELSE statementList . ENDIF
+   72 whileStatement: DO statementList WHILE '(' expression ')' ENDWHILE .
 
-    IF        shift, and go to state 81
-    ENDIF     shift, and go to state 212
-    WHILE     shift, and go to state 82
-    DO        shift, and go to state 83
-    READ      shift, and go to state 84
-    WRITE     shift, and go to state 85
-    CONTINUE  shift, and go to state 86
-    BREAK     shift, and go to state 87
-    REPEAT    shift, and go to state 88
-    RETURN    shift, and go to state 89
-    DEALLOC   shift, and go to state 90
-    NUM       shift, and go to state 91
-    VAR       shift, and go to state 92
-    STRING    shift, and go to state 93
-    '('       shift, and go to state 94
-
-    statement              go to state 136
-    inputStatement         go to state 97
-    outputStatement        go to state 98
-    allocStatement         go to state 99
-    deAllocStatement       go to state 100
-    assignmentStatement    go to state 101
-    ifStatement            go to state 102
-    whileStatement         go to state 103
-    jumpStatement          go to state 104
-    functionCallStatement  go to state 105
-    returnStatement        go to state 106
-    expression             go to state 107
-    arithmeticExpression   go to state 108
-    logicalExpression      go to state 109
-    constant               go to state 110
-    variable               go to state 111
-    field                  go to state 112
+    $default  reduce using rule 72 (whileStatement)
 
 
 State 212
 
-   68 ifStatement: IF '(' expression ')' THEN statementList ELSE statementList ENDIF .
+   52 statementList: statementList . statement ';'
+   69 ifStatement: IF '(' expression ')' THEN statementList ELSE statementList . ENDIF
 
-    $default  reduce using rule 68 (ifStatement)
+    IF        shift, and go to state 79
+    ENDIF     shift, and go to state 213
+    WHILE     shift, and go to state 80
+    DO        shift, and go to state 81
+    READ      shift, and go to state 82
+    WRITE     shift, and go to state 83
+    CONTINUE  shift, and go to state 84
+    BREAK     shift, and go to state 85
+    REPEAT    shift, and go to state 86
+    RETURN    shift, and go to state 87
+    DEALLOC   shift, and go to state 88
+    NUM       shift, and go to state 89
+    VAR       shift, and go to state 90
+    STRING    shift, and go to state 91
+    '('       shift, and go to state 92
+
+    statement              go to state 135
+    inputStatement         go to state 95
+    outputStatement        go to state 96
+    allocStatement         go to state 97
+    deAllocStatement       go to state 98
+    assignmentStatement    go to state 99
+    ifStatement            go to state 100
+    whileStatement         go to state 101
+    jumpStatement          go to state 102
+    functionCallStatement  go to state 103
+    returnStatement        go to state 104
+    expression             go to state 105
+    arithmeticExpression   go to state 106
+    logicalExpression      go to state 107
+    constant               go to state 108
+    variable               go to state 109
+    field                  go to state 110
+
+
+State 213
+
+   69 ifStatement: IF '(' expression ')' THEN statementList ELSE statementList ENDIF .
+
+    $default  reduce using rule 69 (ifStatement)

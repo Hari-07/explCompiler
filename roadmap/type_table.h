@@ -14,7 +14,8 @@ typedef struct FieldlistNode {
 
 void typeTableCreate();
 
-void addToTypeTable(char* name, FieldlistNode* fields);
+void createTypeTableEntry(char* name);
+void addFieldsToTypeTable(char* name, FieldlistNode* fields);
 TypetableNode* findTypeTableEntry(char* name);
 
 FieldlistNode* createFieldNode(TypetableNode* type, char*name);
