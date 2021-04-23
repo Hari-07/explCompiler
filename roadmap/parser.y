@@ -100,7 +100,7 @@
 
 %token START END DECL ENDDECL
 %token IF THEN ELSE ENDIF WHILE DO ENDWHILE READ WRITE CONTINUE BREAK REPEAT UNTIL MAIN ARGS RETURN ALLOC DEALLOC
-%token INT STR TYPE ENDTYPE
+%token INT STR NULL_TOKEN TYPE ENDTYPE 
 %token NUM VAR ADD SUB MUL DIV EQUALS SLT SGT LTE GTE NEQ EQU STRING ARR_INDEX
 %nonassoc SLT SGT LTE GTE NEQ EQU
 %left ADD SUB
@@ -114,7 +114,7 @@
 
 	code : typedefSection globalDeclarations functionDefinitionList mainFunction
 		| globalDeclarations functionDefinitionList mainFunction
-		| globalDeclarations mainFunction
+		| typedefSection globalDeclarations mainFunction
 		| mainFunction
 		;
 
@@ -367,7 +367,8 @@
 
 	constant :
 		NUM				{	$$ = makeConstantNode(findTypeTableEntry("int"), $<integer>1, NULL); 	} |
-		STRING			{	$$ = makeConstantNode(findTypeTableEntry("string"), 0, $<string>1);	}
+		STRING			{	$$ = makeConstantNode(findTypeTableEntry("string"), 0, $<string>1);		} |
+		NULL_TOKEN		{   $$ = makeConstantNode(findTypeTableEntry("void"), 0, NULL);				}
 		;
 
 	variable :
@@ -394,7 +395,7 @@ int getfLabel() {
 
 void yyerror(char const *s)
 {
-    printf("yyerror: %s",s);
+    printf("yyerror: %s\n",s);
 }
 
 extern FILE* yyin;

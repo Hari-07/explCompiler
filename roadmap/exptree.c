@@ -106,7 +106,7 @@ tnode *makeConstantNode(TypetableNode* type, int number, char *s)
 	temp->type = type;
 	if(strcmp(type->name,"int") == 0)
 		temp->val.decimal = number;
-	else {
+	else if (strcmp(type->name,"string") == 0){
 		temp->val.string = (char*)malloc(sizeof(char)*strlen(s));
 		strcpy(temp->val.string, s);
 	}
@@ -343,14 +343,14 @@ void checkOperatorConditions(int meta, tnode*l, tnode* r){
 			printf("Non arithmetic expressions cannot be assigned\n");
 			exit(-1);
 		}
-		else if((l->type != r->type)){
+		else if(l->type != r->type && r->type != findTypeTableEntry("void")){
 			printf("Type Mismatch in Assignment Statement\n");
 			exit(-1);
 		}
 	} else if(meta == 1){
-		if(!((l->nodeType == constantNode || l->nodeType == variableNode || l->nodeType == operatorNode && l->nodeType == functionReturnNode || l->nodeType != fieldNode) &&
-		   	 (r->nodeType == constantNode || r->nodeType == variableNode || r->nodeType == operatorNode && r->nodeType == functionReturnNode || r->nodeType != fieldNode)
-		)) {
+		if( (l->nodeType != constantNode && l->nodeType != variableNode && l->nodeType != operatorNode && l->nodeType != functionReturnNode && l->nodeType != fieldNode) ||
+		   	(r->nodeType != constantNode && r->nodeType != variableNode && r->nodeType != operatorNode && r->nodeType != functionReturnNode && r->nodeType != fieldNode)
+		) {
 			printf("Invalid Node in operation\n");
 			exit(-1);
 		}
@@ -361,13 +361,13 @@ void checkOperatorConditions(int meta, tnode*l, tnode* r){
 			exit(-1);
 		}
 	} else if(meta == 2){
-		if((l->nodeType != constantNode && l->nodeType != variableNode) ||
-		   (r->nodeType != constantNode && r->nodeType != variableNode)
+		if((l->nodeType != constantNode && l->nodeType != variableNode && l->nodeType != fieldNode) ||
+		   (r->nodeType != constantNode && r->nodeType != variableNode && r->nodeType != fieldNode)
 		) {
 			printf("Invalid Expression\n");
 			exit(-1);
 		}
-		else if(l->type != findTypeTableEntry("int") || r->type != findTypeTableEntry("int")) {
+		else if((l->type != findTypeTableEntry("int") || r->type != findTypeTableEntry("int")) && l->type!= findTypeTableEntry("void") && r->type != findTypeTableEntry("void")) {
 			printf("Invalid comparsion\n");
 			exit(-1);
 		}

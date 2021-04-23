@@ -61,6 +61,7 @@ string		{
 				yylval.string = temp;
 				return STR;		
 			}
+null 		{	return NULL_TOKEN;	}
 decl		{	return DECL;	}
 enddecl		{	return ENDDECL;	}
 main		{	return MAIN;	}

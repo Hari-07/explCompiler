@@ -73,23 +73,24 @@ extern int yydebug;
     DEALLOC = 279,
     INT = 280,
     STR = 281,
-    TYPE = 282,
-    ENDTYPE = 283,
-    NUM = 284,
-    VAR = 285,
-    ADD = 286,
-    SUB = 287,
-    MUL = 288,
-    DIV = 289,
-    EQUALS = 290,
-    SLT = 291,
-    SGT = 292,
-    LTE = 293,
-    GTE = 294,
-    NEQ = 295,
-    EQU = 296,
-    STRING = 297,
-    ARR_INDEX = 298
+    NULL_TOKEN = 282,
+    TYPE = 283,
+    ENDTYPE = 284,
+    NUM = 285,
+    VAR = 286,
+    ADD = 287,
+    SUB = 288,
+    MUL = 289,
+    DIV = 290,
+    EQUALS = 291,
+    SLT = 292,
+    SGT = 293,
+    LTE = 294,
+    GTE = 295,
+    NEQ = 296,
+    EQU = 297,
+    STRING = 298,
+    ARR_INDEX = 299
   };
 #endif
 /* Tokens.  */
@@ -117,23 +118,24 @@ extern int yydebug;
 #define DEALLOC 279
 #define INT 280
 #define STR 281
-#define TYPE 282
-#define ENDTYPE 283
-#define NUM 284
-#define VAR 285
-#define ADD 286
-#define SUB 287
-#define MUL 288
-#define DIV 289
-#define EQUALS 290
-#define SLT 291
-#define SGT 292
-#define LTE 293
-#define GTE 294
-#define NEQ 295
-#define EQU 296
-#define STRING 297
-#define ARR_INDEX 298
+#define NULL_TOKEN 282
+#define TYPE 283
+#define ENDTYPE 284
+#define NUM 285
+#define VAR 286
+#define ADD 287
+#define SUB 288
+#define MUL 289
+#define DIV 290
+#define EQUALS 291
+#define SLT 292
+#define SGT 293
+#define LTE 294
+#define GTE 295
+#define NEQ 296
+#define EQU 297
+#define STRING 298
+#define ARR_INDEX 299
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -148,7 +150,7 @@ union YYSTYPE
 	struct FieldlistNode* fieldnode;
 	struct TypetableNode* typenode;
 
-#line 152 "y.tab.h"
+#line 154 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

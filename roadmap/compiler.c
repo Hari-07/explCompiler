@@ -245,10 +245,13 @@ int readNodeCodeGen(tnode *t)
 int constantNodeCodeGen(tnode *t)
 {
 	int p = getReg();
-	if (t->metadata == 0)
+	if (t->type == findTypeTableEntry("int"))
 		fprintf(target, "MOV R%d, %d\n", p, t->val.decimal);
-	if (t->metadata == 1)
-		fprintf(target, "MOV R%d, %s\n", p, t->val.string);
+	else if (t->type == findTypeTableEntry("string"))
+		fprintf(target, "MOV R%d, \"%s\"\n", p, t->val.string);
+	else if (t->type == findTypeTableEntry("void"))
+		fprintf(target, "MOV R%d, \"\"\n", p);
+
 	return p;
 }
 
@@ -261,13 +264,13 @@ int variableNodeCodeGen(tnode *t)
 	LSymbol* localSearch = findLocalVariable(varName);
 
 	if(localSearch != NULL){
-		if(isUserDefined(localSearch->type)) {
-			printf("Hello");
-		} else {
+		// if(isUserDefined(localSearch->type)) {
+		// 	printf("Hello");
+		// } else {
 			fprintf(target, "MOV R%d, BP\n", p);
 			fprintf(target, "ADD R%d, %d\n", p, localSearch->binding);
 			fprintf(target, "MOV R%d, [R%d]\n", p, p);
-		}
+		// }
 	} else {
 		GSymbol* globalSearch = findGlobalVariable(varName);
 		int offsetValueRegister = getOffsetGlobalVar(t->left);
