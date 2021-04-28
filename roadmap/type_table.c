@@ -51,8 +51,7 @@ TypetableNode* findTypeTableEntry(char* name) {
 		temp = temp->next;
 	}
 
-	printf("UNDEFINED DATATYPE\n");
-	exit(-1);
+	return NULL;
 }
 
 FieldlistNode* createFieldNode(TypetableNode* type, char*name){

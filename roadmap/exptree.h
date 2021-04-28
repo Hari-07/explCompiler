@@ -20,10 +20,13 @@ enum nodeType {
 	whileNode,
 	jumpNode,
 	functionCallNode,
+	methodCallNode,
 	functionReturnNode,
 	fieldNode,
 	allocNode,
 	deAllocNode,
+	constructorNode,
+	breakNode,
 };
 
 /*
@@ -82,7 +85,10 @@ tnode* makeIfNode(tnode* condn, tnode* trueBody, tnode* falseBody);
 tnode* makeWhileNode(int looptype, tnode* condn, tnode* body);
 tnode* makeJumpStatement(int type);
 tnode* makeFunctionCallNode(char* fName, tnode* arg);
+tnode* makeClassMethodCallNode(FieldlistNode* fieldChain, tnode* arg);
+tnode* makeClassConstructorNode(tnode* l, char* className);
 tnode* makeReturnNode(tnode* r);
+tnode* makeBreakPointNode();
 
 
 FieldlistNode* makeVariableChain(char* parentFieldName, char* childFieldName, FieldlistNode* childFieldNode);

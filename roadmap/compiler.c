@@ -21,6 +21,7 @@ int READ_WRITE_BUFFER = -1;
 FILE *target;
 
 char* CURRENT_FUNCTION;
+int CURRENT_FUNCTON_MODE;
 
 // CODEGEN FUNCTIONS
 int codeGen(tnode *t);
@@ -33,10 +34,12 @@ int ifNodeCodeGen(tnode *t);
 int whileNodeCodeGen(tnode *t);
 int jumpNodeCodeGen(tnode *t);
 int functionCallNodeCodeGen(tnode *t);
+int methodCallNodeCodeGen(tnode* t);
 int returnNodeCodeGen(tnode *t);
 int fieldNodeCodeGen(tnode *t);
 int allocNodeCodeGen(tnode* t);
 int deAllocNodeCodeGen(tnode* t);
+int breakNodeCodeGen(tnode* t);
 
 // CODEGEN ABSTRACTIONS
 void printFromIndex(int index);
@@ -50,8 +53,11 @@ void freeReg();
 void setRegIndex();
 int getLabel();
 
-void startCodeGen(char* fName, tnode *t)
+
+//Function Mode is 1: Class Method, 0 : Normal
+void startCodeGen(char* fName,int functionMode, tnode *t)
 {
+	CURRENT_FUNCTON_MODE = functionMode;
 	CURRENT_FUNCTION = (char*) malloc(sizeof(char) * strlen(fName));
 	strcpy(CURRENT_FUNCTION, fName);
 
@@ -62,13 +68,25 @@ void startCodeGen(char* fName, tnode *t)
 	}
 
 	if(strcmp(fName, "main") != 0) {
-		GSymbol* functionEntry = findGlobalVariable(fName);
-		fprintf(target, "FUNCTION%d\n", functionEntry->flabel);
-		fprintf(target, "PUSH BP\n");
-		fprintf(target, "MOV BP, SP\n");
-		Param* param = functionEntry->paramlist;
+		Param* param = NULL;
 		LSymbol* temp = getLocalSymbolTableHeader();
 		int paramOffset = -3;
+
+		if(functionMode == 1){
+			ClassMethodNode* functionEntry = findClassMethod(getCurrentClassRef(), fName);
+			fprintf(target, "FUNCTION%d\n", functionEntry->flabel);
+			param = functionEntry->paramlist;
+			temp->binding = paramOffset;
+			paramOffset --;
+			temp = temp->next;			
+		} else {
+			GSymbol* functionEntry = findGlobalVariable(fName);
+			fprintf(target, "FUNCTION%d\n", functionEntry->flabel);
+			param = functionEntry->paramlist;
+		}
+
+		fprintf(target, "PUSH BP\n");
+		fprintf(target, "MOV BP, SP\n");
 		while(param!=NULL) {
 			param = param->next;
 			temp->binding = paramOffset;
@@ -159,6 +177,10 @@ int codeGen(tnode *t)
 	{
 		return functionCallNodeCodeGen(t);
 	}
+	else if (t->nodeType == methodCallNode)
+	{
+		return methodCallNodeCodeGen(t);
+	}
 	else if (t->nodeType == functionReturnNode)
 	{
 		return returnNodeCodeGen(t);
@@ -174,6 +196,14 @@ int codeGen(tnode *t)
 	else if (t->nodeType == deAllocNode)
 	{
 		return deAllocNodeCodeGen(t);
+	}
+	// else if(t->nodeType == constructorNode)
+	// {
+	// 	return constructorNodeCodeGen(t);
+	// }
+	else if(t->nodeType == breakNode)
+	{
+		return breakNodeCodeGen(t);
 	}
 	else
 	{
@@ -498,6 +528,73 @@ int functionCallNodeCodeGen(tnode *t)
 	}
 }
 
+int methodCallNodeCodeGen(tnode* t) {
+	int state_reg_count = getActiveRegIndex();
+
+	for(int i = state_reg_count; i >= 0; i--){
+		fprintf(target, "PUSH R%d\n", i);
+	}
+
+	FieldlistNode* temp = t->fieldChain;
+
+	int p = getReg();
+
+	if(findLocalVariable(temp->name) != NULL){
+		LSymbol* localSearch = findLocalVariable(temp->name);
+		FieldlistNode* temp = t->fieldChain;
+		fprintf(target, "MOV R%d, BP\n", p);
+		fprintf(target, "ADD R%d, %d\n", p, localSearch->binding);
+		while(temp->next->next != NULL) {
+			fprintf(target, "MOV R%d, [R%d]\n", p, p);
+			fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
+			temp = temp->next;
+		}
+		fprintf(target, "MOV R%d, [R%d]\n", p, p);
+	} else {
+		GSymbol* globalSearch = findGlobalVariable(temp->name);
+		FieldlistNode* temp = t->fieldChain;
+		fprintf(target, "MOV R%d, %d\n", p, globalSearch->address);
+		while(temp->next->next != NULL) {
+			fprintf(target, "MOV R%d, [R%d]\n", p, p);
+			fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
+			temp = temp->next;
+		}
+		fprintf(target, "MOV R%d, [R%d]\n", p, p);
+	}
+
+
+
+	for(tnode* arg = t->right; arg != NULL; arg = arg->left){
+		int argValue = codeGen(arg->right);
+		fprintf(target, "PUSH R%d\n", argValue);
+		freeReg();
+	}
+
+	fprintf(target, "PUSH R%d\n", p);
+	freeReg();
+
+	fprintf(target, "PUSH R0\n");
+	setRegIndex(-1);
+	
+	fprintf(target, "CALL FUNCTION%d\n", t->val.decimal);
+	
+	setRegIndex(state_reg_count);
+	int result = getReg();
+
+	fprintf(target, "POP R%d\n", result);
+
+	int buffer = getReg();
+	fprintf(target, "POP R%d\n", buffer);
+	for(tnode* arg = t->right; arg != NULL; arg = arg->left){
+		fprintf(target, "POP R%d\n", buffer);
+	}
+	freeReg();
+
+	for(int i = 0; i <= state_reg_count; i++){
+		fprintf(target, "POP R%d\n", i);
+	}
+}
+
 int returnNodeCodeGen(tnode* t) {
 
 	if(strcmp(CURRENT_FUNCTION, "main") == 0) {
@@ -505,8 +602,17 @@ int returnNodeCodeGen(tnode* t) {
 	}
 	else {
 		LSymbol* temp = getLocalSymbolTableHeader();
-		GSymbol* functionEntry = findGlobalVariable(CURRENT_FUNCTION);
-		Param* param = functionEntry->paramlist;
+		Param* param;
+
+		if(CURRENT_FUNCTON_MODE == 1){
+			ClassMethodNode* functionEntry = findClassMethod(getCurrentClassRef(), CURRENT_FUNCTION);
+			param = functionEntry->paramlist;
+			temp = temp ->next;
+		} else {
+			GSymbol* functionEntry = findGlobalVariable(CURRENT_FUNCTION);
+			param = functionEntry->paramlist;
+		}
+
 		
 		while(param!=NULL) {
 			param = param->next;
@@ -536,9 +642,8 @@ int fieldNodeCodeGen(tnode *t){
 
 	int p = getReg();
 
-	LSymbol* localSearch = findLocalVariable(varName);
-	
-	if(localSearch != NULL){
+	if(findLocalVariable(varName) != NULL || strcmp(varName, "SELF") == 0){
+		LSymbol* localSearch = findLocalVariable(varName);
 		FieldlistNode* temp = t->fieldChain;
 		fprintf(target, "MOV R%d, BP\n", p);
 		fprintf(target, "ADD R%d, %d\n", p, localSearch->binding);
@@ -687,6 +792,11 @@ int deAllocNodeCodeGen(tnode* t){
 	freeReg();
 	freeReg();
 }
+
+int breakNodeCodeGen(tnode* t){
+	fprintf(target, "BRKP\n");
+}
+
 
 void printFromIndex(int index)
 {

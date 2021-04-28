@@ -11,6 +11,11 @@
 #include "symbol_table.h"
 #endif
 
+#ifndef CLASS_H
+#define CLASS_H
+#include "class_table.h"
+#endif
+
 void checkInputConditions(tnode* t);
 void checkOutputConditions(tnode* t);
 void checkVariableConditions(tnode* t);
@@ -200,6 +205,76 @@ tnode* makeFunctionCallNode(char* fName, tnode* arg) {
 	return temp;
 }
 
+tnode* makeClassMethodCallNode(FieldlistNode* fieldChain, tnode* arg){
+	tnode *temp = createNode();
+	temp->nodeType = methodCallNode;
+
+	FieldlistNode* res = fieldChain;
+	if(strcmp(res->name, "SELF") == 0){
+		res->classRef = getCurrentClassRef();
+	} else if(findClassTableEntry(res->name) != NULL) {
+		res->classRef = findClassTableEntry(res->name);
+	} else if(findLocalVariable(fieldChain->name) != NULL){
+		LSymbol* localRef = findLocalVariable(fieldChain->name);
+		temp->varLocation = localRef;
+		res->classRef = localRef->classRef;
+		res->type = localRef->type;
+	} else if(findGlobalVariable(fieldChain->name) != NULL) {
+		GSymbol* result = findGlobalVariable(fieldChain->name);
+		temp->varLocation =  result;
+		res->classRef = result->classRef;
+		res->type = result->type;
+	} else {
+		printf("UNDEFINED ELEMENT IN FIELD CHAIN\n");
+		exit(-1);
+	}
+
+	TypetableNode* parentType = res->type;
+	ClassTableNode* parentClass = res->classRef;
+	res = res->next;
+
+	while(res->next != NULL) {
+		FieldlistNode* fieldRef;
+		if(parentType != NULL){
+			fieldRef = fieldLookup(parentType, res->name);	
+		} else if(parentClass != NULL) {
+			fieldRef = findClassField(parentClass, res->name);
+		}
+
+		res->classRef = fieldRef->classRef;
+		res->type = fieldRef->type;
+		res->fieldIndex = fieldRef->fieldIndex;
+
+		parentType = res->type;
+		parentClass = res->classRef;
+		res = res->next;
+	}
+
+	res = fieldChain;
+	while(res->next->next != NULL){
+		res = res->next;
+	}
+
+	if(res->classRef == NULL){
+		printf("INVALID METHOD CALL");
+		exit(-1);
+	}
+	
+	tnode* iterator = arg;
+	ClassMethodNode* methodRef = findClassMethod(res->classRef, res->next->name);
+	Param* param = methodRef->paramlist;
+
+	checkFunctionCallValidity(iterator, param);
+
+	temp->fieldChain = fieldChain;
+	temp->type = methodRef->returnType;
+	temp->varLocation = (GSymbol*)methodRef->paramlist;
+	temp->right = arg;
+	temp->val.decimal = methodRef->flabel;
+
+	return temp;
+}
+
 tnode* makeReturnNode(tnode* r) {
 	tnode* temp = createNode();
 	temp->nodeType = functionReturnNode;
@@ -212,23 +287,13 @@ FieldlistNode* makeVariableChain(char* parentFieldName, char* childFieldName, Fi
 	parentField->name = (char*)malloc(sizeof(char)* strlen(parentFieldName));
 	strcpy(parentField->name, parentFieldName);
 
-	// TypetableNode* parentTypeRef = NULL;
-	// LSymbol* localRef = findLocalVariable(parentFieldName);
-	// if(localRef != NULL){
-	// 	parentTypeRef = localRef->type;
-	// } else {
-	// 	parentTypeRef = findGlobalVariable(parentFieldName)->type;
-	// }
-
 	
 	if(childFieldNode != NULL){
 		parentField->next = childFieldNode;
-		// childFieldNode->fieldIndex = fieldLookup(parentTypeRef, childFieldNode->name)->fieldIndex;
 	} else {
 		FieldlistNode* temp = (FieldlistNode*)malloc(sizeof(FieldlistNode));
 		temp->name = (char*)malloc(sizeof(char)* strlen(childFieldName));
 		strcpy(temp->name, childFieldName);
-		// temp->fieldIndex = fieldLookup(parentTypeRef, childFieldName)->fieldIndex;
 		parentField->next = temp;
 	}
 	
@@ -242,28 +307,41 @@ tnode* makeFieldNode(FieldlistNode* variableChain, tnode* offset){
 
 	FieldlistNode* res = variableChain;
 
-	LSymbol* tempRes = findLocalVariable(variableChain->name);
-	if(tempRes != NULL){
-		temp->varLocation = tempRes;
-		res->type = tempRes->type;
+	if(strcmp(res->name, "SELF") == 0){
+		res->classRef = getCurrentClassRef();
+		temp->varLocation = findLocalVariable("SELF");
+	} else if(findLocalVariable(variableChain->name) != NULL){
+		LSymbol* localRef = findLocalVariable(variableChain->name);
+		temp->varLocation = localRef;
+		res->type = localRef->type;
 	} else {
 		GSymbol* result = (GSymbol*)findGlobalVariable(variableChain->name);
 		temp->varLocation =  result;
 		res->type = result->type;
 	}
 
-	TypetableNode* parentType = NULL;
+	TypetableNode* parentType = res->type;
+	ClassTableNode* parentClass = res->classRef;
+	res = res->next;
+
 	while(res != NULL) {
+		FieldlistNode* fieldRef;
 		if(parentType != NULL){
-			FieldlistNode* fieldRef = fieldLookup(parentType, res->name);
-			res->type = fieldRef->type;
-			res->fieldIndex = fieldRef->fieldIndex;
+			fieldRef = fieldLookup(parentType, res->name);	
+		} else if(parentClass != NULL) {
+			fieldRef = findClassField(parentClass, res->name);
 		}
+
+		res->classRef = fieldRef->classRef;
+		res->type = fieldRef->type;
+		res->fieldIndex = fieldRef->fieldIndex;
+
 		parentType = res->type;
+		parentClass = res->classRef;
 		res = res->next;
+
 	}
 	temp->type = parentType;
-
 	
 
 	temp->fieldChain = variableChain;
@@ -273,6 +351,24 @@ tnode* makeFieldNode(FieldlistNode* variableChain, tnode* offset){
 
 	return temp;
 }
+
+tnode* makeClassConstructorNode(tnode* l, char* className){
+
+	tnode* temp = createNode();
+	temp->nodeType = allocNode;
+
+	temp->left = l;
+	temp->right = NULL;
+
+	return temp;
+}
+
+tnode* makeBreakPointNode(){
+	tnode* temp = createNode();
+	temp->nodeType = breakNode;
+	return temp;
+}
+
 
 /*
 Input Conditions:
@@ -285,6 +381,8 @@ void checkInputConditions(tnode* t){
 	}
 }
 
+
+
 /*
 Output Conditions:
 - Can Output Constants
@@ -295,6 +393,8 @@ void checkOutputConditions(tnode* t){
 	if (t->nodeType != constantNode &&
 		t->nodeType != variableNode &&
 		t->nodeType != fieldNode &&
+		t->nodeType != functionCallNode &&
+		t->nodeType != methodCallNode &&
 		(t->nodeType != operatorNode ||
 		t->metadata != 1)
 	) {
@@ -334,6 +434,7 @@ void checkOperatorConditions(int meta, tnode*l, tnode* r){
 				r->nodeType != variableNode && 
 				r->nodeType != operatorNode && 
 				r->nodeType != functionCallNode &&
+				r->nodeType != methodCallNode &&
 				r->nodeType != fieldNode
 		) {
 			printf("Invalid Assignment Statement\n");
@@ -348,8 +449,8 @@ void checkOperatorConditions(int meta, tnode*l, tnode* r){
 			exit(-1);
 		}
 	} else if(meta == 1){
-		if( (l->nodeType != constantNode && l->nodeType != variableNode && l->nodeType != operatorNode && l->nodeType != functionReturnNode && l->nodeType != fieldNode) ||
-		   	(r->nodeType != constantNode && r->nodeType != variableNode && r->nodeType != operatorNode && r->nodeType != functionReturnNode && r->nodeType != fieldNode)
+		if( (l->nodeType != constantNode && l->nodeType != variableNode && l->nodeType != operatorNode && l->nodeType != functionReturnNode && l->nodeType != fieldNode && l->nodeType != methodCallNode) ||
+		   	(r->nodeType != constantNode && r->nodeType != variableNode && r->nodeType != operatorNode && r->nodeType != functionReturnNode && r->nodeType != fieldNode && r->nodeType != methodCallNode)
 		) {
 			printf("Invalid Node in operation\n");
 			exit(-1);

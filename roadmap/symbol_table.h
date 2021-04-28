@@ -1,17 +1,19 @@
-#ifndef TYPES_H
-#define TYPES_H
-#include "type_table.h"
+#ifndef CLASS_H
+#define CLASS_H
+#include "class_table.h"
 #endif
 
 typedef struct Param {
 	char* name;
 	TypetableNode* type;
+	ClassTableNode* classRef;
 	struct Param* next;
 }Param;
 
 typedef struct GSymbol {
 	char* name;
 	TypetableNode* type;
+	ClassTableNode* classRef;
 	int size; 
 	int address;
 	int flabel;
@@ -22,11 +24,12 @@ typedef struct GSymbol {
 typedef struct LSymbol {
 	char* name;
 	TypetableNode* type;
+	ClassTableNode* classRef;
 	int binding;
 	struct LSymbol* next;
 } LSymbol;
 
-void addGlobalVariable(char* name, TypetableNode* type, int size, int flabel, Param* paramList);
+void addGlobalVariable(char* name, char* typeString, int size, int flabel, Param* paramList);
 void addLocalVariable (char* name, TypetableNode* type);
 Param* createParameter(char *name, TypetableNode* type);
 Param* addParameter(Param* next, Param* paramNode);
@@ -34,8 +37,8 @@ Param* addParameter(Param* next, Param* paramNode);
 int checkNameEquivalence(Param* params, char* fname);
 void addParamstoLSymbol(Param* param);
 
-struct GSymbol* findGlobalVariable(char* name);
-struct LSymbol* findLocalVariable(char* name);
+GSymbol* findGlobalVariable(char* name);
+LSymbol* findLocalVariable(char* name);
 
 LSymbol* getLocalSymbolTableHeader();
 int getVarAddress();

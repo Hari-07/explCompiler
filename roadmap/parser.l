@@ -49,6 +49,9 @@ break		{	return BREAK;	}
 continue 	{	return CONTINUE;}
 repeat 		{	return REPEAT;	}
 until		{	return UNTIL;	}
+self		{	return SELF;	}
+new			{	return NEW;		}
+brkp		{	return BREAKPOINT;	}
 int			{	
 				char* temp = (char*)malloc(sizeof(char)*strlen(yytext));
 				strcpy(temp, yytext);
@@ -64,6 +67,8 @@ string		{
 null 		{	return NULL_TOKEN;	}
 decl		{	return DECL;	}
 enddecl		{	return ENDDECL;	}
+class		{	return CLASSBEGIN; 	}
+endclass	{	return ENDCLASS;	}
 main		{	return MAIN;	}
 args 		{	return ARGS;	}
 return 		{	return RETURN;  }

@@ -9,6 +9,7 @@ typedef struct FieldlistNode {
 	char* name;
 	int fieldIndex;
 	struct TypetableNode* type;
+	struct ClassTableNode* classRef;
 	struct FieldlistNode* next;
 }FieldlistNode;
 
@@ -18,6 +19,6 @@ void createTypeTableEntry(char* name);
 void addFieldsToTypeTable(char* name, FieldlistNode* fields);
 TypetableNode* findTypeTableEntry(char* name);
 
-FieldlistNode* createFieldNode(TypetableNode* type, char*name);
+FieldlistNode* createFieladdNode(TypetableNode* type, char*name);
 FieldlistNode* addToFieldList(FieldlistNode* fieldNode, FieldlistNode* next);
 FieldlistNode* fieldLookup(TypetableNode* type, char* fieldName);

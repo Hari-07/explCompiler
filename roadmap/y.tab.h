@@ -53,44 +53,49 @@ extern int yydebug;
     END = 259,
     DECL = 260,
     ENDDECL = 261,
-    IF = 262,
-    THEN = 263,
-    ELSE = 264,
-    ENDIF = 265,
-    WHILE = 266,
-    DO = 267,
-    ENDWHILE = 268,
-    READ = 269,
-    WRITE = 270,
-    CONTINUE = 271,
-    BREAK = 272,
-    REPEAT = 273,
-    UNTIL = 274,
-    MAIN = 275,
-    ARGS = 276,
-    RETURN = 277,
-    ALLOC = 278,
-    DEALLOC = 279,
-    INT = 280,
-    STR = 281,
-    NULL_TOKEN = 282,
-    TYPE = 283,
-    ENDTYPE = 284,
-    NUM = 285,
-    VAR = 286,
-    ADD = 287,
-    SUB = 288,
-    MUL = 289,
-    DIV = 290,
-    EQUALS = 291,
-    SLT = 292,
-    SGT = 293,
-    LTE = 294,
-    GTE = 295,
-    NEQ = 296,
-    EQU = 297,
-    STRING = 298,
-    ARR_INDEX = 299
+    CLASSBEGIN = 262,
+    ENDCLASS = 263,
+    IF = 264,
+    THEN = 265,
+    ELSE = 266,
+    ENDIF = 267,
+    WHILE = 268,
+    DO = 269,
+    ENDWHILE = 270,
+    READ = 271,
+    WRITE = 272,
+    CONTINUE = 273,
+    BREAK = 274,
+    REPEAT = 275,
+    UNTIL = 276,
+    MAIN = 277,
+    ARGS = 278,
+    RETURN = 279,
+    ALLOC = 280,
+    DEALLOC = 281,
+    INT = 282,
+    STR = 283,
+    NULL_TOKEN = 284,
+    TYPE = 285,
+    ENDTYPE = 286,
+    SELF = 287,
+    NEW = 288,
+    BREAKPOINT = 289,
+    NUM = 290,
+    VAR = 291,
+    ADD = 292,
+    SUB = 293,
+    MUL = 294,
+    DIV = 295,
+    EQUALS = 296,
+    SLT = 297,
+    SGT = 298,
+    LTE = 299,
+    GTE = 300,
+    NEQ = 301,
+    EQU = 302,
+    STRING = 303,
+    ARR_INDEX = 304
   };
 #endif
 /* Tokens.  */
@@ -98,50 +103,55 @@ extern int yydebug;
 #define END 259
 #define DECL 260
 #define ENDDECL 261
-#define IF 262
-#define THEN 263
-#define ELSE 264
-#define ENDIF 265
-#define WHILE 266
-#define DO 267
-#define ENDWHILE 268
-#define READ 269
-#define WRITE 270
-#define CONTINUE 271
-#define BREAK 272
-#define REPEAT 273
-#define UNTIL 274
-#define MAIN 275
-#define ARGS 276
-#define RETURN 277
-#define ALLOC 278
-#define DEALLOC 279
-#define INT 280
-#define STR 281
-#define NULL_TOKEN 282
-#define TYPE 283
-#define ENDTYPE 284
-#define NUM 285
-#define VAR 286
-#define ADD 287
-#define SUB 288
-#define MUL 289
-#define DIV 290
-#define EQUALS 291
-#define SLT 292
-#define SGT 293
-#define LTE 294
-#define GTE 295
-#define NEQ 296
-#define EQU 297
-#define STRING 298
-#define ARR_INDEX 299
+#define CLASSBEGIN 262
+#define ENDCLASS 263
+#define IF 264
+#define THEN 265
+#define ELSE 266
+#define ENDIF 267
+#define WHILE 268
+#define DO 269
+#define ENDWHILE 270
+#define READ 271
+#define WRITE 272
+#define CONTINUE 273
+#define BREAK 274
+#define REPEAT 275
+#define UNTIL 276
+#define MAIN 277
+#define ARGS 278
+#define RETURN 279
+#define ALLOC 280
+#define DEALLOC 281
+#define INT 282
+#define STR 283
+#define NULL_TOKEN 284
+#define TYPE 285
+#define ENDTYPE 286
+#define SELF 287
+#define NEW 288
+#define BREAKPOINT 289
+#define NUM 290
+#define VAR 291
+#define ADD 292
+#define SUB 293
+#define MUL 294
+#define DIV 295
+#define EQUALS 296
+#define SLT 297
+#define SGT 298
+#define LTE 299
+#define GTE 300
+#define NEQ 301
+#define EQU 302
+#define STRING 303
+#define ARR_INDEX 304
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 35 "parser.y"
+#line 41 "parser.y"
 
 	struct tnode* node;
 	int integer;
@@ -149,8 +159,9 @@ union YYSTYPE
 	struct Param* fparams;
 	struct FieldlistNode* fieldnode;
 	struct TypetableNode* typenode;
+	struct ClassMethodNode* classMethodNode;
 
-#line 154 "y.tab.h"
+#line 165 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

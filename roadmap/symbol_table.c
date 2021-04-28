@@ -11,7 +11,10 @@ LSymbol* localSymbolTableHead = NULL;
 int LOCAL_ADDRESS = 1;
 int VAR_ADDRESS = 4096;
 
-void addGlobalVariable(char* name, TypetableNode* type, int size, int flabel, Param* paramList){
+void addGlobalVariable(char* name, char* typeString, int size, int flabel, Param* paramList){
+	TypetableNode* type = findTypeTableEntry(typeString);
+	ClassTableNode* classRef = findClassTableEntry(typeString);
+	
 	GSymbol* temp = globalSymbolTableHead;
 	while(temp){
 		if(strcmp(temp->name, name) == 0){
@@ -24,6 +27,7 @@ void addGlobalVariable(char* name, TypetableNode* type, int size, int flabel, Pa
 	temp = (GSymbol*)malloc(sizeof(GSymbol));
 	temp->name = name;
 	temp->type = type;
+	temp->classRef = classRef;
 	temp->size = size;
 	temp->flabel = flabel;
 	temp->paramlist = paramList;
@@ -87,7 +91,7 @@ struct GSymbol* findGlobalVariable(char* name){
 		temp = temp->next;
 	}
 	printf("UNDECLARED VARIABLE: %s\n", name);
-	exit(-1);
+	return NULL;
 }
 
 struct LSymbol* findLocalVariable(char* name){
