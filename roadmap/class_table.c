@@ -105,9 +105,9 @@ void addMethodsToClass(char* className, ClassMethodNode* methods){
 					exit(-1);
 				}
 				oldMethodRef->flabel = newMethodRef->flabel;
+				temp = temp->next;
+				continue;
 			}
-			temp = temp->next;
-			continue;
 		}
 
 		if(classRef->methods == NULL){

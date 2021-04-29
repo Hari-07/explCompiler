@@ -239,6 +239,8 @@ int readNodeCodeGen(tnode *t)
 			FieldlistNode* temp = t->left->fieldChain;
 			fprintf(target, "MOV R%d, BP\n", p);
 			fprintf(target, "ADD R%d, %d\n", p, localSearch->binding);
+			if(strcmp(varName, "SELF") == 0)
+					fprintf(target, "MOV R%d, [R%d]\n", p, p);
 			while(temp->next != NULL) {
 				fprintf(target, "MOV R%d, [R%d]\n", p, p);
 				fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
@@ -256,6 +258,8 @@ int readNodeCodeGen(tnode *t)
 		if(t->left->nodeType == fieldNode) {
 			FieldlistNode* temp = t->left->fieldChain;
 			fprintf(target, "MOV R%d, %d\n", p, var->address);
+			if(strcmp(varName, "SELF") == 0)
+					fprintf(target, "MOV R%d, [R%d]\n", p, p);
 			while(temp->next != NULL) {
 				fprintf(target, "MOV R%d, [R%d]\n", p, p);
 				fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
@@ -332,6 +336,8 @@ int operatorNodeCodeGen(tnode *t)
 				FieldlistNode* temp = t->left->fieldChain;
 				fprintf(target, "MOV R%d, BP\n", p);
 				fprintf(target, "ADD R%d, %d\n", p, localSearch->binding);
+				if(strcmp(varName, "SELF") == 0)
+					fprintf(target, "MOV R%d, [R%d]\n", p, p);
 				while(temp->next != NULL) {
 					fprintf(target, "MOV R%d, [R%d]\n", p, p);
 					fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
@@ -349,6 +355,8 @@ int operatorNodeCodeGen(tnode *t)
 			if(t->left->nodeType == fieldNode) {
 				FieldlistNode* temp = t->left->fieldChain;
 				fprintf(target, "MOV R%d, %d\n", p, var->address);
+				if(strcmp(varName, "SELF") == 0)
+					fprintf(target, "MOV R%d, [R%d]\n", p, p);
 				while(temp->next != NULL) {
 					fprintf(target, "MOV R%d, [R%d]\n", p, p);
 					fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
@@ -528,6 +536,8 @@ int functionCallNodeCodeGen(tnode *t)
 	for(int i = 0; i <= state_reg_count; i++){
 		fprintf(target, "POP R%d\n", i);
 	}
+
+	return result;
 }
 
 int methodCallNodeCodeGen(tnode* t) {
@@ -540,11 +550,10 @@ int methodCallNodeCodeGen(tnode* t) {
 	FieldlistNode* temp = t->fieldChain;
 
 	int p = getReg();
-	int p2 = getReg();
 
 	if(findLocalVariable(temp->name) != NULL){
 		LSymbol* localSearch = findLocalVariable(temp->name);
-		FieldlistNode* temp = t->fieldChain;
+		temp = t->fieldChain;
 		fprintf(target, "MOV R%d, BP\n", p);
 		fprintf(target, "ADD R%d, %d\n", p, localSearch->binding);
 		while(temp->next->next != NULL) {
@@ -555,18 +564,15 @@ int methodCallNodeCodeGen(tnode* t) {
 		fprintf(target, "MOV R%d, [R%d]\n", p, p);
 	} else {
 		GSymbol* globalSearch = findGlobalVariable(temp->name);
-		FieldlistNode* temp = t->fieldChain;
+		temp = t->fieldChain;
 		fprintf(target, "MOV R%d, %d\n", p, globalSearch->address);
 		while(temp->next->next != NULL) {
 			fprintf(target, "MOV R%d, [R%d]\n", p, p);
 			fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
 			temp = temp->next;
 		}
-		fprintf(target, "MOV R%d, [R%d]\n", p2, p);
 	}
 
-	// fprintf()
-	// fprintf(target, "BRKP");
 
 	for(tnode* arg = t->right; arg != NULL; arg = arg->left){
 		int argValue = codeGen(arg->right);
@@ -574,7 +580,7 @@ int methodCallNodeCodeGen(tnode* t) {
 		freeReg();
 	}
 
-	fprintf(target, "PUSH R%d\n", p2);
+	fprintf(target, "PUSH R%d\n", p);
 	freeReg();
 	freeReg();
 
@@ -586,7 +592,6 @@ int methodCallNodeCodeGen(tnode* t) {
 	fprintf(target, "ADD R%d, %d\n", p, findClassMethod(temp->classRef, temp->next->name)->methodIndex);
 	fprintf(target, "MOV R%d, [R%d]\n", p, p);
 	fprintf(target, "CALL R%d\n", p);
-
 
 	// GSymbol* globalRef = findGlobalVariable(t->fieldChain)
 	// fprintf(target, "CALL FUNCTION%d\n", t->val.decimal);
@@ -606,6 +611,8 @@ int methodCallNodeCodeGen(tnode* t) {
 	for(int i = 0; i <= state_reg_count; i++){
 		fprintf(target, "POP R%d\n", i);
 	}
+
+	return result;
 }
 
 int returnNodeCodeGen(tnode* t) {
@@ -660,12 +667,15 @@ int fieldNodeCodeGen(tnode *t){
 		FieldlistNode* temp = t->fieldChain;
 		fprintf(target, "MOV R%d, BP\n", p);
 		fprintf(target, "ADD R%d, %d\n", p, localSearch->binding);
+		if(strcmp(varName, "SELF") == 0)
+			fprintf(target, "MOV R%d, [R%d]\n", p, p);
 		while(temp->next != NULL) {
 			fprintf(target, "MOV R%d, [R%d]\n", p, p);
 			fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
 			temp = temp->next;
 		}
 		fprintf(target, "MOV R%d, [R%d]\n", p, p);
+		
 	} else {
 		GSymbol* globalSearch = findGlobalVariable(varName);
 		FieldlistNode* temp = t->fieldChain;
