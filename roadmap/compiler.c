@@ -17,7 +17,7 @@ int HIGHEST_REGISTER = -1;
 int LABEL_COUNTER = -1;
 int CURRENT_WHILE_START = -1;
 int CURRENT_WHILE_END = -1;
-int READ_WRITE_BUFFER = -1;
+int READ_WRITE_BUFFER = 4096;
 FILE *target;
 
 char* CURRENT_FUNCTION;
@@ -40,6 +40,7 @@ int fieldNodeCodeGen(tnode *t);
 int allocNodeCodeGen(tnode* t);
 int deAllocNodeCodeGen(tnode* t);
 int breakNodeCodeGen(tnode* t);
+int constructorNodeCodeGen(tnode* t);
 
 // CODEGEN ABSTRACTIONS
 void printFromIndex(int index);
@@ -52,7 +53,7 @@ int getActiveRegIndex();
 void freeReg();
 void setRegIndex();
 int getLabel();
-
+void functionTableCodeGen();
 
 //Function Mode is 1: Class Method, 0 : Normal
 void startCodeGen(char* fName,int functionMode, tnode *t)
@@ -100,7 +101,8 @@ void startCodeGen(char* fName,int functionMode, tnode *t)
 	}
 	else {
 		fprintf(target, "MAIN\n");
-		READ_WRITE_BUFFER = getVarAddress();
+		functionTableCodeGen();
+		// READ_WRITE_BUFFER = getVarAddress();
 		fprintf(target, "MOV SP, %d\n", getVarAddress()+1);
 		fprintf(target, "MOV BP, SP\n");
 		LSymbol* temp = getLocalSymbolTableHeader();
@@ -197,10 +199,10 @@ int codeGen(tnode *t)
 	{
 		return deAllocNodeCodeGen(t);
 	}
-	// else if(t->nodeType == constructorNode)
-	// {
-	// 	return constructorNodeCodeGen(t);
-	// }
+	else if(t->nodeType == constructorNode)
+	{
+		return constructorNodeCodeGen(t);
+	}
 	else if(t->nodeType == breakNode)
 	{
 		return breakNodeCodeGen(t);
@@ -538,6 +540,7 @@ int methodCallNodeCodeGen(tnode* t) {
 	FieldlistNode* temp = t->fieldChain;
 
 	int p = getReg();
+	int p2 = getReg();
 
 	if(findLocalVariable(temp->name) != NULL){
 		LSymbol* localSearch = findLocalVariable(temp->name);
@@ -559,10 +562,11 @@ int methodCallNodeCodeGen(tnode* t) {
 			fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
 			temp = temp->next;
 		}
-		fprintf(target, "MOV R%d, [R%d]\n", p, p);
+		fprintf(target, "MOV R%d, [R%d]\n", p2, p);
 	}
 
-
+	// fprintf()
+	// fprintf(target, "BRKP");
 
 	for(tnode* arg = t->right; arg != NULL; arg = arg->left){
 		int argValue = codeGen(arg->right);
@@ -570,13 +574,22 @@ int methodCallNodeCodeGen(tnode* t) {
 		freeReg();
 	}
 
-	fprintf(target, "PUSH R%d\n", p);
+	fprintf(target, "PUSH R%d\n", p2);
+	freeReg();
 	freeReg();
 
 	fprintf(target, "PUSH R0\n");
 	setRegIndex(-1);
 	
-	fprintf(target, "CALL FUNCTION%d\n", t->val.decimal);
+	fprintf(target, "ADD R%d, 1\n", p);
+	fprintf(target, "MOV R%d, [R%d]\n", p, p);
+	fprintf(target, "ADD R%d, %d\n", p, findClassMethod(temp->classRef, temp->next->name)->methodIndex);
+	fprintf(target, "MOV R%d, [R%d]\n", p, p);
+	fprintf(target, "CALL R%d\n", p);
+
+
+	// GSymbol* globalRef = findGlobalVariable(t->fieldChain)
+	// fprintf(target, "CALL FUNCTION%d\n", t->val.decimal);
 	
 	setRegIndex(state_reg_count);
 	int result = getReg();
@@ -797,6 +810,45 @@ int breakNodeCodeGen(tnode* t){
 	fprintf(target, "BRKP\n");
 }
 
+int constructorNodeCodeGen(tnode* t){
+
+	printf("CHECK IF DESCENDANT CLASS\n");
+
+	GSymbol* globalRef = t->left->varLocation;
+	int address = globalRef->address;
+
+	int state_reg_count = getActiveRegIndex();
+	for(int i = state_reg_count; i >= 0; i--){
+		fprintf(target, "PUSH R%d\n", i);
+	}
+
+	int q = getReg();
+	int ret = getReg();
+	fprintf(target, "MOV R%d, \"Alloc\"\n", q);
+	fprintf(target, "PUSH R%d\n", q);
+	fprintf(target, "PUSH R%d\n", q);
+	fprintf(target, "PUSH R%d\n", q);
+	fprintf(target, "PUSH R%d\n", q);
+	fprintf(target, "PUSH R%d\n", q);
+	fprintf(target, "CALL 0\n");
+	fprintf(target, "POP R%d\n", ret);
+	fprintf(target, "POP R%d\n", q);
+	fprintf(target, "POP R%d\n", q);
+	fprintf(target, "POP R%d\n", q);
+	fprintf(target, "POP R%d\n", q);
+	
+	for(int i = 0; i <= state_reg_count; i++){
+		fprintf(target, "POP R%d\n", i);
+	}
+	fprintf(target, "MOV [%d], R%d\n", address, ret);
+	freeReg();
+	freeReg();
+
+	int p = getReg();
+	fprintf(target, "MOV [%d], %d\n", address + 1, t->classRef->functionTableAddress);
+	freeReg();
+}
+
 
 void printFromIndex(int index)
 {
@@ -854,7 +906,7 @@ void readToIndex(int index)
 	freeReg();
 
 	for(int i = state_reg_count; i >= 0; i--){
-		fprintf(target, "PUSH R%d\n", i);
+		fprintf(target, "POP R%d\n", i);
 	}
 	fprintf(target, "MOV R%d, [%d]\n", index, READ_WRITE_BUFFER);
 }
@@ -907,4 +959,19 @@ void freeReg()
 void setRegIndex(int index)
 {
 	HIGHEST_REGISTER = index;
+}
+
+void functionTableCodeGen(){
+	ClassTableNode* temp = getCurrentClassRef();
+
+	while(temp!=NULL){
+		ClassMethodNode* method = temp->methods;
+		while(method != NULL){
+			fprintf(target,"MOV R0, FUNCTION%d\n", method->flabel);
+			fprintf(target,"MOV [%d], R0\n", temp->functionTableAddress + method->methodIndex);
+			method = method->next;
+		}
+		temp = temp->next;
+	}
+	return;
 }

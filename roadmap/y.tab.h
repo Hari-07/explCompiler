@@ -81,21 +81,22 @@ extern int yydebug;
     SELF = 287,
     NEW = 288,
     BREAKPOINT = 289,
-    NUM = 290,
-    VAR = 291,
-    ADD = 292,
-    SUB = 293,
-    MUL = 294,
-    DIV = 295,
-    EQUALS = 296,
-    SLT = 297,
-    SGT = 298,
-    LTE = 299,
-    GTE = 300,
-    NEQ = 301,
-    EQU = 302,
-    STRING = 303,
-    ARR_INDEX = 304
+    EXTENDS = 290,
+    NUM = 291,
+    VAR = 292,
+    ADD = 293,
+    SUB = 294,
+    MUL = 295,
+    DIV = 296,
+    EQUALS = 297,
+    SLT = 298,
+    SGT = 299,
+    LTE = 300,
+    GTE = 301,
+    NEQ = 302,
+    EQU = 303,
+    STRING = 304,
+    ARR_INDEX = 305
   };
 #endif
 /* Tokens.  */
@@ -131,21 +132,22 @@ extern int yydebug;
 #define SELF 287
 #define NEW 288
 #define BREAKPOINT 289
-#define NUM 290
-#define VAR 291
-#define ADD 292
-#define SUB 293
-#define MUL 294
-#define DIV 295
-#define EQUALS 296
-#define SLT 297
-#define SGT 298
-#define LTE 299
-#define GTE 300
-#define NEQ 301
-#define EQU 302
-#define STRING 303
-#define ARR_INDEX 304
+#define EXTENDS 290
+#define NUM 291
+#define VAR 292
+#define ADD 293
+#define SUB 294
+#define MUL 295
+#define DIV 296
+#define EQUALS 297
+#define SLT 298
+#define SGT 299
+#define LTE 300
+#define GTE 301
+#define NEQ 302
+#define EQU 303
+#define STRING 304
+#define ARR_INDEX 305
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -161,7 +163,7 @@ union YYSTYPE
 	struct TypetableNode* typenode;
 	struct ClassMethodNode* classMethodNode;
 
-#line 165 "y.tab.h"
+#line 167 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

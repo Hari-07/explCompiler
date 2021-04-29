@@ -9,7 +9,7 @@
 GSymbol *globalSymbolTableHead = NULL;
 LSymbol* localSymbolTableHead = NULL;
 int LOCAL_ADDRESS = 1;
-int VAR_ADDRESS = 4096;
+int VAR_ADDRESS = 4097;
 
 void addGlobalVariable(char* name, char* typeString, int size, int flabel, Param* paramList){
 	TypetableNode* type = findTypeTableEntry(typeString);
@@ -28,11 +28,16 @@ void addGlobalVariable(char* name, char* typeString, int size, int flabel, Param
 	temp->name = name;
 	temp->type = type;
 	temp->classRef = classRef;
-	temp->size = size;
+	temp->address = VAR_ADDRESS;
+	if(temp->classRef != NULL){
+		temp->size = 2;
+		VAR_ADDRESS += 2;
+	} else {
+		temp->size = size;
+		VAR_ADDRESS += size;
+	}
 	temp->flabel = flabel;
 	temp->paramlist = paramList;
-	temp->address = VAR_ADDRESS;
-	VAR_ADDRESS += size;
 	temp->next = globalSymbolTableHead;
 	globalSymbolTableHead = temp;
 }
@@ -129,6 +134,12 @@ LSymbol* getLocalSymbolTableHeader(){
 
 int getVarAddress(){
 	return VAR_ADDRESS;
+}
+
+int get8VarAddress(){
+	int t = VAR_ADDRESS;
+	VAR_ADDRESS += 8;
+	return t;
 }
 
 void terminateFunction(){

@@ -36,7 +36,7 @@
 	int flabel = 0;
 %}
 
-// %define parse.error verbose
+%define parse.error verbose
 
 %union {
 	struct tnode* node;
@@ -120,7 +120,7 @@
 %token START END DECL ENDDECL
 %token CLASSBEGIN ENDCLASS
 %token IF THEN ELSE ENDIF WHILE DO ENDWHILE READ WRITE CONTINUE BREAK REPEAT UNTIL MAIN ARGS RETURN ALLOC DEALLOC
-%token INT STR NULL_TOKEN TYPE ENDTYPE SELF NEW BREAKPOINT
+%token INT STR NULL_TOKEN TYPE ENDTYPE SELF NEW BREAKPOINT EXTENDS
 %token NUM VAR ADD SUB MUL DIV EQUALS SLT SGT LTE GTE NEQ EQU STRING ARR_INDEX
 %nonassoc SLT SGT LTE GTE NEQ EQU
 %left ADD SUB
@@ -202,6 +202,14 @@
 			{
 				addFieldToClass($1, $4);
 				addMethodsToClass($1, $5);
+				createFunctionTable();
+			} 
+		ENDDECL classMethodDefList '}' 
+			{} |
+		className '{' DECL classMethodList 
+			{
+				addMethodsToClass($1, $4);
+				createFunctionTable();
 			} 
 		ENDDECL classMethodDefList '}' 
 			{}
@@ -209,9 +217,14 @@
 	
 	className:
 		VAR			{	
-						createClassTableEntry($<string>1);
+						createClassTableEntry($<string>1, NULL);
 						$$ = $<string>1;
-					}
+					} |
+		VAR EXTENDS VAR 
+		{
+			createClassTableEntry($<string>1, findClassTableEntry($<string>3));
+			$$ = $<string>1;
+		}
 		;
 	
 	classFieldList:
@@ -460,7 +473,7 @@
 
 	constant :
 		NUM				{	$$ = makeConstantNode(findTypeTableEntry("int"), $<integer>1, NULL); 	} |
-		STRING			{	$$ = makeConstantNode(findTypeTableEntry("string"), 0, $<string>1);		} |
+		STRING	{	$$ = makeConstantNode(findTypeTableEntry("string"), 0, $<string>1);		} |
 		NULL_TOKEN		{   $$ = makeConstantNode(findTypeTableEntry("void"), 0, NULL);				}
 		;
 

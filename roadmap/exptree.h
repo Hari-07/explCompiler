@@ -3,6 +3,11 @@
 #include "type_table.h"
 #endif
 
+#ifndef CLASS_H
+#define CLASS_H
+#include "class_table.h"
+#endif
+
 typedef struct value{
 	int decimal;
 	char* string;
@@ -64,8 +69,9 @@ typedef struct tnode{
  	value val;
  	enum nodeType nodeType;
 	int metadata;
-	TypetableNode* type;
-	FieldlistNode* fieldChain;
+	struct TypetableNode* type;
+	struct FieldlistNode* fieldChain;
+	struct ClassTableNode* classRef;
 	char* op;
  	struct tnode *left,*right;
 	void* varLocation; //Points to SYMBOL TABLE ENTRY

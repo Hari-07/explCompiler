@@ -22,12 +22,14 @@ typedef struct ClassTableNode {
 	FieldlistNode* fields;
 	ClassMethodNode* methods;
 	struct ClassTableNode* next;
+	struct ClassTableNode* parent;
+	int functionTableAddress;
 }ClassTableNode;
 
 
 ClassTableNode* findClassTableEntry(char* className);
 
-void createClassTableEntry(char* name);
+void createClassTableEntry(char* name, ClassTableNode* parent);
 void addFieldToClass(char* className, FieldlistNode* fields);
 void addMethodsToClass(char* className, ClassMethodNode* methods);
 
@@ -46,3 +48,5 @@ void checkMethodValidity(char* methodName,struct Param* params);
 void addSelfToLSymbol();
 
 ClassTableNode* getCurrentClassRef();
+
+void createFunctionTable(); 

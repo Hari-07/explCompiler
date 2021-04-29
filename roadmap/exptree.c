@@ -28,7 +28,6 @@ tnode* createNode(){
 
 	temp -> val.decimal = 0;
 	temp -> val.string = "";
-
 	temp -> nodeType = newNode;
 	temp -> metadata = 0;
 	temp -> type = NULL;
@@ -37,7 +36,7 @@ tnode* createNode(){
 	temp -> right = NULL;
 	temp -> varLocation = NULL;
 	temp -> fieldChain = NULL;
-
+	temp -> classRef = NULL;
 	return temp;
 }
 
@@ -355,11 +354,16 @@ tnode* makeFieldNode(FieldlistNode* variableChain, tnode* offset){
 tnode* makeClassConstructorNode(tnode* l, char* className){
 
 	tnode* temp = createNode();
-	temp->nodeType = allocNode;
+	temp->nodeType = constructorNode;
 
 	temp->left = l;
-	temp->right = NULL;
+	temp->classRef = findClassTableEntry(className);
 
+	if(temp->classRef == NULL){
+		printf("UNDEFINED CLASS\n");
+		exit(-1);
+	}
+	
 	return temp;
 }
 

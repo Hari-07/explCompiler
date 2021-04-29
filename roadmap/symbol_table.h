@@ -5,15 +5,15 @@
 
 typedef struct Param {
 	char* name;
-	TypetableNode* type;
-	ClassTableNode* classRef;
+	struct TypetableNode* type;
+	struct ClassTableNode* classRef;
 	struct Param* next;
 }Param;
 
 typedef struct GSymbol {
 	char* name;
-	TypetableNode* type;
-	ClassTableNode* classRef;
+	struct TypetableNode* type;
+	struct ClassTableNode* classRef;
 	int size; 
 	int address;
 	int flabel;
@@ -23,8 +23,8 @@ typedef struct GSymbol {
 
 typedef struct LSymbol {
 	char* name;
-	TypetableNode* type;
-	ClassTableNode* classRef;
+	struct TypetableNode* type;
+	struct ClassTableNode* classRef;
 	int binding;
 	struct LSymbol* next;
 } LSymbol;
@@ -42,6 +42,7 @@ LSymbol* findLocalVariable(char* name);
 
 LSymbol* getLocalSymbolTableHeader();
 int getVarAddress();
+int get8VarAddress();
 void test();
 int isUserDefined(TypetableNode* type);
 void terminateFunction();

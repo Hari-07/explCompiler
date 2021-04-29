@@ -16,7 +16,9 @@
 			}
 			
 \"[:_a-zA-z 0-9]*\" {
-					yylval.string = yytext;
+					char* temp = (char*)malloc(sizeof(char)*(strlen(yytext)-2));
+					strncpy(temp, yytext+1, strlen(yytext) - 2);
+					yylval.string = temp;
 					return STRING;
 				}
 "+"			{	return ADD;	}
@@ -51,6 +53,7 @@ repeat 		{	return REPEAT;	}
 until		{	return UNTIL;	}
 self		{	return SELF;	}
 new			{	return NEW;		}
+extends		{	return EXTENDS;	}
 brkp		{	return BREAKPOINT;	}
 int			{	
 				char* temp = (char*)malloc(sizeof(char)*strlen(yytext));
@@ -74,7 +77,7 @@ args 		{	return ARGS;	}
 return 		{	return RETURN;  }
 type		{	return TYPE;	}
 endtype		{ 	return ENDTYPE; }
-[a-zA-Z][a-zA-Z0-9]*		{	
+[a-zA-Z_][_a-zA-Z0-9]*		{	
 						char* temp = (char*)malloc(sizeof(char)*strlen(yytext));
 						strcpy(temp, yytext);
 						yylval.string = temp;

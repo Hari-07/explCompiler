@@ -51,7 +51,7 @@ void printLabel(char* s){
 		if(temp) {
 			fprintf(target, "%d\n", temp->address);
 		} else {
-			printf("LABEL NOT FOUND\n");
+			printf("LABEL NOT FOUND: %s \n", s);
 			exit(-1);
 		}
 	} else {
