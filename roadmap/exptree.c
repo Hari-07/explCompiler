@@ -313,14 +313,20 @@ tnode* makeFieldNode(FieldlistNode* variableChain, tnode* offset){
 		LSymbol* localRef = findLocalVariable(variableChain->name);
 		temp->varLocation = localRef;
 		res->type = localRef->type;
+		res->classRef = localRef->classRef;
 	} else {
 		GSymbol* result = (GSymbol*)findGlobalVariable(variableChain->name);
 		temp->varLocation =  result;
 		res->type = result->type;
+		res->classRef = result->classRef;
 	}
 
 	TypetableNode* parentType = res->type;
 	ClassTableNode* parentClass = res->classRef;
+	if(parentClass != NULL && strcmp(variableChain->name, "SELF") != 0){
+		printf("ILLEGAL REFERENCE TO MEMBER FIELD\n");
+		exit(-1);
+	}
 	res = res->next;
 
 	while(res != NULL) {
