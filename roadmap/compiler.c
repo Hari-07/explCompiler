@@ -322,9 +322,22 @@ int operatorNodeCodeGen(tnode *t)
 {
 	int p, q;
 	if (t->metadata == 0)
-	{
-		GSymbol *var = t->left->varLocation;
-		char* varName = var->name;
+	{   
+		GSymbol* varLeft = t->left->varLocation;
+		char* varName = varLeft->name;
+
+		GSymbol* varRight = t->right->varLocation;
+
+		if(t->left->nodeType == variableNode && varLeft->classRef != NULL && t->right->nodeType == variableNode && varRight != NULL && varRight->classRef != NULL){
+			int buffer = getReg();
+			fprintf(target, "MOV R%d, [%d]\n", buffer, varRight->address);
+			fprintf(target, "MOV [%d], R%d\n", varLeft->address, buffer);
+			fprintf(target, "MOV R%d, [%d]\n", buffer, varRight->address + 1);
+			fprintf(target, "MOV [%d], R%d\n", varLeft->address + 1, buffer);
+
+			freeReg();
+			return 0;
+		}
 
 		p = getReg();
 		q = codeGen(t->right);
@@ -354,7 +367,7 @@ int operatorNodeCodeGen(tnode *t)
 
 			if(t->left->nodeType == fieldNode) {
 				FieldlistNode* temp = t->left->fieldChain;
-				fprintf(target, "MOV R%d, %d\n", p, var->address);
+				fprintf(target, "MOV R%d, %d\n", p, varLeft->address);
 				if(strcmp(varName, "SELF") == 0)
 					fprintf(target, "MOV R%d, [R%d]\n", p, p);
 				while(temp->next != NULL) {
@@ -365,7 +378,7 @@ int operatorNodeCodeGen(tnode *t)
 				fprintf(target, "MOV [R%d], R%d\n", p, q);
  			} else {
 				int offsetValueRegister = getOffsetGlobalVar(t->left->left);
-				fprintf(target, "MOV R%d, %d\n", p, var->address);
+				fprintf(target, "MOV R%d, %d\n", p, varLeft->address);
 				fprintf(target, "ADD R%d, R%d\n", p, offsetValueRegister);
 				fprintf(target, "MOV [R%d], R%d\n", p, q);
 				freeReg();
@@ -822,12 +835,37 @@ int breakNodeCodeGen(tnode* t){
 
 int constructorNodeCodeGen(tnode* t){
 
-	printf("CHECK IF DESCENDANT CLASS\n");
-
-int p = getReg();
+	int p = getReg();
 	
 	GSymbol* globalSymbolReference = t->left->varLocation;	
 	char* varName = globalSymbolReference->name;
+
+	ClassTableNode* declaredClass = globalSymbolReference->classRef;
+	if(t->left->nodeType == fieldNode){
+		FieldlistNode* tempField = t->left->fieldChain;
+		while(tempField->next != NULL){
+			tempField = tempField->next;
+		}
+		declaredClass = tempField->classRef;
+	}
+	ClassTableNode* varClass = t->classRef;
+
+	int isValidConstructor = 0;
+
+	ClassTableNode* tempClassRef = varClass;
+	while(tempClassRef != NULL){
+		if(tempClassRef == declaredClass) {
+			isValidConstructor = 1;
+			break;
+		}
+		tempClassRef = tempClassRef->parent;
+	}
+	
+	if(isValidConstructor == 0){
+		printf("INVALID CLASS INITIALIZATION\n");
+		exit(-1);
+	}
+
 
 	LSymbol* localSymbolReference = findLocalVariable(varName);
 	if(localSymbolReference != NULL){

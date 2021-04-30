@@ -36,7 +36,7 @@
 	int flabel = 0;
 %}
 
-%define parse.error verbose
+// %define parse.error verbose
 
 %union {
 	struct tnode* node;
