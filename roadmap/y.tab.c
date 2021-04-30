@@ -2062,13 +2062,13 @@ yyreduce:
 
   case 61:
 #line 358 "parser.y"
-                                                        {	addLocalVariable((yyvsp[0].string), findTypeTableEntry((yyvsp[-3].string)));	}
+                                                        {	addLocalVariable((yyvsp[0].string), (yyvsp[-3].string));	}
 #line 2067 "y.tab.c"
     break;
 
   case 62:
 #line 359 "parser.y"
-                                                                                {	addLocalVariable((yyvsp[0].string), findTypeTableEntry((yyvsp[-1].string))); 	}
+                                                                                {	addLocalVariable((yyvsp[0].string), (yyvsp[-1].string)); 	}
 #line 2073 "y.tab.c"
     break;
 

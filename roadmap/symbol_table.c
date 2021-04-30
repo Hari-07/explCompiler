@@ -14,6 +14,14 @@ int VAR_ADDRESS = 4097;
 void addGlobalVariable(char* name, char* typeString, int size, int flabel, Param* paramList){
 	TypetableNode* type = findTypeTableEntry(typeString);
 	ClassTableNode* classRef = findClassTableEntry(typeString);
+
+	if(strcmp(name, "SELF") == 0)
+		classRef = getCurrentClassRef();
+
+	if(type == NULL && classRef == NULL){
+		printf("Either Class or Type must be defined for variable: %s\n", name);
+		exit(-1);
+	}
 	
 	GSymbol* temp = globalSymbolTableHead;
 	while(temp){
@@ -25,7 +33,8 @@ void addGlobalVariable(char* name, char* typeString, int size, int flabel, Param
 	}
 
 	temp = (GSymbol*)malloc(sizeof(GSymbol));
-	temp->name = name;
+	temp->name = (char*)malloc(sizeof(char) * strlen(name));
+	strcpy(temp->name, name);
 	temp->type = type;
 	temp->classRef = classRef;
 	temp->address = VAR_ADDRESS;
@@ -43,7 +52,18 @@ void addGlobalVariable(char* name, char* typeString, int size, int flabel, Param
 }
 
 
-void addLocalVariable (char* name, TypetableNode* type) {
+void addLocalVariable (char* name, char* typeString) {
+	TypetableNode* type = findTypeTableEntry(typeString);
+	ClassTableNode* classRef = findClassTableEntry(typeString);
+
+	if(strcmp(name, "SELF") == 0)
+		classRef = getCurrentClassRef();
+
+	if(type == NULL && classRef == NULL){
+		printf("Either Class or Type must be defined for variable:%s\n", name);
+		exit(-1);
+	}
+
 	LSymbol* temp = localSymbolTableHead;
 	while(temp){
 		if(strcmp(temp->name, name) == 0){
@@ -54,9 +74,18 @@ void addLocalVariable (char* name, TypetableNode* type) {
 	}
 
 	temp = (LSymbol*)malloc(sizeof(LSymbol));
-	temp->name = name;
+	temp->name = (char*)malloc(sizeof(char) * strlen(name));
+	strcpy(temp->name, name);
 	temp->type = type;
-	temp->binding = LOCAL_ADDRESS++;
+	temp->classRef = classRef;
+
+	temp->binding = LOCAL_ADDRESS;
+	if(temp->classRef != NULL){
+		LOCAL_ADDRESS += 2;
+	} else {
+		LOCAL_ADDRESS ++;
+	}
+
 	temp->next = localSymbolTableHead;
 	localSymbolTableHead = temp;
 }
@@ -82,7 +111,7 @@ int checkNameEquivalence(Param* params, char* fname) {
 
 void addParamstoLSymbol(Param* param) {
 	while(param != NULL){
-		addLocalVariable(param->name, param->type);
+		addLocalVariable(param->name, param->type->name);
 		param = param->next;
 	}
 }

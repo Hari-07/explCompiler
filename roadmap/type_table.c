@@ -41,6 +41,10 @@ void addFieldsToTypeTable(char* name, FieldlistNode* fields) {
 }
 
 TypetableNode* findTypeTableEntry(char* name) {
+	if(name == NULL){
+		return NULL;
+	}
+
 	TypetableNode* temp = typeTableHead;
 
 	while (temp != NULL)

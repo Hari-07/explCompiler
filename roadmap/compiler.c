@@ -824,9 +824,42 @@ int constructorNodeCodeGen(tnode* t){
 
 	printf("CHECK IF DESCENDANT CLASS\n");
 
-	GSymbol* globalRef = t->left->varLocation;
-	int address = globalRef->address;
+int p = getReg();
+	
+	GSymbol* globalSymbolReference = t->left->varLocation;	
+	char* varName = globalSymbolReference->name;
 
+	LSymbol* localSymbolReference = findLocalVariable(varName);
+	if(localSymbolReference != NULL){
+		fprintf(target, "MOV R%d, BP\n", p);
+		fprintf(target, "ADD R%d, %d\n", p, localSymbolReference->binding);
+		if(strcmp(varName, "SELF") == 0)
+			fprintf(target, "MOV R%d, [R%d]\n", p, p);
+		if(t->left->fieldChain != NULL){
+			FieldlistNode* temp = t->left->fieldChain;
+			while(temp->next != NULL) {
+				fprintf(target, "MOV R%d, [R%d]\n", p, p);
+				fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
+				temp = temp->next;
+			}
+		}
+	} else {
+		GSymbol* globalSymbolReference = findGlobalVariable(varName);
+		int address = globalSymbolReference->address;
+
+		fprintf(target, "MOV R%d, %d\n", p, address);
+		if(strcmp(varName, "SELF") == 0)
+			fprintf(target, "MOV R%d, [R%d]\n", p, p);
+		if(t->left->fieldChain != NULL){
+			FieldlistNode* temp = t->left->fieldChain;
+			while(temp->next != NULL) {
+				fprintf(target, "MOV R%d, [R%d]\n", p, p);
+				fprintf(target, "ADD R%d, %d\n", p, temp->next->fieldIndex);
+				temp = temp->next;
+			}
+		}
+	}
+		
 	int state_reg_count = getActiveRegIndex();
 	for(int i = state_reg_count; i >= 0; i--){
 		fprintf(target, "PUSH R%d\n", i);
@@ -850,12 +883,12 @@ int constructorNodeCodeGen(tnode* t){
 	for(int i = 0; i <= state_reg_count; i++){
 		fprintf(target, "POP R%d\n", i);
 	}
-	fprintf(target, "MOV [%d], R%d\n", address, ret);
+	
+	fprintf(target, "MOV [R%d], R%d\n", p, ret);
+	fprintf(target, "ADD R%d, 1\n", p);
+	fprintf(target, "MOV [R%d], %d\n", p , t->classRef->functionTableAddress);
 	freeReg();
 	freeReg();
-
-	int p = getReg();
-	fprintf(target, "MOV [%d], %d\n", address + 1, t->classRef->functionTableAddress);
 	freeReg();
 }
 

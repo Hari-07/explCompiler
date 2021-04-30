@@ -355,8 +355,8 @@
 		;
 
 	localVariableList : 
-		localVariableList ',' VAR		{	addLocalVariable($<string>3, findTypeTableEntry($<string>0));	}| 
-		VAR								{	addLocalVariable($<string>1, findTypeTableEntry($<string>0)); 	}
+		localVariableList ',' VAR		{	addLocalVariable($<string>3, $<string>0);	}| 
+		VAR								{	addLocalVariable($<string>1, $<string>0); 	}
 		;
 
 	functionBody :

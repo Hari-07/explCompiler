@@ -12,6 +12,11 @@ ClassTableNode* classTableHead = NULL;
 ClassMethodNode* getCopyMethods(ClassMethodNode* head);
 
 ClassTableNode* findClassTableEntry(char* className){
+	
+	if(className == NULL){
+		return NULL;
+	}
+
 	ClassTableNode* temp = classTableHead;
 	while (temp != NULL)
 	{

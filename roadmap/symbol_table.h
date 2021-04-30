@@ -30,7 +30,7 @@ typedef struct LSymbol {
 } LSymbol;
 
 void addGlobalVariable(char* name, char* typeString, int size, int flabel, Param* paramList);
-void addLocalVariable (char* name, TypetableNode* type);
+void addLocalVariable (char* name, char* typeString);
 Param* createParameter(char *name, TypetableNode* type);
 Param* addParameter(Param* next, Param* paramNode);
 
