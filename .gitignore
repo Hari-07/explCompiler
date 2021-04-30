@@ -1,7 +1,1 @@
 *.txt
-roadmap/label
-roadmap/y.output
-roadmap/y.tab.h
-roadmap/y.tab.c
-roadmap/parser
-roadmap/lex.yy.c
