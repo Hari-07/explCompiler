@@ -1985,7 +1985,7 @@ yyreduce:
 
   case 46:
 #line 302 "parser.y"
-                                                                                {	addGlobalVariable((yyvsp[-3].string), (yyvsp[-4].string), 	(yyvsp[-2].integer), -1, NULL);		}
+                                                                                {	addGlobalVariable((yyvsp[-3].string), (yyvsp[-4].string), 	(yyvsp[-1].integer), -1, NULL);		}
 #line 1990 "y.tab.c"
     break;
 

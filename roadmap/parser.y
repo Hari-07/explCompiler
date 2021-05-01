@@ -299,7 +299,7 @@
 		variableList ',' VAR '['NUM']'			{	addGlobalVariable($<string>3, $<string>0, 	$<integer>5, -1, NULL);		} |
 		variableList ',' VAR '('parameterList')'{   addGlobalVariable($<string>3, $<string>0, 		0, getfLabel(), $5);	} |
 		VAR										{	addGlobalVariable($<string>1, $<string>0, 		1, 		  -1, NULL); 	} |
-		VAR '['NUM']'							{	addGlobalVariable($<string>1, $<string>0, 	$<integer>2, -1, NULL);		} |
+		VAR '['NUM']'							{	addGlobalVariable($<string>1, $<string>0, 	$<integer>3, -1, NULL);		} |
 		VAR '('parameterList')'					{   addGlobalVariable($<string>1, $<string>0, 		0, getfLabel(), $3);	}
 		;
 
